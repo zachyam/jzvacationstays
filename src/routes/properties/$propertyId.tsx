@@ -78,9 +78,11 @@ function PropertyDetailPage() {
   const totalAmount = subtotal + property.cleaningFee;
 
   function handleReserve() {
+    if (!checkIn || !checkOut) return;
     navigate({
       to: "/booking/$propertyId",
       params: { propertyId: property.slug },
+      search: { checkIn, checkOut, guests: guestsCount },
     });
   }
 
@@ -262,7 +264,8 @@ function PropertyDetailPage() {
             {/* Reserve Button */}
             <button
               onClick={handleReserve}
-              className="w-full py-4 bg-sky-600 hover:bg-sky-700 text-white text-lg font-medium rounded-2xl transition-all shadow-lg shadow-sky-600/20 active:scale-[0.98] mb-4"
+              disabled={!checkIn || !checkOut}
+              className="w-full py-4 bg-sky-600 hover:bg-sky-700 text-white text-lg font-medium rounded-2xl transition-all shadow-lg shadow-sky-600/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed mb-4"
             >
               Reserve
             </button>
