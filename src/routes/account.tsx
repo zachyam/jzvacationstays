@@ -210,7 +210,7 @@ function AccountPage() {
                     </div>
                     <div className="hidden sm:flex items-center gap-3 pr-2">
                       <Link
-                        to="/booking/$propertyId"
+                        to="/properties/$propertyId"
                         params={{ propertyId: propertySlug }}
                         className="px-4 py-2 text-sm font-medium text-stone-600 hover:text-stone-900 bg-white border border-stone-200 rounded-lg hover:border-stone-300 transition-all"
                       >
