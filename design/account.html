@@ -1,0 +1,336 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - JZ Vacation Stays</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <style>
+      body {
+        font-family: 'Outfit', sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      iconify-icon {
+        stroke-width: 1.5;
+      }
+    </style>
+  </head>
+  <body class="bg-stone-50 text-stone-900 selection:bg-sky-500/20 flex flex-col min-h-screen relative">
+    
+    <!-- Minimal Header -->
+    <header class="w-full pt-8 pb-4">
+      <div class="max-w-screen-xl mx-auto px-6 flex items-center justify-between">
+        <a href="#" class="text-xl font-medium tracking-tight text-stone-900">
+          JZ Vacation Stays
+        </a>
+
+        <nav class="hidden md:flex items-center gap-8">
+          <a href="#" class="text-sm font-light text-stone-500 hover:text-stone-900 transition-colors duration-200">Browse</a>
+          <a href="#" class="text-sm font-light text-stone-500 hover:text-stone-900 transition-colors duration-200">Find stay</a>
+          <a href="#" class="text-sm font-medium text-stone-900 transition-colors duration-200">Dashboard</a>
+        </nav>
+
+        <div class="flex items-center gap-5">
+          <button class="text-stone-400 hover:text-stone-900 transition-colors duration-200 flex items-center" aria-label="Notifications">
+            <iconify-icon icon="solar:bell-linear" class="w-5 h-5"></iconify-icon>
+          </button>
+          <button class="flex items-center gap-2 group">
+            <div class="w-8 h-8 rounded-full bg-white border border-stone-200 shadow-sm text-stone-700 flex items-center justify-center font-medium text-xs group-hover:border-stone-300 transition-colors duration-200">
+              SJ
+            </div>
+            <iconify-icon icon="solar:alt-arrow-down-linear" class="w-4 h-4 text-stone-400 group-hover:text-stone-600 transition-colors duration-200"></iconify-icon>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="w-full max-w-screen-xl mx-auto px-6 py-12 md:py-16 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 flex-grow">
+      
+      <!-- Left Side: Bookings -->
+      <div class="lg:col-span-7 xl:col-span-8 flex flex-col">
+        
+        <div class="mb-12">
+          <h1 class="text-4xl lg:text-5xl font-medium tracking-tight text-stone-900 mb-4">
+            Welcome back, Sarah
+          </h1>
+          <p class="text-lg text-stone-500 font-light">
+            Manage your upcoming stays and review your past adventures.
+          </p>
+        </div>
+
+        <!-- Upcoming Bookings -->
+        <div class="mb-16">
+          <h2 class="text-2xl md:text-3xl font-medium tracking-tight text-stone-900 mb-6">
+            Upcoming Bookings
+          </h2>
+          
+          <div class="bg-white border border-stone-200 rounded-[2rem] p-4 md:p-6 flex flex-col md:flex-row gap-6 lg:gap-8 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-shadow hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] group">
+            <div class="w-full md:w-64 h-56 md:h-auto flex-shrink-0 overflow-hidden rounded-2xl relative">
+              <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=800&amp;q=80" alt="Seaglass Villa" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500">
+              <div class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
+                <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                <span class="text-xs font-medium uppercase tracking-widest text-stone-900">Confirmed</span>
+              </div>
+            </div>
+
+            <div class="flex flex-col flex-grow py-2">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="text-2xl font-medium tracking-tight text-stone-900">Seaglass Villa</h3>
+                <span class="text-xl font-medium text-stone-900 hidden sm:block">$2,720</span>
+              </div>
+              
+              <p class="text-base text-stone-500 font-light mb-6 flex items-center gap-2">
+                <iconify-icon icon="solar:map-point-linear" class="w-4 h-4"></iconify-icon>
+                Seaside, Florida
+              </p>
+
+              <div class="grid grid-cols-2 gap-4 mb-8">
+                <div>
+                  <span class="text-xs font-medium uppercase tracking-widest text-stone-400 block mb-1">Dates</span>
+                  <span class="text-base text-stone-900 font-light block">Oct 12 - Oct 17, 2024</span>
+                </div>
+                <div>
+                  <span class="text-xs font-medium uppercase tracking-widest text-stone-400 block mb-1">Guests</span>
+                  <span class="text-base text-stone-900 font-light block">2 adults, 1 child</span>
+                </div>
+              </div>
+
+              <div class="mt-auto flex flex-wrap gap-3">
+                <button class="px-5 py-2.5 bg-stone-900 hover:bg-stone-800 text-white text-sm font-medium rounded-xl transition-colors shadow-sm active:scale-[0.98]">
+                  Modify Booking
+                </button>
+                <button onclick="openModal()" class="px-5 py-2.5 bg-white hover:bg-stone-50 border border-stone-200 text-stone-700 text-sm font-medium rounded-xl transition-colors active:scale-[0.98]">
+                  View Details
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Past Bookings -->
+        <div>
+          <h2 class="text-2xl md:text-3xl font-medium tracking-tight text-stone-900 mb-6">
+            Past Bookings
+          </h2>
+          
+          <div class="flex flex-col gap-4">
+            <!-- Past Item 1 -->
+            <div class="group flex items-center gap-5 p-4 rounded-2xl border border-stone-200 bg-white hover:bg-stone-50/50 transition-colors cursor-pointer">
+              <img src="https://images.unsplash.com/photo-1449844908441-8829872d2607?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=300&amp;q=80" alt="Mountain Retreat" class="w-20 h-20 rounded-xl object-cover flex-shrink-0">
+              <div class="flex-grow">
+                <h4 class="text-lg font-medium text-stone-900 mb-1">Aspen Mountain Retreat</h4>
+                <p class="text-sm font-light text-stone-500">Jan 5 - Jan 10, 2024 • 4 Guests</p>
+              </div>
+              <div class="hidden sm:flex items-center gap-3 pr-2">
+                <button class="px-4 py-2 text-sm font-medium text-stone-600 hover:text-stone-900 bg-white border border-stone-200 rounded-lg hover:border-stone-300 transition-all">
+                  Book again
+                </button>
+              </div>
+            </div>
+
+            <!-- Past Item 2 -->
+            <div class="group flex items-center gap-5 p-4 rounded-2xl border border-stone-200 bg-white hover:bg-stone-50/50 transition-colors cursor-pointer">
+              <img src="https://images.unsplash.com/photo-1494526585095-c41746248156?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=300&amp;q=80" alt="Desert Oasis" class="w-20 h-20 rounded-xl object-cover flex-shrink-0">
+              <div class="flex-grow">
+                <h4 class="text-lg font-medium text-stone-900 mb-1">Joshua Tree Oasis</h4>
+                <p class="text-sm font-light text-stone-500">Nov 12 - Nov 15, 2023 • 2 Guests</p>
+              </div>
+              <div class="hidden sm:flex items-center gap-3 pr-2">
+                <button class="px-4 py-2 text-sm font-medium text-stone-600 hover:text-stone-900 bg-white border border-stone-200 rounded-lg hover:border-stone-300 transition-all">
+                  Book again
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Side: Personal Details Card -->
+      <div class="lg:col-span-5 xl:col-span-4 relative mt-4 lg:mt-0">
+        <div class="sticky top-12 bg-white border border-stone-200 rounded-[2rem] p-8 shadow-[0_20px_40px_rgb(0,0,0,0.04)]">
+          
+          <div class="flex items-center justify-between mb-8">
+            <h2 class="text-2xl font-medium tracking-tight text-stone-900">Personal Details</h2>
+            <iconify-icon icon="solar:user-circle-linear" class="w-7 h-7 text-stone-400"></iconify-icon>
+          </div>
+
+          <!-- Edit Profile Form -->
+          <div class="border border-stone-200 rounded-2xl mb-8 flex flex-col bg-white shadow-sm transition-all focus-within:ring-2 focus-within:ring-sky-500/20 focus-within:border-sky-500/50 overflow-hidden">
+            
+            <!-- Name Input -->
+            <div class="p-4 flex flex-col text-left bg-white border-b border-stone-200 group focus-within:bg-stone-50 transition-colors">
+              <label for="fullName" class="text-xs font-medium uppercase tracking-widest text-stone-500 group-focus-within:text-sky-600 transition-colors mb-1">Full Name</label>
+              <input id="fullName" type="text" value="Sarah Jenkins" class="text-lg font-light text-stone-900 bg-transparent focus:outline-none w-full">
+            </div>
+
+            <!-- Email Input -->
+            <div class="p-4 flex flex-col text-left bg-white border-b border-stone-200 group focus-within:bg-stone-50 transition-colors">
+              <label for="emailAddr" class="text-xs font-medium uppercase tracking-widest text-stone-500 group-focus-within:text-sky-600 transition-colors mb-1">Email Address</label>
+              <input id="emailAddr" type="email" value="sarah.jenkins@example.com" class="text-lg font-light text-stone-900 bg-transparent focus:outline-none w-full">
+            </div>
+
+            <!-- Phone Input -->
+            <div class="p-4 flex flex-col text-left bg-white border-b border-stone-200 group focus-within:bg-stone-50 transition-colors">
+              <label for="phoneNum" class="text-xs font-medium uppercase tracking-widest text-stone-500 group-focus-within:text-sky-600 transition-colors mb-1">Phone Number</label>
+              <input id="phoneNum" type="tel" value="+1 (555) 123-4567" class="text-lg font-light text-stone-900 bg-transparent focus:outline-none w-full">
+            </div>
+
+            <!-- Location Input -->
+            <div class="p-4 flex flex-col text-left bg-white group focus-within:bg-stone-50 transition-colors">
+              <label for="location" class="text-xs font-medium uppercase tracking-widest text-stone-500 group-focus-within:text-sky-600 transition-colors mb-1">Location</label>
+              <input id="location" type="text" value="Chicago, IL" class="text-lg font-light text-stone-900 bg-transparent focus:outline-none w-full">
+            </div>
+
+          </div>
+
+          <button class="w-full py-4 bg-sky-600 hover:bg-sky-700 text-white text-lg font-medium rounded-2xl transition-all shadow-lg shadow-sky-600/20 active:scale-[0.98] mb-4">
+            Save Changes
+          </button>
+
+          <p class="text-sm font-light text-stone-500 text-center flex items-center justify-center gap-2">
+            <iconify-icon icon="solar:lock-password-linear" class="w-4 h-4"></iconify-icon>
+            Your data is securely encrypted
+          </p>
+
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Booking Details Modal -->
+    <div id="details-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 sm:p-6">
+      <!-- Backdrop -->
+      <div id="modal-backdrop" onclick="closeModal()" class="absolute inset-0 bg-stone-900/40 backdrop-blur-sm opacity-0 transition-opacity duration-300"></div>
+      
+      <!-- Modal Content -->
+      <div id="modal-content" class="relative w-full max-w-2xl bg-white rounded-[2rem] shadow-[0_20px_60px_rgb(0,0,0,0.15)] overflow-hidden flex flex-col max-h-[90vh] opacity-0 scale-95 translate-y-4 transition-all duration-300">
+        
+        <!-- Modal Image Header -->
+        <div class="h-48 sm:h-64 w-full relative flex-shrink-0">
+          <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=1200&amp;q=80" alt="Seaglass Villa" class="w-full h-full object-cover">
+          
+          <div class="absolute inset-0 bg-gradient-to-t from-stone-900/40 to-transparent"></div>
+          
+          <!-- Close Button -->
+          <button onclick="closeModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm text-stone-900 flex items-center justify-center hover:bg-white transition-colors shadow-sm">
+            <iconify-icon icon="solar:close-circle-linear" class="w-5 h-5"></iconify-icon>
+          </button>
+
+          <div class="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
+            <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+            <span class="text-xs font-medium uppercase tracking-widest text-stone-900">Confirmed</span>
+          </div>
+
+          <div class="absolute bottom-4 left-6 pr-6">
+            <h2 class="text-2xl sm:text-3xl font-medium tracking-tight text-white mb-1 shadow-sm">Seaglass Villa</h2>
+            <p class="text-sm font-light text-white/90 flex items-center gap-1.5">
+              <iconify-icon icon="solar:map-point-linear" class="w-4 h-4"></iconify-icon>
+              Seaside, Florida
+            </p>
+          </div>
+        </div>
+
+        <!-- Modal Body (Scrollable) -->
+        <div class="p-6 sm:p-8 overflow-y-auto">
+          
+          <div class="flex items-center justify-between pb-6 border-b border-stone-200 mb-6">
+            <div>
+              <p class="text-xs font-medium uppercase tracking-widest text-stone-400 mb-1">Confirmation Code</p>
+              <p class="text-lg font-medium tracking-widest text-stone-900">#JZ-9842F</p>
+            </div>
+            <div class="text-right">
+              <p class="text-xs font-medium uppercase tracking-widest text-stone-400 mb-1">Total Paid</p>
+              <p class="text-xl font-medium text-stone-900">$2,720.00</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+            <!-- Check in -->
+            <div class="border border-stone-200 rounded-2xl p-4 bg-stone-50/50">
+              <p class="text-xs font-medium uppercase tracking-widest text-stone-500 mb-2">Check-in</p>
+              <p class="text-base font-medium text-stone-900 mb-0.5">Sat, Oct 12, 2024</p>
+              <p class="text-sm font-light text-stone-500">After 3:00 PM</p>
+            </div>
+            <!-- Check out -->
+            <div class="border border-stone-200 rounded-2xl p-4 bg-stone-50/50">
+              <p class="text-xs font-medium uppercase tracking-widest text-stone-500 mb-2">Check-out</p>
+              <p class="text-base font-medium text-stone-900 mb-0.5">Thu, Oct 17, 2024</p>
+              <p class="text-sm font-light text-stone-500">Before 11:00 AM</p>
+            </div>
+          </div>
+
+          <div class="mb-8">
+            <p class="text-xs font-medium uppercase tracking-widest text-stone-400 mb-3">Guests &amp; Accommodation</p>
+            <div class="flex flex-col gap-3">
+              <div class="flex items-center justify-between">
+                <span class="text-base font-light text-stone-600">Guests</span>
+                <span class="text-base font-medium text-stone-900">2 Adults, 1 Child</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-base font-light text-stone-600">Rooms</span>
+                <span class="text-base font-medium text-stone-900">2 Bedrooms, 2 Baths</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p class="text-xs font-medium uppercase tracking-widest text-stone-400 mb-3">Address</p>
+            <div class="flex items-center justify-between border border-stone-200 rounded-2xl p-4 bg-white">
+              <p class="text-base font-light text-stone-900">123 Oceanfront Drive<br>Seaside, FL 32459</p>
+              <button class="w-10 h-10 rounded-xl bg-stone-50 text-stone-600 hover:text-stone-900 hover:bg-stone-100 flex items-center justify-center transition-colors" title="Copy Address">
+                <iconify-icon icon="solar:copy-linear" class="w-5 h-5"></iconify-icon>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="p-6 sm:p-8 pt-0 mt-auto flex flex-col sm:flex-row items-center gap-4">
+          <button class="w-full sm:w-auto px-6 py-3 bg-stone-900 hover:bg-stone-800 text-white text-sm font-medium rounded-xl transition-colors shadow-sm active:scale-[0.98] flex items-center justify-center gap-2">
+            <iconify-icon icon="solar:document-text-linear" class="w-4 h-4"></iconify-icon>
+            Download Receipt
+          </button>
+          <button onclick="closeModal()" class="w-full sm:w-auto px-6 py-3 bg-transparent hover:bg-stone-50 text-stone-600 text-sm font-medium rounded-xl transition-colors active:scale-[0.98]">
+            Close
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Script for Modal Functionality -->
+    <script>
+      function openModal() {
+        const modal = document.getElementById('details-modal');
+        const backdrop = document.getElementById('modal-backdrop');
+        const content = document.getElementById('modal-content');
+        
+        // Remove hidden first
+        modal.classList.remove('hidden');
+        
+        // Slight delay to allow display:block to apply before animating
+        setTimeout(() => {
+          backdrop.classList.remove('opacity-0');
+          content.classList.remove('opacity-0', 'scale-95', 'translate-y-4');
+        }, 10);
+      }
+
+      function closeModal() {
+        const modal = document.getElementById('details-modal');
+        const backdrop = document.getElementById('modal-backdrop');
+        const content = document.getElementById('modal-content');
+        
+        // Add animation classes back
+        backdrop.classList.add('opacity-0');
+        content.classList.add('opacity-0', 'scale-95', 'translate-y-4');
+        
+        // Wait for animation to finish before hiding
+        setTimeout(() => {
+          modal.classList.add('hidden');
+        }, 300);
+      }
+    </script>
+  
+</body></html>

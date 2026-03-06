@@ -1,0 +1,18 @@
+@import "tailwindcss" source("../");
+
+@theme inline {
+  --font-sans: "Outfit", sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-stone-200;
+  }
+  body {
+    @apply bg-stone-100 font-sans text-stone-900 antialiased;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    @apply bg-sky-500/20;
+  }
+}

@@ -1,0 +1,436 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - JZ Vacation Stays</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <style>
+      body {
+        font-family: 'Outfit', sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      iconify-icon {
+        stroke-width: 1.5;
+      }
+      /* Hide scrollbar for clean horizontal scrolling on small mobile devices */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+  </head>
+  <body class="bg-stone-50 text-stone-900 selection:bg-sky-500/20 flex flex-col min-h-screen relative">
+    
+    <!-- Admin Header -->
+    <header class="w-full pt-8 pb-4 bg-stone-50 sticky top-0 z-40 border-b border-stone-200/50 backdrop-blur-md">
+      <div class="max-w-[90rem] mx-auto px-6 flex items-center justify-between">
+        <a href="#" class="text-xl font-medium tracking-tight text-stone-900 flex items-center gap-2">
+          <div class="w-8 h-8 bg-stone-900 text-white rounded-xl flex items-center justify-center shadow-sm">
+            <iconify-icon icon="solar:buildings-linear" class="w-4 h-4"></iconify-icon>
+          </div>
+          JZ Vacation Stays <span class="text-xs uppercase tracking-widest text-stone-400 ml-2 font-medium bg-stone-100 px-2 py-1 rounded-md">Admin</span>
+        </a>
+
+        <nav class="hidden md:flex items-center gap-8">
+          <a href="#" class="text-sm font-medium text-stone-900 transition-colors duration-200">Calendar</a>
+          <a href="#" class="text-sm font-light text-stone-500 hover:text-stone-900 transition-colors duration-200">Properties</a>
+          <a href="#" class="text-sm font-light text-stone-500 hover:text-stone-900 transition-colors duration-200">Guests</a>
+          <a href="#" class="text-sm font-light text-stone-500 hover:text-stone-900 transition-colors duration-200">Settings</a>
+        </nav>
+
+        <div class="flex items-center gap-5">
+          <button class="text-stone-400 hover:text-stone-900 transition-colors duration-200 flex items-center" aria-label="Notifications">
+            <iconify-icon icon="solar:bell-linear" class="w-5 h-5"></iconify-icon>
+          </button>
+          <button class="flex items-center gap-2 group">
+            <div class="w-8 h-8 rounded-full bg-white border border-stone-200 shadow-sm text-stone-700 flex items-center justify-center font-medium text-xs group-hover:border-stone-300 transition-colors duration-200">
+              AD
+            </div>
+            <iconify-icon icon="solar:alt-arrow-down-linear" class="w-4 h-4 text-stone-400 group-hover:text-stone-600 transition-colors duration-200"></iconify-icon>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="w-full max-w-[90rem] mx-auto px-6 py-8 md:py-12 flex-grow">
+      
+      <!-- Top Controls -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
+        <div>
+          <h1 class="text-3xl md:text-4xl font-medium tracking-tight text-stone-900 mb-2">
+            Property Calendar
+          </h1>
+          <p class="text-sm text-stone-500 font-light">
+            Manage your bookings, availability, and guest details at a glance.
+          </p>
+        </div>
+
+        <!-- Custom Property Selector -->
+        <div class="relative group w-full sm:w-auto flex-shrink-0">
+          <select class="appearance-none w-full sm:w-72 bg-white border border-stone-200 text-stone-900 text-sm font-medium rounded-2xl pl-4 pr-10 py-3 outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all cursor-pointer shadow-[0_2px_10px_rgb(0,0,0,0.02)]">
+            <option>Seaglass Villa</option>
+            <option>Aspen Mountain Retreat</option>
+            <option>Joshua Tree Oasis</option>
+            <option>Downtown Loft</option>
+          </select>
+          <iconify-icon icon="solar:alt-arrow-down-linear" class="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none w-4 h-4"></iconify-icon>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 lg:gap-12">
+        
+        <!-- Left Side: Calendar View -->
+        <div class="xl:col-span-8 flex flex-col">
+          
+          <!-- Calendar Header -->
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-medium tracking-tight text-stone-900">October 2024</h2>
+            <div class="flex items-center gap-2">
+              <button class="w-9 h-9 flex items-center justify-center rounded-xl border border-stone-200 bg-white text-stone-500 hover:text-stone-900 hover:bg-stone-50 transition-colors shadow-sm">
+                <iconify-icon icon="solar:alt-arrow-left-linear" class="w-5 h-5"></iconify-icon>
+              </button>
+              <button class="px-4 h-9 flex items-center justify-center rounded-xl border border-stone-200 bg-white text-sm font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-50 transition-colors shadow-sm">
+                Today
+              </button>
+              <button class="w-9 h-9 flex items-center justify-center rounded-xl border border-stone-200 bg-white text-stone-500 hover:text-stone-900 hover:bg-stone-50 transition-colors shadow-sm">
+                <iconify-icon icon="solar:alt-arrow-right-linear" class="w-5 h-5"></iconify-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- Calendar Grid Container -->
+          <div class="bg-stone-200 rounded-3xl border border-stone-200 overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex flex-col w-full overflow-x-auto no-scrollbar">
+            
+            <!-- Days of Week -->
+            <div class="grid grid-cols-7 bg-stone-50/80 border-b border-stone-200 min-w-[600px]">
+              <div class="py-3 text-center text-xs font-medium uppercase tracking-widest text-stone-400">Sun</div>
+              <div class="py-3 text-center text-xs font-medium uppercase tracking-widest text-stone-400">Mon</div>
+              <div class="py-3 text-center text-xs font-medium uppercase tracking-widest text-stone-400">Tue</div>
+              <div class="py-3 text-center text-xs font-medium uppercase tracking-widest text-stone-400">Wed</div>
+              <div class="py-3 text-center text-xs font-medium uppercase tracking-widest text-stone-400">Thu</div>
+              <div class="py-3 text-center text-xs font-medium uppercase tracking-widest text-stone-400">Fri</div>
+              <div class="py-3 text-center text-xs font-medium uppercase tracking-widest text-stone-400">Sat</div>
+            </div>
+
+            <!-- Calendar Cells -->
+            <div class="grid grid-cols-7 gap-px bg-stone-200 min-w-[600px]">
+              
+              <!-- Empty/Previous Month -->
+              <div class="bg-stone-50/50 min-h-[100px] lg:min-h-[120px] p-2 text-stone-400 opacity-60">
+                <span class="text-sm font-medium p-1">29</span>
+              </div>
+              <div class="bg-stone-50/50 min-h-[100px] lg:min-h-[120px] p-2 text-stone-400 opacity-60">
+                <span class="text-sm font-medium p-1">30</span>
+              </div>
+
+              <!-- Empty Days -->
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer group">
+                <span class="text-sm font-medium text-stone-900 p-1 group-hover:text-sky-600 transition-colors">1</span>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer group">
+                <span class="text-sm font-medium text-stone-900 p-1 group-hover:text-sky-600 transition-colors">2</span>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer group">
+                <span class="text-sm font-medium text-stone-900 p-1 group-hover:text-sky-600 transition-colors">3</span>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer group">
+                <span class="text-sm font-medium text-stone-900 p-1 group-hover:text-sky-600 transition-colors">4</span>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer group">
+                <span class="text-sm font-medium text-stone-900 p-1 group-hover:text-sky-600 transition-colors">5</span>
+              </div>
+              
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer group">
+                <span class="text-sm font-medium text-stone-900 p-1 group-hover:text-sky-600 transition-colors">6</span>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer group">
+                <span class="text-sm font-medium text-stone-900 p-1 group-hover:text-sky-600 transition-colors">7</span>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer group">
+                <span class="text-sm font-medium text-stone-900 p-1 group-hover:text-sky-600 transition-colors">8</span>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer group">
+                <span class="text-sm font-medium text-stone-900 p-1 group-hover:text-sky-600 transition-colors">9</span>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer group">
+                <span class="text-sm font-medium text-stone-900 p-1 group-hover:text-sky-600 transition-colors">10</span>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer group">
+                <span class="text-sm font-medium text-stone-900 p-1 group-hover:text-sky-600 transition-colors">11</span>
+              </div>
+
+              <!-- Booking 1: Airbnb (Rose) -->
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer">
+                <span class="text-sm font-medium text-stone-900 p-1">12</span>
+                <div class="w-full bg-rose-50 border border-rose-100 text-rose-600 text-xs font-medium px-2 py-1.5 rounded-md truncate flex items-center gap-1.5 shadow-sm">
+                  <div class="w-1.5 h-1.5 rounded-full bg-rose-500 flex-shrink-0"></div>
+                  Sarah J.
+                </div>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer">
+                <span class="text-sm font-medium text-stone-900 p-1">13</span>
+                <div class="w-full bg-rose-50 border border-rose-100 text-rose-600 text-xs font-medium px-2 py-1.5 rounded-md truncate flex items-center gap-1.5 shadow-sm">
+                  <div class="w-1.5 h-1.5 rounded-full bg-rose-500 flex-shrink-0"></div>
+                  Sarah J.
+                </div>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer">
+                <span class="text-sm font-medium text-stone-900 p-1">14</span>
+                <div class="w-full bg-rose-50 border border-rose-100 text-rose-600 text-xs font-medium px-2 py-1.5 rounded-md truncate flex items-center gap-1.5 shadow-sm">
+                  <div class="w-1.5 h-1.5 rounded-full bg-rose-500 flex-shrink-0"></div>
+                  Sarah J.
+                </div>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer">
+                <span class="text-sm font-medium text-stone-900 p-1">15</span>
+                <div class="w-full bg-rose-50 border border-rose-100 text-rose-600 text-xs font-medium px-2 py-1.5 rounded-md truncate flex items-center gap-1.5 shadow-sm">
+                  <div class="w-1.5 h-1.5 rounded-full bg-rose-500 flex-shrink-0"></div>
+                  Sarah J.
+                </div>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer">
+                <span class="text-sm font-medium text-stone-900 p-1">16</span>
+                <div class="w-full bg-rose-50 border border-rose-100 text-rose-600 text-xs font-medium px-2 py-1.5 rounded-md truncate flex items-center gap-1.5 shadow-sm">
+                  <div class="w-1.5 h-1.5 rounded-full bg-rose-500 flex-shrink-0"></div>
+                  Sarah J.
+                </div>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer">
+                <span class="text-sm font-medium text-stone-900 p-1">17</span>
+                <div class="w-full bg-rose-50 border border-rose-100 text-rose-600 text-xs font-medium px-2 py-1.5 rounded-md truncate flex items-center gap-1.5 shadow-sm">
+                  <div class="w-1.5 h-1.5 rounded-full bg-rose-500 flex-shrink-0"></div>
+                  Checkout
+                </div>
+              </div>
+
+              <!-- More Empty Days -->
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer group">
+                <span class="text-sm font-medium text-stone-900 p-1 group-hover:text-sky-600 transition-colors">18</span>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer group">
+                <span class="text-sm font-medium text-stone-900 p-1 group-hover:text-sky-600 transition-colors">19</span>
+              </div>
+
+              <!-- Booking 2: Direct (Stone) -->
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer">
+                <span class="text-sm font-medium text-stone-900 p-1">20</span>
+                <div class="w-full bg-stone-100 border border-stone-200 text-stone-700 text-xs font-medium px-2 py-1.5 rounded-md truncate flex items-center gap-1.5 shadow-sm">
+                  <div class="w-1.5 h-1.5 rounded-full bg-stone-700 flex-shrink-0"></div>
+                  Michael C.
+                </div>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer">
+                <span class="text-sm font-medium text-stone-900 p-1">21</span>
+                <div class="w-full bg-stone-100 border border-stone-200 text-stone-700 text-xs font-medium px-2 py-1.5 rounded-md truncate flex items-center gap-1.5 shadow-sm">
+                  <div class="w-1.5 h-1.5 rounded-full bg-stone-700 flex-shrink-0"></div>
+                  Michael C.
+                </div>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer">
+                <span class="text-sm font-medium text-stone-900 p-1">22</span>
+                <div class="w-full bg-stone-100 border border-stone-200 text-stone-700 text-xs font-medium px-2 py-1.5 rounded-md truncate flex items-center gap-1.5 shadow-sm">
+                  <div class="w-1.5 h-1.5 rounded-full bg-stone-700 flex-shrink-0"></div>
+                  Michael C.
+                </div>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer">
+                <span class="text-sm font-medium text-stone-900 p-1">23</span>
+                <div class="w-full bg-stone-100 border border-stone-200 text-stone-700 text-xs font-medium px-2 py-1.5 rounded-md truncate flex items-center gap-1.5 shadow-sm">
+                  <div class="w-1.5 h-1.5 rounded-full bg-stone-700 flex-shrink-0"></div>
+                  Checkout
+                </div>
+              </div>
+
+              <!-- More Empty Days -->
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer group">
+                <span class="text-sm font-medium text-stone-900 p-1 group-hover:text-sky-600 transition-colors">24</span>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer group">
+                <span class="text-sm font-medium text-stone-900 p-1 group-hover:text-sky-600 transition-colors">25</span>
+              </div>
+
+              <!-- Booking 3: Vrbo (Sky) -->
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer">
+                <span class="text-sm font-medium text-stone-900 p-1">26</span>
+                <div class="w-full bg-sky-50 border border-sky-100 text-sky-600 text-xs font-medium px-2 py-1.5 rounded-md truncate flex items-center gap-1.5 shadow-sm">
+                  <div class="w-1.5 h-1.5 rounded-full bg-sky-500 flex-shrink-0"></div>
+                  Emma W.
+                </div>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer">
+                <span class="text-sm font-medium text-stone-900 p-1">27</span>
+                <div class="w-full bg-sky-50 border border-sky-100 text-sky-600 text-xs font-medium px-2 py-1.5 rounded-md truncate flex items-center gap-1.5 shadow-sm">
+                  <div class="w-1.5 h-1.5 rounded-full bg-sky-500 flex-shrink-0"></div>
+                  Emma W.
+                </div>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer">
+                <span class="text-sm font-medium text-stone-900 p-1">28</span>
+                <div class="w-full bg-sky-50 border border-sky-100 text-sky-600 text-xs font-medium px-2 py-1.5 rounded-md truncate flex items-center gap-1.5 shadow-sm">
+                  <div class="w-1.5 h-1.5 rounded-full bg-sky-500 flex-shrink-0"></div>
+                  Emma W.
+                </div>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer">
+                <span class="text-sm font-medium text-stone-900 p-1">29</span>
+                <div class="w-full bg-sky-50 border border-sky-100 text-sky-600 text-xs font-medium px-2 py-1.5 rounded-md truncate flex items-center gap-1.5 shadow-sm">
+                  <div class="w-1.5 h-1.5 rounded-full bg-sky-500 flex-shrink-0"></div>
+                  Emma W.
+                </div>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer">
+                <span class="text-sm font-medium text-stone-900 p-1">30</span>
+                <div class="w-full bg-sky-50 border border-sky-100 text-sky-600 text-xs font-medium px-2 py-1.5 rounded-md truncate flex items-center gap-1.5 shadow-sm">
+                  <div class="w-1.5 h-1.5 rounded-full bg-sky-500 flex-shrink-0"></div>
+                  Emma W.
+                </div>
+              </div>
+              <div class="bg-white min-h-[100px] lg:min-h-[120px] p-2 flex flex-col gap-1 transition-colors hover:bg-stone-50 cursor-pointer">
+                <span class="text-sm font-medium text-stone-900 p-1">31</span>
+                <div class="w-full bg-sky-50 border border-sky-100 text-sky-600 text-xs font-medium px-2 py-1.5 rounded-md truncate flex items-center gap-1.5 shadow-sm">
+                  <div class="w-1.5 h-1.5 rounded-full bg-sky-500 flex-shrink-0"></div>
+                  Checkout
+                </div>
+              </div>
+
+              <!-- Empty/Next Month -->
+              <div class="bg-stone-50/50 min-h-[100px] lg:min-h-[120px] p-2 text-stone-400 opacity-60">
+                <span class="text-sm font-medium p-1">1</span>
+              </div>
+              <div class="bg-stone-50/50 min-h-[100px] lg:min-h-[120px] p-2 text-stone-400 opacity-60">
+                <span class="text-sm font-medium p-1">2</span>
+              </div>
+
+            </div>
+          </div>
+          
+          <!-- Legend -->
+          <div class="mt-6 flex flex-wrap items-center gap-6 px-2">
+            <div class="flex items-center gap-2">
+              <div class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-500/20"></div>
+              <span class="text-sm font-medium text-stone-600">Airbnb</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="w-2.5 h-2.5 rounded-full bg-sky-500 shadow-sm shadow-sky-500/20"></div>
+              <span class="text-sm font-medium text-stone-600">Vrbo</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="w-2.5 h-2.5 rounded-full bg-stone-700 shadow-sm"></div>
+              <span class="text-sm font-medium text-stone-600">Direct Booking</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Side: Agenda/Details List -->
+        <div class="xl:col-span-4 relative">
+          <div class="xl:sticky xl:top-24 flex flex-col gap-4">
+            
+            <div class="flex items-center justify-between mb-2">
+              <h2 class="text-xl font-medium tracking-tight text-stone-900">October Bookings</h2>
+              <span class="text-xs font-medium bg-stone-200 text-stone-700 px-2 py-1 rounded-md">3 Stays</span>
+            </div>
+
+            <!-- Booking Card 1 (Airbnb) -->
+            <div class="bg-white border border-stone-200 rounded-[1.5rem] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-rose-200 transition-all cursor-pointer group">
+              <div class="flex items-start justify-between mb-4 border-b border-stone-100 pb-4">
+                <div>
+                  <h3 class="text-lg font-medium text-stone-900 group-hover:text-rose-600 transition-colors">Sarah Jenkins</h3>
+                  <p class="text-sm font-light text-stone-500 mt-0.5">Oct 12 - Oct 17, 2024</p>
+                </div>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-rose-50 text-rose-600 text-xs font-medium border border-rose-100/50">
+                  <iconify-icon icon="solar:home-smile-linear" class="w-4 h-4"></iconify-icon>
+                  Airbnb
+                </span>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <span class="block text-xs uppercase tracking-widest text-stone-400 mb-1">Guests</span>
+                  <span class="block text-sm font-medium text-stone-900 flex items-center gap-1.5">
+                    <iconify-icon icon="solar:users-group-rounded-linear" class="text-stone-400"></iconify-icon>
+                    2 Adults, 1 Child
+                  </span>
+                </div>
+                <div>
+                  <span class="block text-xs uppercase tracking-widest text-stone-400 mb-1">Total Payout</span>
+                  <span class="block text-sm font-medium text-emerald-600 flex items-center gap-1.5">
+                    <iconify-icon icon="solar:wallet-linear" class="text-emerald-500"></iconify-icon>
+                    $2,720.00
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Booking Card 2 (Direct) -->
+            <div class="bg-white border border-stone-200 rounded-[1.5rem] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-stone-300 transition-all cursor-pointer group">
+              <div class="flex items-start justify-between mb-4 border-b border-stone-100 pb-4">
+                <div>
+                  <h3 class="text-lg font-medium text-stone-900 group-hover:text-stone-700 transition-colors">Michael Chen</h3>
+                  <p class="text-sm font-light text-stone-500 mt-0.5">Oct 20 - Oct 23, 2024</p>
+                </div>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-stone-100 text-stone-700 text-xs font-medium border border-stone-200/50">
+                  <iconify-icon icon="solar:link-linear" class="w-4 h-4"></iconify-icon>
+                  Direct
+                </span>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <span class="block text-xs uppercase tracking-widest text-stone-400 mb-1">Guests</span>
+                  <span class="block text-sm font-medium text-stone-900 flex items-center gap-1.5">
+                    <iconify-icon icon="solar:users-group-rounded-linear" class="text-stone-400"></iconify-icon>
+                    2 Adults
+                  </span>
+                </div>
+                <div>
+                  <span class="block text-xs uppercase tracking-widest text-stone-400 mb-1">Total Payout</span>
+                  <span class="block text-sm font-medium text-emerald-600 flex items-center gap-1.5">
+                    <iconify-icon icon="solar:wallet-linear" class="text-emerald-500"></iconify-icon>
+                    $1,450.00
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Booking Card 3 (Vrbo) -->
+            <div class="bg-white border border-stone-200 rounded-[1.5rem] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-sky-200 transition-all cursor-pointer group">
+              <div class="flex items-start justify-between mb-4 border-b border-stone-100 pb-4">
+                <div>
+                  <h3 class="text-lg font-medium text-stone-900 group-hover:text-sky-600 transition-colors">Emma Wilson</h3>
+                  <p class="text-sm font-light text-stone-500 mt-0.5">Oct 26 - Oct 31, 2024</p>
+                </div>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-sky-50 text-sky-600 text-xs font-medium border border-sky-100/50">
+                  <iconify-icon icon="solar:global-linear" class="w-4 h-4"></iconify-icon>
+                  Vrbo
+                </span>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <span class="block text-xs uppercase tracking-widest text-stone-400 mb-1">Guests</span>
+                  <span class="block text-sm font-medium text-stone-900 flex items-center gap-1.5">
+                    <iconify-icon icon="solar:users-group-rounded-linear" class="text-stone-400"></iconify-icon>
+                    4 Adults
+                  </span>
+                </div>
+                <div>
+                  <span class="block text-xs uppercase tracking-widest text-stone-400 mb-1">Total Payout</span>
+                  <span class="block text-sm font-medium text-emerald-600 flex items-center gap-1.5">
+                    <iconify-icon icon="solar:wallet-linear" class="text-emerald-500"></iconify-icon>
+                    $3,100.00
+                  </span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+  
+</body></html>d

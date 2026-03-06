@@ -1,0 +1,154 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JZ Vacation Stays</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <style>
+      body {
+          font-family: 'Outfit', sans-serif;
+          -webkit-font-smoothing: antialiased;
+      }
+      iconify-icon {
+          stroke-width: 1.5;
+      }
+    </style>
+  </head>
+  <body class="bg-stone-100 text-stone-900 selection:bg-sky-500/20">
+    <main class="relative min-h-screen w-full overflow-hidden flex flex-col">
+      <!-- Background Image & Overlays -->
+      <div class="absolute inset-0 z-0 pointer-events-none">
+        <!-- Bright, sunny family-friendly beachfront house -->
+        <img src="https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=2800&amp;q=80" alt="Sunny family beach house" class="w-full h-full object-cover object-center opacity-90 scale-105">
+
+        <!-- Lowered white overlay opacities to reveal more of the hero image -->
+        <div class="absolute inset-0 bg-stone-900/10"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-stone-100/40 via-stone-100/10 to-stone-100/70"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-stone-100/70 via-stone-100/30 to-stone-100/10"></div>
+      </div>
+
+      <!-- Content Layer -->
+      <div class="relative z-10 flex flex-col min-h-screen w-full max-w-screen-2xl mx-auto p-6 md:p-10 lg:p-12">
+        <!-- Header -->
+        <header class="flex items-center justify-between w-full">
+          <!-- Prominent, well-blended text logo -->
+          <a href="#" class="text-3xl md:text-4xl font-semibold tracking-tighter text-stone-900 uppercase drop-shadow-md hover:opacity-80 transition-opacity duration-300">
+            JZ Vacation Stays
+          </a>
+
+          <nav class="hidden md:flex items-center space-x-10">
+            <a href="#" class="text-lg text-stone-700 hover:text-stone-900 transition-colors duration-200">
+              Browse
+            </a>
+            <a href="#" class="text-lg text-stone-700 hover:text-stone-900 transition-colors duration-200">
+              Find stay
+            </a>
+            <a href="#" class="text-lg text-stone-700 hover:text-stone-900 transition-colors duration-200">
+              Inspiration
+            </a>
+            <a href="#" class="text-lg text-stone-700 hover:text-stone-900 transition-colors duration-200">
+              Contact
+            </a>
+          </nav>
+
+          <div class="flex items-center space-x-4 md:space-x-6">
+            <button class="p-3 rounded-full bg-white/40 hover:bg-white/70 backdrop-blur-md transition-all duration-200 text-stone-800 border border-white/50 flex items-center justify-center shadow-sm" aria-label="Share">
+              <iconify-icon icon="solar:share-linear" class="text-xl"></iconify-icon>
+            </button>
+            <button class="px-7 py-3 rounded-full bg-stone-900/90 hover:bg-stone-800 backdrop-blur-md text-white text-lg font-medium transition-all duration-200 border border-transparent shadow-xl shadow-stone-900/10">
+              Log in
+            </button>
+          </div>
+        </header>
+
+        <!-- Main Split Layout -->
+        <div class="flex-grow flex flex-col lg:flex-row items-center justify-between w-full gap-12 mt-12 lg:mt-0">
+          <!-- Left Side: Hero Text & CTA -->
+          <div class="max-w-xl w-full flex flex-col gap-8">
+            <h1 class="text-5xl md:text-7xl lg:text-8xl font-medium tracking-tight text-stone-900 leading-[1.05] drop-shadow-sm">
+              Feel at home
+              <br>
+              <span class="font-light italic text-sky-600/90">
+                by the ocean
+              </span>
+            </h1>
+
+            <div class="space-y-4 max-w-md drop-shadow-sm">
+              <p class="text-lg text-stone-700 leading-relaxed font-light">
+                Find spaces for fun, connection, and unforgettable family
+                moments under the Florida sun.
+              </p>
+              <p class="text-lg text-stone-600 font-light">
+                Experience our family-friendly coastal retreats.
+              </p>
+            </div>
+
+            <div class="pt-2">
+              <button class="px-8 py-4 bg-sky-600/85 backdrop-blur-sm border border-sky-500/20 text-white text-lg font-medium rounded-full hover:bg-sky-600 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-xl shadow-sky-600/20">
+                Plan your family trip
+              </button>
+            </div>
+          </div>
+
+          <!-- Right Side: The 2 Properties (Made more prominent) -->
+          <div class="w-full lg:w-auto max-w-xl flex flex-col gap-6">
+            <h2 class="text-base font-medium tracking-widest uppercase text-stone-700 mb-2 ml-2 drop-shadow-sm">
+              Our Properties
+            </h2>
+
+            <!-- Property 1 -->
+            <div class="group flex items-center gap-6 p-6 bg-white/85 hover:bg-white/95 backdrop-blur-2xl border border-white/80 rounded-[2rem] transition-all duration-300 cursor-pointer shadow-2xl shadow-stone-800/15">
+              <div class="w-36 h-36 sm:w-40 sm:h-40 rounded-2xl overflow-hidden flex-shrink-0 relative shadow-inner">
+                <img src="https://images.unsplash.com/photo-1519046904884-53103b34b206?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=400&amp;q=80" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" alt="Family on the beach">
+                <div class="absolute inset-0 bg-stone-900/5 group-hover:bg-transparent transition-colors duration-300"></div>
+              </div>
+              <div class="flex flex-col flex-grow justify-center py-1">
+                <h3 class="text-2xl sm:text-3xl font-medium tracking-tight text-stone-900 mb-1">
+                  Seaglass Villa
+                </h3>
+                <p class="text-lg text-stone-500 font-light">
+                  Oceanfront • 8 Guests
+                </p>
+                <div class="flex items-center gap-2 mt-4">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/90 shadow-sm shadow-emerald-500/50"></span>
+                  <span class="text-base text-stone-600 font-medium">
+                    Family favorite
+                  </span>
+                </div>
+              </div>
+              <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full border border-stone-200 flex items-center justify-center text-stone-400 group-hover:bg-sky-600 group-hover:border-transparent group-hover:text-white group-hover:shadow-lg group-hover:shadow-sky-600/30 group-hover:scale-105 transition-all duration-300 flex-shrink-0 mr-1">
+                <iconify-icon icon="solar:arrow-right-up-linear" class="text-2xl sm:text-3xl"></iconify-icon>
+              </div>
+            </div>
+
+            <!-- Property 2 -->
+            <div class="group flex items-center gap-6 p-6 bg-white/85 hover:bg-white/95 backdrop-blur-2xl border border-white/80 rounded-[2rem] transition-all duration-300 cursor-pointer shadow-2xl shadow-stone-800/15">
+              <div class="w-36 h-36 sm:w-40 sm:h-40 rounded-2xl overflow-hidden flex-shrink-0 relative shadow-inner">
+                <img src="https://images.unsplash.com/photo-1572331165267-854da2b10ccc?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=400&amp;q=80" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" alt="Sunny pool area">
+                <div class="absolute inset-0 bg-stone-900/5 group-hover:bg-transparent transition-colors duration-300"></div>
+              </div>
+              <div class="flex flex-col flex-grow justify-center py-1">
+                <h3 class="text-2xl sm:text-3xl font-medium tracking-tight text-stone-900 mb-1">
+                  Coral Retreat
+                </h3>
+                <p class="text-lg text-stone-500 font-light">
+                  Private Pool • 4 Guests
+                </p>
+                <div class="flex items-center gap-2 mt-4">
+                  <span class="w-2.5 h-2.5 rounded-full bg-sky-500/90 shadow-sm shadow-sky-500/50"></span>
+                  <span class="text-base text-stone-600 font-medium">
+                    Kid-friendly pool
+                  </span>
+                </div>
+              </div>
+              <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full border border-stone-200 flex items-center justify-center text-stone-400 group-hover:bg-sky-600 group-hover:border-transparent group-hover:text-white group-hover:shadow-lg group-hover:shadow-sky-600/30 group-hover:scale-105 transition-all duration-300 flex-shrink-0 mr-1">
+                <iconify-icon icon="solar:arrow-right-up-linear" class="text-2xl sm:text-3xl"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  
+</body></html>

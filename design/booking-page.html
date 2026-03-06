@@ -1,0 +1,209 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seaglass Villa - JZ Vacation Stays</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <style>
+      body {
+        font-family: 'Outfit', sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      iconify-icon {
+        stroke-width: 1.5;
+      }
+    </style>
+  </head>
+  <body class="bg-stone-50 text-stone-900 selection:bg-sky-500/20">
+    
+    <!-- Transparent Header overlaying Hero -->
+    <header class="absolute top-0 left-0 right-0 z-50 flex items-center justify-between w-full max-w-screen-2xl mx-auto p-6 md:p-10 lg:p-12">
+      <a href="#" class="text-3xl md:text-4xl font-medium tracking-tighter text-white uppercase drop-shadow-md hover:opacity-80 transition-opacity duration-300">
+        JZ Vacation Stays
+      </a>
+
+      <nav class="hidden md:flex items-center space-x-10">
+        <a href="#" class="text-lg text-stone-100 hover:text-white transition-colors duration-200 drop-shadow-sm font-light">Browse</a>
+        <a href="#" class="text-lg text-stone-100 hover:text-white transition-colors duration-200 drop-shadow-sm font-light">Find stay</a>
+        <a href="#" class="text-lg text-stone-100 hover:text-white transition-colors duration-200 drop-shadow-sm font-light">Inspiration</a>
+        <a href="#" class="text-lg text-stone-100 hover:text-white transition-colors duration-200 drop-shadow-sm font-light">Contact</a>
+      </nav>
+
+      <div class="flex items-center space-x-4 md:space-x-6">
+        <button class="p-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all duration-200 text-white border border-white/20 flex items-center justify-center shadow-sm" aria-label="Share">
+          <iconify-icon icon="solar:share-linear" class="w-6 h-6 flex items-center justify-center"></iconify-icon>
+        </button>
+        <button class="px-7 py-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md text-white text-lg font-medium transition-all duration-200 border border-white/20 shadow-xl">
+          Log in
+        </button>
+      </div>
+    </header>
+
+    <main class="w-full flex flex-col min-h-screen">
+      
+      <!-- Top Section: Hero Image Transitioning to background -->
+      <section class="relative w-full h-[50vh] min-h-[450px]">
+        <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=2800&amp;q=80" alt="Luxury property exterior" class="w-full h-full object-cover object-center">
+        <!-- Gradients to ensure text readability at top and seamless blend at bottom -->
+        <div class="absolute inset-0 bg-gradient-to-b from-stone-900/60 via-stone-900/10 to-transparent"></div>
+        <div class="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-stone-50 to-transparent"></div>
+      </section>
+
+      <!-- Main Content: Property Details & Booking -->
+      <section class="max-w-screen-xl w-full mx-auto px-6 pb-24 pt-8 md:pt-12 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
+        
+        <!-- Left Side: Details -->
+        <div class="lg:col-span-7 xl:col-span-8 flex flex-col">
+          
+          <div class="mb-10">
+            <h1 class="text-5xl lg:text-6xl font-medium tracking-tight text-stone-900 mb-6 leading-[1.1]">
+              Seaglass Villa
+            </h1>
+            <div class="flex flex-wrap items-center gap-4 md:gap-8 text-lg text-stone-600 font-light">
+              <span class="flex items-center gap-2.5">
+                <iconify-icon icon="solar:map-point-linear" class="w-5 h-5 text-stone-400 flex items-center justify-center"></iconify-icon>
+                Seaside, Florida
+              </span>
+              <span class="hidden md:inline text-stone-300">•</span>
+              <span class="flex items-center gap-2.5">
+                <iconify-icon icon="solar:users-group-rounded-linear" class="w-5 h-5 text-stone-400 flex items-center justify-center"></iconify-icon>
+                8 Guests
+              </span>
+              <span class="hidden md:inline text-stone-300">•</span>
+              <span class="flex items-center gap-2.5">
+                <iconify-icon icon="solar:bed-linear" class="w-5 h-5 text-stone-400 flex items-center justify-center"></iconify-icon>
+                4 Bedrooms
+              </span>
+              <span class="hidden md:inline text-stone-300">•</span>
+              <span class="flex items-center gap-2.5">
+                <iconify-icon icon="solar:bath-linear" class="w-5 h-5 text-stone-400 flex items-center justify-center"></iconify-icon>
+                3 Baths
+              </span>
+            </div>
+          </div>
+
+          <hr class="border-stone-200 mb-10">
+
+          <div class="mb-12">
+            <h2 class="text-2xl md:text-3xl font-medium tracking-tight text-stone-900 mb-6">
+              About this home
+            </h2>
+            <div class="space-y-6 text-lg font-light text-stone-700 leading-relaxed">
+              <p>
+                Experience the ultimate coastal retreat at Seaglass Villa. Nestled directly on the pristine white sands, this stunning oceanfront property offers panoramic views of the emerald waters from almost every room.
+              </p>
+              <p>
+                Designed with family connection in mind, the open-concept living area seamlessly transitions to an expansive deck, perfect for morning coffees listening to the waves or evening sunset dinners. The modern kitchen is fully equipped for culinary adventures, while the private boardwalk provides instant access to the beach.
+              </p>
+            </div>
+          </div>
+
+          <hr class="border-stone-200 mb-10">
+
+          <div>
+            <h2 class="text-2xl md:text-3xl font-medium tracking-tight text-stone-900 mb-8">
+              What this place offers
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-12">
+              <div class="flex items-center gap-4 text-lg text-stone-700 font-light">
+                <iconify-icon icon="solar:waterdrops-linear" class="w-6 h-6 text-stone-400 flex-shrink-0 flex items-center justify-center"></iconify-icon>
+                <span>Ocean view</span>
+              </div>
+              <div class="flex items-center gap-4 text-lg text-stone-700 font-light">
+                <iconify-icon icon="solar:wi-fi-router-linear" class="w-6 h-6 text-stone-400 flex-shrink-0 flex items-center justify-center"></iconify-icon>
+                <span>Fast Wi-Fi</span>
+              </div>
+              <div class="flex items-center gap-4 text-lg text-stone-700 font-light">
+                <iconify-icon icon="solar:key-linear" class="w-6 h-6 text-stone-400 flex-shrink-0 flex items-center justify-center"></iconify-icon>
+                <span>Free parking on premises</span>
+              </div>
+              <div class="flex items-center gap-4 text-lg text-stone-700 font-light">
+                <iconify-icon icon="solar:tv-linear" class="w-6 h-6 text-stone-400 flex-shrink-0 flex items-center justify-center"></iconify-icon>
+                <span>Smart TV</span>
+              </div>
+              <div class="flex items-center gap-4 text-lg text-stone-700 font-light">
+                <iconify-icon icon="solar:cup-hot-linear" class="w-6 h-6 text-stone-400 flex-shrink-0 flex items-center justify-center"></iconify-icon>
+                <span>Fully equipped kitchen</span>
+              </div>
+              <div class="flex items-center gap-4 text-lg text-stone-700 font-light">
+                <iconify-icon icon="solar:wind-linear" class="w-6 h-6 text-stone-400 flex-shrink-0 flex items-center justify-center"></iconify-icon>
+                <span>Central air conditioning</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Side: Sticky Price & Booking Card -->
+        <div class="lg:col-span-5 xl:col-span-4 relative mt-4 lg:mt-0">
+          <div class="sticky top-10 bg-white border border-stone-200 rounded-[2rem] p-8 shadow-[0_20px_40px_rgb(0,0,0,0.04)]">
+            
+            <div class="flex items-end gap-2 mb-6">
+              <span class="text-4xl font-medium tracking-tight text-stone-900">$450</span>
+              <span class="text-lg text-stone-500 font-light pb-1">/ night</span>
+            </div>
+
+            <!-- Booking Inputs -->
+            <div class="border border-stone-200 rounded-2xl mb-6 flex flex-col bg-white shadow-sm transition-all focus-within:ring-2 focus-within:ring-sky-500/20 focus-within:border-sky-500/50">
+              <div class="grid grid-cols-2 divide-x divide-stone-200 border-b border-stone-200">
+                <button class="p-4 flex flex-col text-left hover:bg-stone-50 rounded-tl-2xl transition-colors focus:outline-none focus:bg-stone-50 group">
+                  <span class="text-xs font-medium uppercase tracking-widest text-stone-500 group-hover:text-sky-600 transition-colors mb-1">Check In</span>
+                  <span class="text-lg font-light text-stone-900">Oct 12, 2024</span>
+                </button>
+                <button class="p-4 flex flex-col text-left hover:bg-stone-50 rounded-tr-2xl transition-colors focus:outline-none focus:bg-stone-50 group">
+                  <span class="text-xs font-medium uppercase tracking-widest text-stone-500 group-hover:text-sky-600 transition-colors mb-1">Check Out</span>
+                  <span class="text-lg font-light text-stone-900">Oct 17, 2024</span>
+                </button>
+              </div>
+              <button class="p-4 flex flex-col text-left hover:bg-stone-50 rounded-b-2xl transition-colors focus:outline-none focus:bg-stone-50 group">
+                <span class="text-xs font-medium uppercase tracking-widest text-stone-500 group-hover:text-sky-600 transition-colors mb-1">Guests</span>
+                <span class="text-lg font-light text-stone-900">2 adults, 1 child</span>
+              </button>
+            </div>
+
+            <button class="w-full py-4 bg-sky-600 hover:bg-sky-700 text-white text-lg font-medium rounded-2xl transition-all shadow-lg shadow-sky-600/20 active:scale-[0.98] mb-4">
+              Reserve
+            </button>
+            
+            <p class="text-sm font-light text-stone-500 text-center mb-6">
+              You won't be charged yet
+            </p>
+
+            <!-- Price Breakdown -->
+            <div class="flex flex-col gap-4 text-lg font-light text-stone-700 mb-6">
+              <div class="flex justify-between items-center">
+                <span class="underline underline-offset-4 decoration-stone-300 hover:text-stone-900 cursor-pointer transition-colors">
+                  $450 x 5 nights
+                </span>
+                <span>$2,250</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="underline underline-offset-4 decoration-stone-300 hover:text-stone-900 cursor-pointer transition-colors">
+                  Cleaning fee
+                </span>
+                <span>$150</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="underline underline-offset-4 decoration-stone-300 hover:text-stone-900 cursor-pointer transition-colors">
+                  Service fee
+                </span>
+                <span>$320</span>
+              </div>
+            </div>
+
+            <hr class="border-stone-200 mb-6">
+
+            <div class="flex justify-between items-center text-xl font-medium text-stone-900">
+              <span>Total</span>
+              <span>$2,720</span>
+            </div>
+
+          </div>
+        </div>
+
+      </section>
+    </main>
+
+  
+</body></html>

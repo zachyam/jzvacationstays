@@ -1,0 +1,31 @@
+import {
+  pgTable,
+  uuid,
+  varchar,
+  text,
+  integer,
+  numeric,
+  boolean,
+  jsonb,
+  timestamp,
+} from "drizzle-orm/pg-core";
+
+export const properties = pgTable("properties", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  slug: varchar("slug", { length: 100 }).notNull().unique(),
+  name: varchar("name", { length: 255 }).notNull(),
+  tagline: varchar("tagline", { length: 255 }),
+  description: text("description"),
+  maxGuests: integer("max_guests").notNull(),
+  bedrooms: integer("bedrooms").notNull(),
+  bathrooms: numeric("bathrooms", { precision: 3, scale: 1 }).notNull(),
+  cleaningFee: integer("cleaning_fee").notNull().default(0),
+  address: text("address"),
+  latitude: numeric("latitude", { precision: 10, scale: 7 }),
+  longitude: numeric("longitude", { precision: 10, scale: 7 }),
+  amenities: jsonb("amenities").$type<string[]>().default([]),
+  highlight: varchar("highlight", { length: 255 }),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
