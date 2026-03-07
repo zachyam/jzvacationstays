@@ -10,22 +10,23 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AccountRouteImport } from './routes/account'
-import { Route as AdminRouteRouteImport } from './routes/_admin/route'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PropertiesIndexRouteImport } from './routes/properties/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as PropertiesPropertyIdRouteImport } from './routes/properties/$propertyId'
 import { Route as BookingPropertyIdRouteImport } from './routes/booking/$propertyId'
 import { Route as AuthVerifyRouteImport } from './routes/auth/verify'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
-import { Route as AdminThermostatRouteImport } from './routes/_admin/thermostat'
-import { Route as AdminReviewsRouteImport } from './routes/_admin/reviews'
-import { Route as AdminDashboardRouteImport } from './routes/_admin/dashboard'
-import { Route as AdminCalendarSyncRouteImport } from './routes/_admin/calendar-sync'
-import { Route as AdminCalendarRouteImport } from './routes/_admin/calendar'
-import { Route as AdminBookingsRouteImport } from './routes/_admin/bookings'
-import { Route as AdminChecklistsIndexRouteImport } from './routes/_admin/checklists/index'
+import { Route as AdminThermostatRouteImport } from './routes/admin/thermostat'
+import { Route as AdminReviewsRouteImport } from './routes/admin/reviews'
+import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
+import { Route as AdminCalendarSyncRouteImport } from './routes/admin/calendar-sync'
+import { Route as AdminCalendarRouteImport } from './routes/admin/calendar'
+import { Route as AdminBookingsRouteImport } from './routes/admin/bookings'
+import { Route as AdminChecklistsIndexRouteImport } from './routes/admin/checklists/index'
 import { Route as BookingConfirmationBookingIdRouteImport } from './routes/booking/confirmation.$bookingId'
-import { Route as AdminChecklistsChecklistIdRouteImport } from './routes/_admin/checklists/$checklistId'
+import { Route as AdminChecklistsChecklistIdRouteImport } from './routes/admin/checklists/$checklistId'
 
 const AccountRoute = AccountRouteImport.update({
   id: '/account',
@@ -33,7 +34,8 @@ const AccountRoute = AccountRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRouteRoute = AdminRouteRouteImport.update({
-  id: '/_admin',
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -45,6 +47,11 @@ const PropertiesIndexRoute = PropertiesIndexRouteImport.update({
   id: '/properties/',
   path: '/properties/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const PropertiesPropertyIdRoute = PropertiesPropertyIdRouteImport.update({
   id: '/properties/$propertyId',
@@ -116,116 +123,124 @@ const AdminChecklistsChecklistIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/account': typeof AccountRoute
-  '/bookings': typeof AdminBookingsRoute
-  '/calendar': typeof AdminCalendarRoute
-  '/calendar-sync': typeof AdminCalendarSyncRoute
-  '/dashboard': typeof AdminDashboardRoute
-  '/reviews': typeof AdminReviewsRoute
-  '/thermostat': typeof AdminThermostatRoute
+  '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/calendar': typeof AdminCalendarRoute
+  '/admin/calendar-sync': typeof AdminCalendarSyncRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/thermostat': typeof AdminThermostatRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/verify': typeof AuthVerifyRoute
   '/booking/$propertyId': typeof BookingPropertyIdRoute
   '/properties/$propertyId': typeof PropertiesPropertyIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/properties/': typeof PropertiesIndexRoute
-  '/checklists/$checklistId': typeof AdminChecklistsChecklistIdRoute
+  '/admin/checklists/$checklistId': typeof AdminChecklistsChecklistIdRoute
   '/booking/confirmation/$bookingId': typeof BookingConfirmationBookingIdRoute
-  '/checklists/': typeof AdminChecklistsIndexRoute
+  '/admin/checklists/': typeof AdminChecklistsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
-  '/bookings': typeof AdminBookingsRoute
-  '/calendar': typeof AdminCalendarRoute
-  '/calendar-sync': typeof AdminCalendarSyncRoute
-  '/dashboard': typeof AdminDashboardRoute
-  '/reviews': typeof AdminReviewsRoute
-  '/thermostat': typeof AdminThermostatRoute
+  '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/calendar': typeof AdminCalendarRoute
+  '/admin/calendar-sync': typeof AdminCalendarSyncRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/thermostat': typeof AdminThermostatRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/verify': typeof AuthVerifyRoute
   '/booking/$propertyId': typeof BookingPropertyIdRoute
   '/properties/$propertyId': typeof PropertiesPropertyIdRoute
+  '/admin': typeof AdminIndexRoute
   '/properties': typeof PropertiesIndexRoute
-  '/checklists/$checklistId': typeof AdminChecklistsChecklistIdRoute
+  '/admin/checklists/$checklistId': typeof AdminChecklistsChecklistIdRoute
   '/booking/confirmation/$bookingId': typeof BookingConfirmationBookingIdRoute
-  '/checklists': typeof AdminChecklistsIndexRoute
+  '/admin/checklists': typeof AdminChecklistsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_admin': typeof AdminRouteRouteWithChildren
+  '/admin': typeof AdminRouteRouteWithChildren
   '/account': typeof AccountRoute
-  '/_admin/bookings': typeof AdminBookingsRoute
-  '/_admin/calendar': typeof AdminCalendarRoute
-  '/_admin/calendar-sync': typeof AdminCalendarSyncRoute
-  '/_admin/dashboard': typeof AdminDashboardRoute
-  '/_admin/reviews': typeof AdminReviewsRoute
-  '/_admin/thermostat': typeof AdminThermostatRoute
+  '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/calendar': typeof AdminCalendarRoute
+  '/admin/calendar-sync': typeof AdminCalendarSyncRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/thermostat': typeof AdminThermostatRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/verify': typeof AuthVerifyRoute
   '/booking/$propertyId': typeof BookingPropertyIdRoute
   '/properties/$propertyId': typeof PropertiesPropertyIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/properties/': typeof PropertiesIndexRoute
-  '/_admin/checklists/$checklistId': typeof AdminChecklistsChecklistIdRoute
+  '/admin/checklists/$checklistId': typeof AdminChecklistsChecklistIdRoute
   '/booking/confirmation/$bookingId': typeof BookingConfirmationBookingIdRoute
-  '/_admin/checklists/': typeof AdminChecklistsIndexRoute
+  '/admin/checklists/': typeof AdminChecklistsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/account'
-    | '/bookings'
-    | '/calendar'
-    | '/calendar-sync'
-    | '/dashboard'
-    | '/reviews'
-    | '/thermostat'
+    | '/admin/bookings'
+    | '/admin/calendar'
+    | '/admin/calendar-sync'
+    | '/admin/dashboard'
+    | '/admin/reviews'
+    | '/admin/thermostat'
     | '/auth/login'
     | '/auth/verify'
     | '/booking/$propertyId'
     | '/properties/$propertyId'
+    | '/admin/'
     | '/properties/'
-    | '/checklists/$checklistId'
+    | '/admin/checklists/$checklistId'
     | '/booking/confirmation/$bookingId'
-    | '/checklists/'
+    | '/admin/checklists/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/account'
-    | '/bookings'
-    | '/calendar'
-    | '/calendar-sync'
-    | '/dashboard'
-    | '/reviews'
-    | '/thermostat'
+    | '/admin/bookings'
+    | '/admin/calendar'
+    | '/admin/calendar-sync'
+    | '/admin/dashboard'
+    | '/admin/reviews'
+    | '/admin/thermostat'
     | '/auth/login'
     | '/auth/verify'
     | '/booking/$propertyId'
     | '/properties/$propertyId'
+    | '/admin'
     | '/properties'
-    | '/checklists/$checklistId'
+    | '/admin/checklists/$checklistId'
     | '/booking/confirmation/$bookingId'
-    | '/checklists'
+    | '/admin/checklists'
   id:
     | '__root__'
     | '/'
-    | '/_admin'
+    | '/admin'
     | '/account'
-    | '/_admin/bookings'
-    | '/_admin/calendar'
-    | '/_admin/calendar-sync'
-    | '/_admin/dashboard'
-    | '/_admin/reviews'
-    | '/_admin/thermostat'
+    | '/admin/bookings'
+    | '/admin/calendar'
+    | '/admin/calendar-sync'
+    | '/admin/dashboard'
+    | '/admin/reviews'
+    | '/admin/thermostat'
     | '/auth/login'
     | '/auth/verify'
     | '/booking/$propertyId'
     | '/properties/$propertyId'
+    | '/admin/'
     | '/properties/'
-    | '/_admin/checklists/$checklistId'
+    | '/admin/checklists/$checklistId'
     | '/booking/confirmation/$bookingId'
-    | '/_admin/checklists/'
+    | '/admin/checklists/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -249,10 +264,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_admin': {
-      id: '/_admin'
-      path: ''
-      fullPath: '/'
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -269,6 +284,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/properties/'
       preLoaderRoute: typeof PropertiesIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/properties/$propertyId': {
       id: '/properties/$propertyId'
@@ -298,52 +320,52 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_admin/thermostat': {
-      id: '/_admin/thermostat'
+    '/admin/thermostat': {
+      id: '/admin/thermostat'
       path: '/thermostat'
-      fullPath: '/thermostat'
+      fullPath: '/admin/thermostat'
       preLoaderRoute: typeof AdminThermostatRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/_admin/reviews': {
-      id: '/_admin/reviews'
+    '/admin/reviews': {
+      id: '/admin/reviews'
       path: '/reviews'
-      fullPath: '/reviews'
+      fullPath: '/admin/reviews'
       preLoaderRoute: typeof AdminReviewsRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/_admin/dashboard': {
-      id: '/_admin/dashboard'
+    '/admin/dashboard': {
+      id: '/admin/dashboard'
       path: '/dashboard'
-      fullPath: '/dashboard'
+      fullPath: '/admin/dashboard'
       preLoaderRoute: typeof AdminDashboardRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/_admin/calendar-sync': {
-      id: '/_admin/calendar-sync'
+    '/admin/calendar-sync': {
+      id: '/admin/calendar-sync'
       path: '/calendar-sync'
-      fullPath: '/calendar-sync'
+      fullPath: '/admin/calendar-sync'
       preLoaderRoute: typeof AdminCalendarSyncRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/_admin/calendar': {
-      id: '/_admin/calendar'
+    '/admin/calendar': {
+      id: '/admin/calendar'
       path: '/calendar'
-      fullPath: '/calendar'
+      fullPath: '/admin/calendar'
       preLoaderRoute: typeof AdminCalendarRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/_admin/bookings': {
-      id: '/_admin/bookings'
+    '/admin/bookings': {
+      id: '/admin/bookings'
       path: '/bookings'
-      fullPath: '/bookings'
+      fullPath: '/admin/bookings'
       preLoaderRoute: typeof AdminBookingsRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/_admin/checklists/': {
-      id: '/_admin/checklists/'
+    '/admin/checklists/': {
+      id: '/admin/checklists/'
       path: '/checklists'
-      fullPath: '/checklists/'
+      fullPath: '/admin/checklists/'
       preLoaderRoute: typeof AdminChecklistsIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
@@ -354,10 +376,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BookingConfirmationBookingIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_admin/checklists/$checklistId': {
-      id: '/_admin/checklists/$checklistId'
+    '/admin/checklists/$checklistId': {
+      id: '/admin/checklists/$checklistId'
       path: '/checklists/$checklistId'
-      fullPath: '/checklists/$checklistId'
+      fullPath: '/admin/checklists/$checklistId'
       preLoaderRoute: typeof AdminChecklistsChecklistIdRouteImport
       parentRoute: typeof AdminRouteRoute
     }
@@ -371,6 +393,7 @@ interface AdminRouteRouteChildren {
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
   AdminThermostatRoute: typeof AdminThermostatRoute
+  AdminIndexRoute: typeof AdminIndexRoute
   AdminChecklistsChecklistIdRoute: typeof AdminChecklistsChecklistIdRoute
   AdminChecklistsIndexRoute: typeof AdminChecklistsIndexRoute
 }
@@ -382,6 +405,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminDashboardRoute: AdminDashboardRoute,
   AdminReviewsRoute: AdminReviewsRoute,
   AdminThermostatRoute: AdminThermostatRoute,
+  AdminIndexRoute: AdminIndexRoute,
   AdminChecklistsChecklistIdRoute: AdminChecklistsChecklistIdRoute,
   AdminChecklistsIndexRoute: AdminChecklistsIndexRoute,
 }

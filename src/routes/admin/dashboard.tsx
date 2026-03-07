@@ -4,7 +4,7 @@ import { getDashboardStats } from "../../server/functions/admin-dashboard";
 import { StatsCard } from "../../components/admin/stats-card";
 import { formatCurrency, formatDate } from "../../lib/utils";
 
-export const Route = createFileRoute("/_admin/dashboard")({
+export const Route = createFileRoute("/admin/dashboard")({
   loader: async () => {
     try {
       return await getDashboardStats();

@@ -33,20 +33,52 @@ export const sendOtp = createServerFn({ method: "POST" })
     const { email, name } = data;
 
     // Check if user exists
-    const existingUser = await db
+    const [existingUser] = await db
       .select()
       .from(users)
       .where(eq(users.email, email.toLowerCase()))
       .limit(1);
 
-    const isNewUser = existingUser.length === 0;
+    const isNewUser = !existingUser;
 
     // New user requires name
     if (isNewUser && !name?.trim()) {
       return { success: false, isNewUser: true, needsName: true };
     }
 
-    // Generate and store OTP
+    // Skip OTP for admin users - directly create session
+    if (existingUser && existingUser.role === "admin") {
+      const token = generateToken();
+      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+
+      await db.insert(sessions).values({
+        userId: existingUser.id,
+        token,
+        expiresAt,
+      });
+
+      // Set session cookie
+      setCookie("session_token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 30 * 24 * 60 * 60, // 30 days in seconds
+      });
+
+      return {
+        success: true,
+        skipOtp: true,
+        user: {
+          id: existingUser.id,
+          email: existingUser.email,
+          name: existingUser.name,
+          role: existingUser.role
+        },
+      };
+    }
+
+    // Generate and store OTP for regular users
     const code = generateOtp();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 

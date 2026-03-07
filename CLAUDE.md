@@ -28,8 +28,31 @@
 
 ## Routing
 - File-based routing via TanStack Router (`src/routes/`)
-- Public routes at root level, admin routes under `_admin/` pathless layout
-- Auth guard in `_admin/route.tsx`, session loaded in `__root.tsx` loader
+- Public routes at root level, admin routes under `admin/` nested routes
+- Auth guard in `admin/route.tsx`, session loaded in `__root.tsx` loader
+
+### TanStack Router Patterns & Lessons Learned
+
+#### Route Structure Patterns
+**Pathless Routes (`_folder/`)**:
+- Purpose: Layout wrapper without adding URL segments
+- Example: `_admin/dashboard.tsx` → Creates route `/dashboard`
+- Use Case: When you want layout/auth guards but no URL prefix
+
+**Regular Nested Routes (`folder/`)**:
+- Purpose: Standard nested routing with URL segments
+- Example: `admin/dashboard.tsx` → Creates route `/admin/dashboard`
+- Use Case: When you want URL structure to match file structure
+
+#### Common Issues & Solutions
+1. **Route Conflicts**: Multiple routes handling same path (e.g., conflicting index routes)
+2. **Redirect Loops**: Broad redirects intercepting child routes
+3. **URL Mismatch**: Using pathless when you need URL segments
+
+#### Best Practices
+- Choose pattern based on desired URLs: `/admin/dashboard` = use `admin/dashboard.tsx`
+- Use `folder/index.tsx` for folder redirects
+- File structure = URL structure (for regular routes)
 
 ## Styling
 - Tailwind CSS with Outfit font family

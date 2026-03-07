@@ -5,7 +5,7 @@ import {
   toggleReviewVisibility,
 } from "../../server/functions/admin-reviews";
 
-export const Route = createFileRoute("/_admin/reviews")({
+export const Route = createFileRoute("/admin/reviews")({
   loader: async () => {
     try {
       return { reviews: await getAdminReviews() };

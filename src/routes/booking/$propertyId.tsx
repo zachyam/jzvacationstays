@@ -6,7 +6,6 @@ import { createBooking } from "../../server/functions/bookings";
 import { createPaymentIntent } from "../../server/functions/payments";
 import { sendOtp, verifyOtp } from "../../server/functions/auth";
 import { useAuth } from "../../hooks/use-auth";
-import { BookingSummary } from "../../components/booking/booking-summary";
 import { StripePayment } from "../../components/booking/stripe-payment";
 import { formatDate } from "../../lib/utils";
 
@@ -68,6 +67,12 @@ function BookingPage() {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Edit booking state
+  const [isEditingBooking, setIsEditingBooking] = useState(false);
+  const [tempCheckIn, setTempCheckIn] = useState(checkIn);
+  const [tempCheckOut, setTempCheckOut] = useState(checkOut);
+  const [tempGuests, setTempGuests] = useState(guests);
+
   if (!property) {
     return (
       <main className="min-h-screen bg-stone-100 flex items-center justify-center">
@@ -100,10 +105,14 @@ function BookingPage() {
   }
 
   const guestsCount = guests;
+  const currentCheckIn = isEditingBooking && tempCheckIn ? tempCheckIn : checkIn;
+  const currentCheckOut = isEditingBooking && tempCheckOut ? tempCheckOut : checkOut;
+  const currentGuests = isEditingBooking ? tempGuests : guests;
+
   const nights = Math.max(
     1,
     Math.ceil(
-      (new Date(checkOut).getTime() - new Date(checkIn).getTime()) /
+      (new Date(currentCheckOut).getTime() - new Date(currentCheckIn).getTime()) /
         (1000 * 60 * 60 * 24),
     ),
   );
@@ -131,8 +140,16 @@ function BookingPage() {
         return;
       }
       if (result.success) {
-        setAuthEmail(emailToUse);
-        setAuthMode("verify");
+        // Admin users skip OTP
+        if (result.skipOtp && result.user) {
+          setAuthenticatedUserId(result.user.id);
+          setAuthMode("none");
+          if (!guestName && result.user.name) setGuestName(result.user.name);
+          if (!guestEmail) setGuestEmail(result.user.email);
+        } else {
+          setAuthEmail(emailToUse);
+          setAuthMode("verify");
+        }
       }
     } catch (err: any) {
       setAuthError(err.message || "Failed to send code");
@@ -214,302 +231,467 @@ function BookingPage() {
     });
   }
 
+
+  function handleApplyChanges() {
+    navigate({
+      to: "/booking/$propertyId",
+      params: { propertyId: property.slug },
+      search: {
+        checkIn: tempCheckIn,
+        checkOut: tempCheckOut,
+        guests: tempGuests
+      },
+    });
+    setIsEditingBooking(false);
+  }
+
+  function handleCancelEdit() {
+    setTempCheckIn(checkIn);
+    setTempCheckOut(checkOut);
+    setTempGuests(guests);
+    setIsEditingBooking(false);
+  }
+
   return (
-    <main className="min-h-screen bg-stone-100">
-      <div className="max-w-screen-lg mx-auto px-6 md:px-10 py-12">
-        {/* Header */}
-        <h1 className="text-3xl md:text-4xl font-medium tracking-tight text-stone-900 mb-2">
-          Book {property.name}
-        </h1>
-        <p className="text-stone-500 font-light mb-8">
-          {formatDate(checkIn)} &rarr; {formatDate(checkOut)} &bull;{" "}
-          {guestsCount} guest{guestsCount !== 1 ? "s" : ""} &bull; {nights}{" "}
-          night{nights !== 1 ? "s" : ""}
-        </p>
-
-        {/* Steps indicator */}
-        <div className="flex items-center gap-2 mb-10">
-          {(["details", "payment"] as Step[]).map((s, i) => (
-            <div key={s} className="flex items-center gap-2">
-              {i > 0 && <div className="w-8 h-px bg-stone-300" />}
-              <div
-                className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  step === s
-                    ? "bg-sky-600 text-white"
-                    : step === "payment" && s === "details"
-                      ? "bg-sky-100 text-sky-700"
-                      : "bg-stone-200 text-stone-500"
-                }`}
-              >
-                {s === "details" ? "Your details" : "Payment"}
-              </div>
-            </div>
-          ))}
+    <main className="bg-stone-50 text-stone-900 selection:bg-sky-500/20 flex flex-col min-h-screen relative">
+      {/* Header */}
+      <header className="bg-white border-b border-stone-200 px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-2 text-stone-900">
+          <div className="w-8 h-8 bg-sky-500 rounded-lg flex items-center justify-center text-white">
+            <iconify-icon icon="solar:home-smile-linear" className="text-xl"></iconify-icon>
+          </div>
+          <span className="text-xl font-medium tracking-tight">JZ Vacation Stays</span>
         </div>
+      </header>
 
-        <div className="grid lg:grid-cols-5 gap-10">
-          {/* Left: Form */}
-          <div className="lg:col-span-3">
-            {/* Step 1: Guest details + login */}
-            {step === "details" && (
-              <div className="space-y-8">
-                {/* Login section */}
-                {!isLoggedIn && (
-                  <div className="bg-white/90 backdrop-blur-xl border border-stone-200 rounded-2xl p-6">
-                    <div className="flex items-start gap-3 mb-4">
-                      <div className="w-8 h-8 rounded-full bg-sky-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <iconify-icon
-                          icon="solar:user-circle-linear"
-                          class="text-sky-600"
-                          width="18"
-                          height="18"
+      <div className="max-w-6xl mx-auto w-full p-6 sm:p-12 lg:p-16 flex flex-col lg:flex-row gap-10 lg:gap-16 items-start">
+
+        {/* Left Column: Modify Booking & Details */}
+        <div className="flex-1 w-full space-y-10">
+
+          {/* Header */}
+          <div>
+            <button
+              onClick={() => navigate({ to: "/properties/$propertyId", params: { propertyId: property.slug } })}
+              className="flex items-center gap-2 text-sm font-medium text-stone-500 hover:text-stone-900 transition-colors mb-6"
+            >
+              <iconify-icon icon="solar:arrow-left-linear"></iconify-icon>
+              Back to property
+            </button>
+            <h1 className="text-4xl font-medium tracking-tight text-stone-900 mb-2">Review your booking</h1>
+            <p className="text-stone-500 text-lg">Make sure all details are correct before confirming your stay.</p>
+          </div>
+
+          {/* Trip Details Modification Bar */}
+          <section className="space-y-4">
+            <h2 className="text-2xl font-medium tracking-tight text-stone-900">Trip Details</h2>
+
+            <div className="bg-white border border-stone-200 rounded-[1.5rem] p-2 shadow-sm flex flex-col sm:flex-row gap-2 relative z-20">
+
+              {/* Dates Editor */}
+              <div className="relative group flex-1">
+                <button
+                  onClick={() => setIsEditingBooking(!isEditingBooking)}
+                  className="w-full flex flex-col items-start px-5 py-3.5 rounded-xl hover:bg-stone-50 transition-colors text-left focus-within:ring-2 focus-within:ring-sky-500/20 focus-within:outline-none"
+                >
+                  <span className="text-xs font-medium text-stone-500 uppercase tracking-wider mb-1">Dates</span>
+                  <div className="flex items-center gap-2 text-stone-900 font-medium">
+                    <span>{formatDate(currentCheckIn)}</span>
+                    <iconify-icon icon="solar:arrow-right-linear" className="text-stone-400"></iconify-icon>
+                    <span>{formatDate(currentCheckOut)}</span>
+                  </div>
+                </button>
+
+                {/* Editing Panel */}
+                {isEditingBooking && (
+                  <div className="absolute top-full left-0 mt-3 w-full sm:w-80 bg-white border border-stone-200 rounded-[1.5rem] p-6 shadow-2xl shadow-stone-200/50 z-30">
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-stone-600 mb-2">Check In</label>
+                        <input
+                          type="date"
+                          value={tempCheckIn}
+                          onChange={(e) => setTempCheckIn(e.target.value)}
+                          min={new Date().toISOString().split("T")[0]}
+                          className="w-full px-3 py-2 border border-stone-300 rounded-lg text-stone-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
                         />
                       </div>
                       <div>
-                        <h3 className="text-base font-medium text-stone-900">
-                          Have an account?
-                        </h3>
-                        <p className="text-sm text-stone-500">
-                          Sign in to speed up your booking and access your
-                          reservations later.
-                        </p>
+                        <label className="block text-sm font-medium text-stone-600 mb-2">Check Out</label>
+                        <input
+                          type="date"
+                          value={tempCheckOut}
+                          onChange={(e) => setTempCheckOut(e.target.value)}
+                          min={tempCheckIn || new Date().toISOString().split("T")[0]}
+                          className="w-full px-3 py-2 border border-stone-300 rounded-lg text-stone-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                        />
+                      </div>
+                      <div className="flex gap-3 pt-4 border-t border-stone-100">
+                        <button
+                          onClick={handleCancelEdit}
+                          className="flex-1 px-4 py-2 border border-stone-300 text-stone-700 rounded-lg font-medium hover:bg-stone-50 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleApplyChanges}
+                          disabled={!tempCheckIn || !tempCheckOut}
+                          className="flex-1 px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Apply
+                        </button>
                       </div>
                     </div>
+                  </div>
+                )}
+              </div>
 
-                    {authMode === "none" && (
-                      <div className="space-y-3">
-                        <div className="flex gap-3">
-                          <input
-                            type="email"
-                            value={authEmail || guestEmail}
-                            onChange={(e) => setAuthEmail(e.target.value)}
-                            placeholder="Your email address"
-                            className="flex-1 px-4 py-2.5 border border-stone-200 rounded-xl bg-white text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/30"
-                          />
-                          <button
-                            onClick={handleSendOtp}
-                            disabled={
-                              authLoading ||
-                              (!authEmail && !guestEmail)
-                            }
-                            className="px-5 py-2.5 bg-stone-900 hover:bg-stone-800 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap"
-                          >
-                            {authLoading ? "Sending..." : "Sign in"}
-                          </button>
-                        </div>
-                        {showNameField && (
-                          <div>
-                            <input
-                              type="text"
-                              value={authName}
-                              onChange={(e) => setAuthName(e.target.value)}
-                              placeholder="Full name (required for new accounts)"
-                              className="w-full px-4 py-2.5 border border-stone-200 rounded-xl bg-white text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/30"
-                            />
-                            <button
-                              onClick={handleSendOtp}
-                              disabled={authLoading || !authName}
-                              className="mt-2 w-full py-2.5 bg-stone-900 hover:bg-stone-800 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50"
-                            >
-                              {authLoading
-                                ? "Sending..."
-                                : "Send verification code"}
-                            </button>
-                          </div>
-                        )}
-                        {authError && (
-                          <p className="text-sm text-red-600">{authError}</p>
-                        )}
-                      </div>
-                    )}
+              {/* Divider */}
+              <div className="hidden sm:block w-px bg-stone-200 my-3"></div>
+              <div className="sm:hidden h-px w-full bg-stone-200 mx-3"></div>
 
-                    {authMode === "send" && (
-                      <div className="space-y-3">
-                        {showNameField && (
-                          <input
-                            type="text"
-                            value={authName}
-                            onChange={(e) => setAuthName(e.target.value)}
-                            placeholder="Full name (required for new accounts)"
-                            className="w-full px-4 py-2.5 border border-stone-200 rounded-xl bg-white text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/30"
-                          />
-                        )}
-                        <button
-                          onClick={handleSendOtp}
-                          disabled={
-                            authLoading || (showNameField && !authName)
-                          }
-                          className="w-full py-2.5 bg-stone-900 hover:bg-stone-800 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50"
+              {/* Guests Editor */}
+              <div className="relative group flex-1">
+                <button
+                  onClick={() => setIsEditingBooking(!isEditingBooking)}
+                  className="w-full flex items-center justify-between px-5 py-3.5 rounded-xl hover:bg-stone-50 transition-colors text-left focus-within:ring-2 focus-within:ring-sky-500/20 focus-within:outline-none"
+                >
+                  <div>
+                    <span className="text-xs font-medium text-stone-500 uppercase tracking-wider mb-1 block">Guests</span>
+                    <div className="text-stone-900 font-medium">{currentGuests} Guest{currentGuests !== 1 ? "s" : ""}</div>
+                  </div>
+                  <iconify-icon icon="solar:alt-arrow-down-linear" className="text-stone-400 text-xl"></iconify-icon>
+                </button>
+
+                {/* Guests Editing Panel */}
+                {isEditingBooking && (
+                  <div className="absolute top-full left-0 sm:right-0 sm:left-auto mt-3 w-full sm:w-80 bg-white border border-stone-200 rounded-[1.5rem] p-6 shadow-2xl shadow-stone-200/50 z-30">
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-stone-600 mb-2">Number of Guests</label>
+                        <select
+                          value={tempGuests}
+                          onChange={(e) => setTempGuests(Number(e.target.value))}
+                          className="w-full px-3 py-2 border border-stone-300 rounded-lg text-stone-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
                         >
-                          {authLoading
-                            ? "Sending..."
-                            : "Send verification code"}
-                        </button>
-                        {authError && (
-                          <p className="text-sm text-red-600">{authError}</p>
-                        )}
+                          {Array.from({ length: property.maxGuests }, (_, i) => i + 1).map((n) => (
+                            <option key={n} value={n}>
+                              {n} guest{n !== 1 ? "s" : ""}
+                            </option>
+                          ))}
+                        </select>
                       </div>
-                    )}
+                      <div className="flex gap-3 pt-4 border-t border-stone-100">
+                        <button
+                          onClick={handleCancelEdit}
+                          className="flex-1 px-4 py-2 border border-stone-300 text-stone-700 rounded-lg font-medium hover:bg-stone-50 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleApplyChanges}
+                          disabled={!tempCheckIn || !tempCheckOut}
+                          className="flex-1 px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Apply
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
 
-                    {authMode === "verify" && (
-                      <div className="space-y-3">
-                        <p className="text-sm text-stone-600">
-                          Enter the 6-digit code sent to{" "}
-                          <span className="font-medium">{authEmail}</span>
-                        </p>
+            </div>
+          </section>
+
+
+          {/* Information / Policies */}
+          <section className="bg-white border border-stone-200 rounded-[1.5rem] p-6 shadow-sm relative z-10">
+            <div className="flex gap-4 items-start">
+              <div className="mt-1 bg-sky-50 w-10 h-10 rounded-full flex items-center justify-center shrink-0">
+                <iconify-icon icon="solar:calendar-bold-duotone" className="text-xl text-sky-500"></iconify-icon>
+              </div>
+              <div>
+                <h3 className="text-lg font-medium text-stone-900 mb-1 tracking-tight">Free cancellation before {formatDate(new Date(new Date(checkIn).getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])}</h3>
+                <p className="text-stone-500 leading-relaxed text-sm">Cancel before {formatDate(new Date(new Date(checkIn).getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])} for a full refund. After that, cancel before check-in and get a 50% refund, minus the service fee.</p>
+              </div>
+            </div>
+          </section>
+
+          <section className="bg-white border border-stone-200 rounded-[1.5rem] p-6 shadow-sm relative z-10">
+            <div className="flex gap-4 items-start">
+              <div className="mt-1 bg-stone-100 w-10 h-10 rounded-full flex items-center justify-center shrink-0">
+                <iconify-icon icon="solar:shield-check-bold-duotone" className="text-xl text-stone-600"></iconify-icon>
+              </div>
+              <div>
+                <h3 className="text-lg font-medium text-stone-900 mb-1 tracking-tight">JZ Vacation Stays Guarantee</h3>
+                <p className="text-stone-500 leading-relaxed text-sm">Every booking includes free protection from Host cancellations, listing inaccuracies, and other issues like trouble checking in.</p>
+              </div>
+            </div>
+          </section>
+
+          {/* Auth and Guest Details */}
+          {step === "details" && (
+            <div className="space-y-10">
+              {/* Account Sign-in Card */}
+              {!isLoggedIn && (
+                <div className="bg-white border border-stone-200 rounded-[1.5rem] p-6 sm:p-8 shadow-sm transition-all">
+                  <div className="flex items-start gap-4 mb-6">
+                    <div className="w-12 h-12 rounded-full bg-sky-50 text-sky-500 flex items-center justify-center flex-shrink-0 border border-sky-100/50">
+                      <iconify-icon icon="solar:user-linear" width="24" height="24"></iconify-icon>
+                    </div>
+                    <div className="pt-0.5">
+                      <h2 className="text-xl font-medium tracking-tight text-stone-900">Have an account?</h2>
+                      <p className="text-base text-stone-500 mt-1 leading-relaxed">Sign in to speed up your booking and access your reservations later.</p>
+                    </div>
+                  </div>
+
+                  {authMode === "none" && (
+                    <div className="flex flex-col sm:flex-row gap-4 mt-2">
+                      <input
+                        type="email"
+                        value={authEmail || guestEmail}
+                        onChange={(e) => setAuthEmail(e.target.value)}
+                        placeholder="Your email address"
+                        className="flex-grow bg-white border border-stone-200 rounded-xl px-5 py-3.5 text-base text-stone-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all placeholder:text-stone-400 shadow-sm"
+                      />
+                      <button
+                        onClick={handleSendOtp}
+                        disabled={authLoading || (!authEmail && !guestEmail)}
+                        className="bg-stone-500 hover:bg-stone-600 text-white font-medium px-8 py-3.5 rounded-xl text-base transition-colors shadow-sm whitespace-nowrap disabled:opacity-50"
+                      >
+                        {authLoading ? "Sending..." : "Sign in"}
+                      </button>
+                    </div>
+                  )}
+
+                  {(authMode === "send" || showNameField) && (
+                    <div className="space-y-4">
+                      {showNameField && (
                         <input
                           type="text"
-                          value={otpCode}
-                          onChange={(e) =>
-                            setOtpCode(
-                              e.target.value.replace(/\D/g, "").slice(0, 6),
-                            )
-                          }
-                          placeholder="000000"
-                          maxLength={6}
-                          className="w-full px-4 py-2.5 border border-stone-200 rounded-xl bg-white text-stone-900 text-center text-xl tracking-[0.5em] font-mono focus:outline-none focus:ring-2 focus:ring-sky-500/30"
+                          value={authName}
+                          onChange={(e) => setAuthName(e.target.value)}
+                          placeholder="Full name (required for new accounts)"
+                          className="w-full bg-white border border-stone-200 rounded-xl px-5 py-3.5 text-base text-stone-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all placeholder:text-stone-400 shadow-sm"
                         />
-                        {authError && (
-                          <p className="text-sm text-red-600">{authError}</p>
-                        )}
-                        <button
-                          onClick={handleVerifyOtp}
-                          disabled={otpCode.length !== 6 || authLoading}
-                          className="w-full py-2.5 bg-stone-900 hover:bg-stone-800 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50"
-                        >
-                          {authLoading ? "Verifying..." : "Verify code"}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
+                      )}
+                      <button
+                        onClick={handleSendOtp}
+                        disabled={authLoading || (showNameField && !authName)}
+                        className="w-full bg-stone-500 hover:bg-stone-600 text-white font-medium py-3.5 rounded-xl text-base transition-colors shadow-sm disabled:opacity-50"
+                      >
+                        {authLoading ? "Sending..." : "Send verification code"}
+                      </button>
+                      {authError && (
+                        <p className="text-sm text-red-600">{authError}</p>
+                      )}
+                    </div>
+                  )}
 
-                {/* Logged-in confirmation */}
-                {isLoggedIn && (
-                  <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                      <iconify-icon
-                        icon="solar:check-circle-bold"
-                        class="text-emerald-600"
-                        width="18"
-                        height="18"
+                  {authMode === "verify" && (
+                    <div className="space-y-4">
+                      <p className="text-base text-stone-600">
+                        Enter the 6-digit code sent to{" "}
+                        <span className="font-medium">{authEmail}</span>
+                      </p>
+                      <input
+                        type="text"
+                        value={otpCode}
+                        onChange={(e) =>
+                          setOtpCode(
+                            e.target.value.replace(/\D/g, "").slice(0, 6),
+                          )
+                        }
+                        placeholder="000000"
+                        maxLength={6}
+                        className="w-full bg-white border border-stone-200 rounded-xl px-5 py-3.5 text-base text-stone-900 text-center tracking-[0.5em] font-mono focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all placeholder:text-stone-400 shadow-sm"
                       />
+                      {authError && (
+                        <p className="text-sm text-red-600">{authError}</p>
+                      )}
+                      <button
+                        onClick={handleVerifyOtp}
+                        disabled={otpCode.length !== 6 || authLoading}
+                        className="w-full bg-stone-500 hover:bg-stone-600 text-white font-medium py-3.5 rounded-xl text-base transition-colors shadow-sm disabled:opacity-50"
+                      >
+                        {authLoading ? "Verifying..." : "Verify code"}
+                      </button>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-emerald-900">
-                        Signed in{user?.name ? ` as ${user.name}` : ""}
-                      </p>
-                      <p className="text-xs text-emerald-700">
-                        Your booking will be saved to your account.
-                      </p>
-                    </div>
-                  </div>
-                )}
+                  )}
+                </div>
+              )}
 
-                {/* Guest details form */}
+              {/* Logged-in confirmation */}
+              {isLoggedIn && (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                    <iconify-icon
+                      icon="solar:check-circle-bold"
+                      class="text-emerald-600"
+                      width="18"
+                      height="18"
+                    ></iconify-icon>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-emerald-900">
+                      Signed in{user?.name ? ` as ${user.name}` : ""}
+                    </p>
+                    <p className="text-xs text-emerald-700">
+                      Your booking will be saved to your account.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Guest Details Section - Only for non-logged-in users */}
+              {!isLoggedIn && (
                 <div>
-                  <h2 className="text-xl font-medium text-stone-900 mb-5">
-                    Guest details
-                  </h2>
-                  <div className="space-y-4">
+                  <h2 className="text-2xl font-medium tracking-tight text-stone-900 mb-6">Guest details</h2>
+
+                  <div className="space-y-6">
                     <div>
-                      <label className="block text-sm text-stone-500 mb-1">
-                        Full name
-                      </label>
+                      <label className="block text-base font-medium text-stone-600 mb-2.5">Full name</label>
                       <input
                         type="text"
                         value={guestName}
                         onChange={(e) => setGuestName(e.target.value)}
+                        className="w-full bg-white border border-stone-200 rounded-xl px-5 py-4 text-base text-stone-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all shadow-sm placeholder:text-stone-400"
                         placeholder="Your full name"
-                        className="w-full px-4 py-3 border border-stone-200 rounded-xl bg-white text-stone-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30"
                       />
                     </div>
+
                     <div>
-                      <label className="block text-sm text-stone-500 mb-1">
-                        Email
-                      </label>
+                      <label className="block text-base font-medium text-stone-600 mb-2.5">Email</label>
                       <input
                         type="email"
                         value={guestEmail}
                         onChange={(e) => setGuestEmail(e.target.value)}
                         placeholder="you@example.com"
-                        className="w-full px-4 py-3 border border-stone-200 rounded-xl bg-white text-stone-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30"
+                        className="w-full bg-white border border-stone-200 rounded-xl px-5 py-4 text-base text-stone-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all shadow-sm placeholder:text-stone-400"
                       />
                     </div>
+
                     <div>
-                      <label className="block text-sm text-stone-500 mb-1">
-                        Phone (optional)
-                      </label>
+                      <label className="block text-base font-medium text-stone-600 mb-2.5">Phone (optional)</label>
                       <input
                         type="tel"
                         value={guestPhone}
                         onChange={(e) => setGuestPhone(e.target.value)}
                         placeholder="(555) 123-4567"
-                        className="w-full px-4 py-3 border border-stone-200 rounded-xl bg-white text-stone-900 focus:outline-none focus:ring-2 focus:ring-sky-500/30"
+                        className="w-full bg-white border border-stone-200 rounded-xl px-5 py-4 text-base text-stone-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all shadow-sm placeholder:text-stone-400"
                       />
                     </div>
-                    {error && <p className="text-sm text-red-600">{error}</p>}
-                    <button
-                      onClick={handleContinueToPayment}
-                      disabled={
-                        !guestName ||
-                        !guestEmail ||
-                        !isLoggedIn ||
-                        paymentLoading
-                      }
-                      className="w-full py-3 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50"
-                    >
-                      {paymentLoading
-                        ? "Setting up payment..."
-                        : !isLoggedIn
-                          ? "Sign in above to continue"
-                          : "Continue to payment"}
-                    </button>
-                    {!isLoggedIn && guestName && guestEmail && (
-                      <p className="text-xs text-stone-400 text-center">
-                        Please sign in or create an account above to proceed
-                        with your booking.
-                      </p>
-                    )}
                   </div>
+
+                  {error && <p className="text-sm text-red-600 mt-4">{error}</p>}
+
+                  <button
+                    onClick={handleContinueToPayment}
+                    disabled={
+                      !guestName ||
+                      !guestEmail ||
+                      !isLoggedIn ||
+                      paymentLoading
+                    }
+                    className="w-full mt-8 bg-sky-400 text-white rounded-xl py-4 text-base font-medium text-center shadow-sm cursor-not-allowed transition-all disabled:opacity-50"
+                  >
+                    {paymentLoading
+                      ? "Setting up payment..."
+                      : "Sign in above to continue"}
+                  </button>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Step 2: Payment */}
-            {step === "payment" && clientSecret && (
-              <div className="space-y-6">
-                <h2 className="text-xl font-medium text-stone-900">Payment</h2>
-                <StripePayment
-                  clientSecret={clientSecret}
-                  onSuccess={handlePaymentSuccess}
-                />
-              </div>
-            )}
-          </div>
+            </div>
+          )}
 
-          {/* Right: Summary sidebar */}
-          <div className="lg:col-span-2">
-            <div className="sticky top-6">
+          {/* Step 2: Payment */}
+          {step === "payment" && clientSecret && (
+            <div className="space-y-6">
+              <h2 className="text-xl font-medium text-stone-900">Payment</h2>
+              <StripePayment
+                clientSecret={clientSecret}
+                onSuccess={handlePaymentSuccess}
+              />
+            </div>
+          )}
+
+        </div>
+
+        {/* Right Column: Booking Summary Card */}
+        <div className="w-full lg:w-[26rem] shrink-0 sticky top-12 z-10">
+          <div className="bg-white border border-stone-200 rounded-[1.5rem] p-7 shadow-xl shadow-stone-200/50">
+
+            {/* Property Preview */}
+            <div className="flex gap-5 items-center">
               {coverPhoto && (
                 <img
                   src={coverPhoto.url}
                   alt={coverPhoto.alt || property.name}
-                  className="w-full h-48 object-cover rounded-2xl mb-4"
+                  className="w-24 h-24 rounded-2xl object-cover border border-stone-100 shadow-sm"
                 />
               )}
-              <BookingSummary
-                propertyName={property.name}
-                checkIn={checkIn}
-                checkOut={checkOut}
-                guestsCount={guestsCount}
-                nights={nights}
-                cleaningFee={property.cleaningFee}
-                totalAmount={totalAmount}
-              />
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1 block">Entire Villa</span>
+                <h3 className="font-medium text-xl text-stone-900 tracking-tight leading-tight">{property.name}</h3>
+                <div className="flex items-center gap-1.5 text-sm text-stone-500 mt-2">
+                  <iconify-icon icon="solar:star-linear" className="text-sky-500"></iconify-icon>
+                  <span className="font-medium text-stone-900">4.96</span>
+                  <span className="text-stone-400">(128 reviews)</span>
+                </div>
+              </div>
             </div>
+
+            <div className="h-px w-full bg-stone-200 my-7"></div>
+
+            {/* Price Breakdown */}
+            <h4 className="text-xl font-medium tracking-tight text-stone-900 mb-5">Price details</h4>
+            <div className="space-y-4 text-stone-600 text-base">
+              <div className="flex justify-between items-center">
+                <span>${(nightlyRate / 100).toFixed(2)} x {nights} nights</span>
+                <span className="font-medium text-stone-900">${(nights * nightlyRate / 100).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="underline decoration-stone-300 underline-offset-4 decoration-dashed hover:text-stone-900 transition-colors cursor-help">Cleaning fee</span>
+                <span className="font-medium text-stone-900">${(property.cleaningFee / 100).toFixed(2)}</span>
+              </div>
+            </div>
+
+            <div className="h-px w-full bg-stone-200 my-7"></div>
+
+            {/* Total & Action */}
+            <div className="flex justify-between items-end mb-8">
+              <div>
+                <span className="block font-semibold text-lg text-stone-900 tracking-tight">Total</span>
+                <span className="text-sm text-stone-500">Includes all taxes and fees</span>
+              </div>
+              <span className="font-semibold text-3xl tracking-tight text-stone-900">${(totalAmount / 100).toFixed(2)}</span>
+            </div>
+
+            {/* Action Button */}
+            {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
+
+            {isLoggedIn && step === "details" ? (
+              <button
+                onClick={handleContinueToPayment}
+                disabled={paymentLoading}
+                className="w-full bg-sky-500 text-white font-medium py-4 rounded-xl shadow-md shadow-sky-500/20 hover:bg-sky-400 hover:shadow-lg hover:-translate-y-0.5 transition-all focus:ring-4 focus:ring-sky-500/20 focus:outline-none text-lg disabled:opacity-50"
+              >
+                {paymentLoading ? "Setting up payment..." : "Confirm & Pay"}
+              </button>
+            ) : (
+              <button
+                disabled
+                className="w-full bg-stone-300 text-stone-500 font-medium py-4 rounded-xl text-lg cursor-not-allowed"
+              >
+                Sign in to continue
+              </button>
+            )}
+
           </div>
         </div>
+
       </div>
     </main>
   );

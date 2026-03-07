@@ -1,0 +1,165 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - JZ Vacation Stays</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      body {
+        font-family: 'Outfit', sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .lucide {
+        stroke-width: 1.5;
+      }
+    </style>
+  </head>
+  <body class="bg-stone-50 text-stone-900 selection:bg-sky-500/20 flex flex-col min-h-screen relative">
+    
+    <!-- Minimal Checkout Header -->
+    <header class="w-full pt-8 pb-6 bg-stone-50">
+      <div class="max-w-[70rem] mx-auto px-6 flex items-center">
+        <a href="#" class="text-xl font-medium tracking-tight text-stone-900 flex items-center gap-2 transition-opacity hover:opacity-80">
+          <div class="w-8 h-8 bg-stone-900 text-white rounded-xl flex items-center justify-center shadow-sm">
+            <i data-lucide="building-2" class="w-4 h-4"></i>
+          </div>
+          JZ Vacation Stays
+        </a>
+      </div>
+    </header>
+
+    <main class="w-full max-w-[70rem] mx-auto px-6 pb-16 lg:pb-24 flex-grow">
+      
+      <!-- Top Title & Progress -->
+      <div class="mb-12">
+        <h1 class="text-3xl sm:text-4xl font-medium tracking-tight text-stone-900 mb-3">
+          Book Seaglass Villa
+        </h1>
+        
+        <div class="flex flex-wrap items-center gap-2 text-base text-stone-500">
+          <span>Mar 9, 2026</span>
+          <i data-lucide="arrow-right" class="w-4 h-4 mx-1"></i>
+          <span>Mar 25, 2026</span>
+          <span class="mx-1.5">•</span>
+          <span>2 guests</span>
+          <span class="mx-1.5">•</span>
+          <span>16 nights</span>
+        </div>
+
+        <div class="flex items-center gap-4 mt-8">
+          <div class="bg-sky-500 text-white px-5 py-2 rounded-full text-sm font-medium shadow-sm shadow-sky-500/20">
+            Your details
+          </div>
+          <div class="h-px w-8 bg-stone-300"></div>
+          <div class="bg-stone-200 text-stone-500 px-5 py-2 rounded-full text-sm font-medium">
+            Payment
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+        
+        <!-- Left Side: Forms -->
+        <div class="lg:col-span-7 flex flex-col gap-12">
+          
+          <!-- Account Sign-in Card -->
+          <div class="bg-white border border-stone-200 rounded-[1.5rem] p-6 sm:p-8 shadow-[0_4px_20px_rgb(0,0,0,0.02)] transition-all">
+            <div class="flex items-start gap-4 mb-6">
+              <div class="w-12 h-12 rounded-full bg-sky-50 text-sky-500 flex items-center justify-center flex-shrink-0 border border-sky-100/50">
+                <i data-lucide="user" class="w-6 h-6"></i>
+              </div>
+              <div class="pt-0.5">
+                <h2 class="text-xl font-medium tracking-tight text-stone-900">Have an account?</h2>
+                <p class="text-base text-stone-500 mt-1 leading-relaxed">Sign in to speed up your booking and access your reservations later.</p>
+              </div>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row gap-4 mt-2">
+              <input type="email" placeholder="Your email address" class="flex-grow bg-white border border-stone-200 rounded-xl px-5 py-3.5 text-base text-stone-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all placeholder:text-stone-400 shadow-sm">
+              <button class="bg-stone-500 hover:bg-stone-600 text-white font-medium px-8 py-3.5 rounded-xl text-base transition-colors shadow-sm whitespace-nowrap">
+                Sign in
+              </button>
+            </div>
+          </div>
+
+          <!-- Guest Details Section -->
+          <div>
+            <h2 class="text-2xl font-medium tracking-tight text-stone-900 mb-6">Guest details</h2>
+            
+            <div class="space-y-6">
+              <div>
+                <label class="block text-base font-medium text-stone-600 mb-2.5">Full name</label>
+                <!-- Styled with a slight blue tint to mimic the autofilled state from the design -->
+                <input type="text" value="Jeremie Zach" class="w-full bg-sky-50/60 border border-sky-100 rounded-xl px-5 py-4 text-base text-stone-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all shadow-sm">
+              </div>
+              
+              <div>
+                <label class="block text-base font-medium text-stone-600 mb-2.5">Email</label>
+                <input type="email" placeholder="you@example.com" class="w-full bg-white border border-stone-200 rounded-xl px-5 py-4 text-base text-stone-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all shadow-sm placeholder:text-stone-400">
+              </div>
+              
+              <div>
+                <label class="block text-base font-medium text-stone-600 mb-2.5">Phone (optional)</label>
+                <input type="tel" placeholder="(555) 123-4567" class="w-full bg-white border border-stone-200 rounded-xl px-5 py-4 text-base text-stone-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all shadow-sm placeholder:text-stone-400">
+              </div>
+            </div>
+
+            <button disabled="" class="w-full mt-8 bg-sky-400 text-white rounded-xl py-4 text-base font-medium text-center shadow-sm cursor-not-allowed transition-all">
+              Sign in above to continue
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Right Side: Booking Summary -->
+        <div class="lg:col-span-5 relative">
+          <div class="lg:sticky lg:top-8 bg-white border border-stone-200 rounded-[1.5rem] p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+            <h3 class="text-xl font-medium tracking-tight text-stone-900 mb-8">Booking summary</h3>
+            
+            <div class="space-y-5">
+              <div class="flex justify-between items-center text-base">
+                <span class="text-stone-500">Property</span>
+                <span class="font-medium text-stone-900">Seaglass Villa</span>
+              </div>
+              <div class="flex justify-between items-center text-base">
+                <span class="text-stone-500">Check-in</span>
+                <span class="text-stone-900">Mar 9, 2026</span>
+              </div>
+              <div class="flex justify-between items-center text-base">
+                <span class="text-stone-500">Check-out</span>
+                <span class="text-stone-900">Mar 25, 2026</span>
+              </div>
+              <div class="flex justify-between items-center text-base">
+                <span class="text-stone-500">Guests</span>
+                <span class="text-stone-900">2</span>
+              </div>
+              
+              <div class="pt-4 space-y-5">
+                <div class="flex justify-between items-center text-base">
+                  <span class="text-stone-500">16 nights</span>
+                  <span class="text-stone-900">$3,200.00</span>
+                </div>
+                <div class="flex justify-between items-center text-base">
+                  <span class="text-stone-500">Cleaning fee</span>
+                  <span class="text-stone-900">$250.00</span>
+                </div>
+              </div>
+
+              <div class="pt-6 mt-2 border-t border-stone-100 flex justify-between items-center">
+                <span class="text-lg font-medium text-stone-900">Total</span>
+                <span class="text-lg font-medium text-stone-900">$3,450.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <script>
+      // Initialize Lucide icons
+      lucide.createIcons();
+    </script>
+  
+</body></html>

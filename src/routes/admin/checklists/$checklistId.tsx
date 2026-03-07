@@ -8,7 +8,7 @@ import {
   deleteChecklist,
 } from "../../../server/functions/admin-checklists";
 
-export const Route = createFileRoute("/_admin/checklists/$checklistId")({
+export const Route = createFileRoute("/admin/checklists/$checklistId")({
   loader: async ({ params }) => {
     try {
       return await getChecklistById({ data: { checklistId: params.checklistId } });

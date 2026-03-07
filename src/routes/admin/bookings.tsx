@@ -7,7 +7,7 @@ import {
 } from "../../server/functions/admin-bookings";
 import { formatCurrency, formatDate } from "../../lib/utils";
 
-export const Route = createFileRoute("/_admin/bookings")({
+export const Route = createFileRoute("/admin/bookings")({
   loader: async () => {
     try {
       return { bookings: await getAdminBookings() };

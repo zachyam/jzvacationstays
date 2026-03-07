@@ -7,6 +7,7 @@ import { getAvailability } from "../../server/functions/calendar-sync";
 import { Header } from "../../components/layout/header";
 import { PropertyAmenities } from "../../components/property/property-amenities";
 import { PropertyReviews } from "../../components/property/property-reviews";
+import { DateRangePicker } from "../../components/ui/date-range-picker";
 import { formatCurrency } from "../../lib/utils";
 
 export const Route = createFileRoute("/properties/$propertyId")({
@@ -32,7 +33,7 @@ export const Route = createFileRoute("/properties/$propertyId")({
 });
 
 function PropertyDetailPage() {
-  const { property, photos, reviews } = Route.useLoaderData();
+  const { property, photos, reviews, blockedDates } = Route.useLoaderData();
   const navigate = useNavigate();
 
   const [checkIn, setCheckIn] = useState<string | null>(null);
@@ -76,6 +77,11 @@ function PropertyDetailPage() {
       : 0;
   const subtotal = nights * nightlyRate;
   const totalAmount = subtotal + property.cleaningFee;
+
+  function handleDateChange(newCheckIn: string, newCheckOut: string) {
+    setCheckIn(newCheckIn);
+    setCheckOut(newCheckOut);
+  }
 
   function handleReserve() {
     if (!checkIn || !checkOut) return;
@@ -214,50 +220,41 @@ function PropertyDetailPage() {
             </div>
 
             {/* Booking Inputs */}
-            <div className="border border-stone-200 rounded-2xl mb-6 flex flex-col bg-white shadow-sm transition-all focus-within:ring-2 focus-within:ring-sky-500/20 focus-within:border-sky-500/50">
-              <div className="grid grid-cols-2 divide-x divide-stone-200 border-b border-stone-200">
-                <div className="p-4 flex flex-col text-left">
-                  <span className="text-xs font-medium uppercase tracking-widest text-stone-500 mb-1">
-                    Check In
-                  </span>
-                  <input
-                    type="date"
-                    value={checkIn || ""}
-                    onChange={(e) => setCheckIn(e.target.value)}
-                    min={new Date().toISOString().split("T")[0]}
-                    className="text-lg font-light text-stone-900 bg-transparent focus:outline-none w-full"
-                  />
-                </div>
-                <div className="p-4 flex flex-col text-left">
-                  <span className="text-xs font-medium uppercase tracking-widest text-stone-500 mb-1">
-                    Check Out
-                  </span>
-                  <input
-                    type="date"
-                    value={checkOut || ""}
-                    onChange={(e) => setCheckOut(e.target.value)}
-                    min={checkIn || new Date().toISOString().split("T")[0]}
-                    className="text-lg font-light text-stone-900 bg-transparent focus:outline-none w-full"
-                  />
-                </div>
-              </div>
-              <div className="p-4 flex flex-col text-left">
-                <span className="text-xs font-medium uppercase tracking-widest text-stone-500 mb-1">
-                  Guests
+            <div className="space-y-4 mb-6">
+              {/* Date Range Picker */}
+              <div>
+                <span className="text-xs font-medium uppercase tracking-widest text-stone-500 mb-2 block">
+                  Dates
                 </span>
-                <select
-                  value={guestsCount}
-                  onChange={(e) => setGuestsCount(Number(e.target.value))}
-                  className="text-lg font-light text-stone-900 bg-transparent focus:outline-none w-full"
-                >
-                  {Array.from({ length: property.maxGuests }, (_, i) => i + 1).map(
-                    (n) => (
-                      <option key={n} value={n}>
-                        {n} guest{n !== 1 ? "s" : ""}
-                      </option>
-                    ),
-                  )}
-                </select>
+                <DateRangePicker
+                  checkIn={checkIn}
+                  checkOut={checkOut}
+                  onDateChange={handleDateChange}
+                  minDate={new Date().toISOString().split("T")[0]}
+                  blockedDates={blockedDates}
+                />
+              </div>
+
+              {/* Guests Selector */}
+              <div className="border border-stone-200 rounded-xl bg-white shadow-sm">
+                <div className="p-4 flex flex-col text-left">
+                  <span className="text-xs font-medium uppercase tracking-widest text-stone-500 mb-1">
+                    Guests
+                  </span>
+                  <select
+                    value={guestsCount}
+                    onChange={(e) => setGuestsCount(Number(e.target.value))}
+                    className="text-lg font-light text-stone-900 bg-transparent focus:outline-none w-full"
+                  >
+                    {Array.from({ length: property.maxGuests }, (_, i) => i + 1).map(
+                      (n) => (
+                        <option key={n} value={n}>
+                          {n} guest{n !== 1 ? "s" : ""}
+                        </option>
+                      ),
+                    )}
+                  </select>
+                </div>
               </div>
             </div>
 

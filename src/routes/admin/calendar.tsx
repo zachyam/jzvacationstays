@@ -5,7 +5,7 @@ import { getProperties } from "../../server/functions/properties";
 import { getCalendarBookings } from "../../server/functions/admin-calendar";
 import { formatCurrency } from "../../lib/utils";
 
-export const Route = createFileRoute("/_admin/calendar")({
+export const Route = createFileRoute("/admin/calendar")({
   loader: async () => {
     try {
       const properties = await getProperties();

@@ -7,7 +7,7 @@ import {
 } from "../../../server/functions/admin-checklists";
 import { getProperties } from "../../../server/functions/properties";
 
-export const Route = createFileRoute("/_admin/checklists/")({
+export const Route = createFileRoute("/admin/checklists/")({
   loader: async () => {
     try {
       const [checklists, properties] = await Promise.all([

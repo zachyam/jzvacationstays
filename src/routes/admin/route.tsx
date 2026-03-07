@@ -2,10 +2,10 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 import { AdminSidebar } from "../../components/admin/admin-sidebar";
 
-export const Route = createFileRoute("/_admin")({
+export const Route = createFileRoute("/admin")({
   beforeLoad: ({ context }) => {
     if (!context.user) {
-      throw redirect({ to: "/auth/login", search: { redirect: "/dashboard" } });
+      throw redirect({ to: "/auth/login", search: { redirect: "/admin/dashboard" } });
     }
     if (context.user.role !== "admin") {
       throw redirect({ to: "/" });

@@ -9,7 +9,7 @@ import {
   syncCalendar,
 } from "../../server/functions/calendar-sync";
 
-export const Route = createFileRoute("/_admin/calendar-sync")({
+export const Route = createFileRoute("/admin/calendar-sync")({
   loader: async () => {
     try {
       const properties = await getProperties();

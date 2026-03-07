@@ -37,6 +37,12 @@ function LoginPage() {
         return;
       }
 
+      // Admin users skip OTP and go directly to admin dashboard
+      if (result.skipOtp) {
+        window.location.href = "/admin/dashboard";
+        return;
+      }
+
       navigate({
         to: "/auth/verify",
         search: { email, isNewUser: result.isNewUser, name: showName ? name : undefined },

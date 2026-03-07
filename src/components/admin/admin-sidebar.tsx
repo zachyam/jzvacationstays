@@ -1,13 +1,13 @@
 import { Link, useMatchRoute } from "@tanstack/react-router";
 
 const NAV_ITEMS = [
-  { to: "/dashboard", label: "Dashboard", icon: "solar:chart-square-linear" },
-  { to: "/calendar", label: "Calendar", icon: "solar:calendar-linear" },
-  { to: "/bookings", label: "Bookings", icon: "solar:clipboard-list-linear" },
-  { to: "/reviews", label: "Reviews", icon: "solar:star-linear" },
-  { to: "/calendar-sync", label: "Calendar Sync", icon: "solar:refresh-linear" },
-  { to: "/checklists", label: "Checklists", icon: "solar:checklist-minimalistic-linear" },
-  { to: "/thermostat", label: "Thermostat", icon: "solar:temperature-linear" },
+  { to: "/admin/dashboard", label: "Dashboard", icon: "solar:chart-square-linear" },
+  { to: "/admin/calendar", label: "Calendar", icon: "solar:calendar-linear" },
+  { to: "/admin/bookings", label: "Bookings", icon: "solar:clipboard-list-linear" },
+  { to: "/admin/reviews", label: "Reviews", icon: "solar:star-linear" },
+  { to: "/admin/calendar-sync", label: "Calendar Sync", icon: "solar:refresh-linear" },
+  { to: "/admin/checklists", label: "Checklists", icon: "solar:checklist-minimalistic-linear" },
+  { to: "/admin/thermostat", label: "Thermostat", icon: "solar:temperature-linear" },
 ] as const;
 
 export function AdminSidebar() {
