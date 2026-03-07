@@ -26,6 +26,7 @@ export const checklistItems = pgTable("checklist_items", {
   checklistId: uuid("checklist_id")
     .notNull()
     .references(() => checklists.id, { onDelete: "cascade" }),
+  room: varchar("room", { length: 100 }),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
   isCompleted: boolean("is_completed").notNull().default(false),

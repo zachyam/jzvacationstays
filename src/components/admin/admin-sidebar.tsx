@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { to: "/reviews", label: "Reviews", icon: "solar:star-linear" },
   { to: "/calendar-sync", label: "Calendar Sync", icon: "solar:refresh-linear" },
   { to: "/checklists", label: "Checklists", icon: "solar:checklist-minimalistic-linear" },
+  { to: "/inspections", label: "Inspections", icon: "solar:clipboard-check-linear" },
   { to: "/thermostat", label: "Thermostat", icon: "solar:temperature-linear" },
 ] as const;
 

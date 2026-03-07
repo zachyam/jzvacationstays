@@ -72,7 +72,13 @@ export const createChecklist = createServerFn({ method: "POST" })
 
 export const addChecklistItem = createServerFn({ method: "POST" })
   .inputValidator(
-    (data: { checklistId: string; title: string; sortOrder?: number }) => {
+    (data: {
+      checklistId: string;
+      title: string;
+      room?: string;
+      description?: string;
+      sortOrder?: number;
+    }) => {
       if (!data.checklistId || !data.title) {
         throw new Error("Checklist ID and title are required");
       }
@@ -87,6 +93,8 @@ export const addChecklistItem = createServerFn({ method: "POST" })
       .values({
         checklistId: data.checklistId,
         title: data.title,
+        room: data.room || null,
+        description: data.description || null,
         sortOrder: data.sortOrder ?? 0,
       })
       .returning();

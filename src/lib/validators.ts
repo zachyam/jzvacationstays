@@ -44,5 +44,18 @@ export const checklistSchema = z.object({
 export const checklistItemSchema = z.object({
   checklistId: z.string().uuid(),
   title: z.string().min(1, "Title is required"),
+  room: z.string().optional(),
   description: z.string().optional(),
+});
+
+export const inspectionSchema = z.object({
+  checklistId: z.string().uuid(),
+  propertyId: z.string().uuid().optional(),
+});
+
+export const inspectionItemUpdateSchema = z.object({
+  itemId: z.string().uuid(),
+  isCompleted: z.boolean().optional(),
+  status: z.enum(["pass", "fail", "na"]).optional(),
+  comment: z.string().optional(),
 });
