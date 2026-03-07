@@ -1,6 +1,7 @@
 import { Link, useMatchRoute } from "@tanstack/react-router";
 
 const NAV_ITEMS = [
+<<<<<<< HEAD
   { to: "/admin/dashboard", label: "Dashboard", icon: "solar:chart-square-linear" },
   { to: "/admin/calendar", label: "Calendar", icon: "solar:calendar-linear" },
   { to: "/admin/bookings", label: "Bookings", icon: "solar:clipboard-list-linear" },
@@ -8,6 +9,16 @@ const NAV_ITEMS = [
   { to: "/admin/calendar-sync", label: "Calendar Sync", icon: "solar:refresh-linear" },
   { to: "/admin/checklists", label: "Checklists", icon: "solar:checklist-minimalistic-linear" },
   { to: "/admin/thermostat", label: "Thermostat", icon: "solar:temperature-linear" },
+=======
+  { to: "/dashboard", label: "Dashboard", icon: "solar:chart-square-linear" },
+  { to: "/calendar", label: "Calendar", icon: "solar:calendar-linear" },
+  { to: "/bookings", label: "Bookings", icon: "solar:clipboard-list-linear" },
+  { to: "/reviews", label: "Reviews", icon: "solar:star-linear" },
+  { to: "/calendar-sync", label: "Calendar Sync", icon: "solar:refresh-linear" },
+  { to: "/checklists", label: "Checklists", icon: "solar:checklist-minimalistic-linear" },
+  { to: "/inspections", label: "Inspections", icon: "solar:clipboard-check-linear" },
+  { to: "/thermostat", label: "Thermostat", icon: "solar:temperature-linear" },
+>>>>>>> refs/remotes/origin/main
 ] as const;
 
 export function AdminSidebar() {
