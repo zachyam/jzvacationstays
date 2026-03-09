@@ -15,7 +15,15 @@ export const Route = createFileRoute("/admin/checklists/")({
         getProperties(),
       ]);
       return { checklists, properties };
-    } catch {
+    } catch (error) {
+      console.error("Admin checklists loader error:", error);
+      // If auth error, let it bubble up to trigger redirect
+      if (error instanceof Error &&
+          (error.message.includes("Authentication required") ||
+           error.message.includes("Admin access required") ||
+           error.message.includes("Session expired"))) {
+        throw error;
+      }
       return { checklists: [], properties: [] };
     }
   },
@@ -130,7 +138,7 @@ function ChecklistsPage() {
           checklists.map(({ checklist, propertyName }) => (
             <Link
               key={checklist.id}
-              to="/checklists/$checklistId"
+              to="/admin/checklists/$checklistId"
               params={{ checklistId: checklist.id }}
               className="block bg-white border border-stone-200 rounded-xl p-4 hover:border-stone-300 transition-colors"
             >

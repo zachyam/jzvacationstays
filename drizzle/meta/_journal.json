@@ -8,6 +8,20 @@
       "when": 1772695005172,
       "tag": "0000_new_sphinx",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1773091651424,
+      "tag": "0001_clammy_iron_monger",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773092237898,
+      "tag": "0002_tricky_scrambler",
+      "breakpoints": true
     }
   ]
 }

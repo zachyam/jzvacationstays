@@ -1,6 +1,19 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      'iconify-icon': {
+        icon: string;
+        className?: string;
+        width?: string;
+        height?: string;
+      };
+    }
+  }
+}
+
 import { getPropertyBySlug } from "../../server/functions/properties";
 import { createBooking } from "../../server/functions/bookings";
 import { createPaymentIntent } from "../../server/functions/payments";
@@ -68,7 +81,8 @@ function BookingPage() {
   const [error, setError] = useState("");
 
   // Edit booking state
-  const [isEditingBooking, setIsEditingBooking] = useState(false);
+  const [isEditingDates, setIsEditingDates] = useState(false);
+  const [isEditingGuests, setIsEditingGuests] = useState(false);
   const [tempCheckIn, setTempCheckIn] = useState(checkIn);
   const [tempCheckOut, setTempCheckOut] = useState(checkOut);
   const [tempGuests, setTempGuests] = useState(guests);
@@ -105,9 +119,9 @@ function BookingPage() {
   }
 
   const guestsCount = guests;
-  const currentCheckIn = isEditingBooking && tempCheckIn ? tempCheckIn : checkIn;
-  const currentCheckOut = isEditingBooking && tempCheckOut ? tempCheckOut : checkOut;
-  const currentGuests = isEditingBooking ? tempGuests : guests;
+  const currentCheckIn = isEditingDates && tempCheckIn ? tempCheckIn : checkIn;
+  const currentCheckOut = isEditingDates && tempCheckOut ? tempCheckOut : checkOut;
+  const currentGuests = isEditingGuests ? tempGuests : guests;
 
   const nights = Math.max(
     1,
@@ -242,14 +256,16 @@ function BookingPage() {
         guests: tempGuests
       },
     });
-    setIsEditingBooking(false);
+    setIsEditingDates(false);
+    setIsEditingGuests(false);
   }
 
   function handleCancelEdit() {
     setTempCheckIn(checkIn);
     setTempCheckOut(checkOut);
     setTempGuests(guests);
-    setIsEditingBooking(false);
+    setIsEditingDates(false);
+    setIsEditingGuests(false);
   }
 
   return (
@@ -264,7 +280,7 @@ function BookingPage() {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto w-full p-6 sm:p-12 lg:p-16 flex flex-col lg:flex-row gap-10 lg:gap-16 items-start">
+      <div className="max-w-7xl mx-auto w-full p-6 sm:p-8 lg:p-12 flex flex-col xl:flex-row gap-8 lg:gap-12 items-start">
 
         {/* Left Column: Modify Booking & Details */}
         <div className="flex-1 w-full space-y-10">
@@ -283,27 +299,30 @@ function BookingPage() {
           </div>
 
           {/* Trip Details Modification Bar */}
-          <section className="space-y-4">
+          <section className="space-y-6">
             <h2 className="text-2xl font-medium tracking-tight text-stone-900">Trip Details</h2>
 
-            <div className="bg-white border border-stone-200 rounded-[1.5rem] p-2 shadow-sm flex flex-col sm:flex-row gap-2 relative z-20">
+            <div className="bg-white border border-stone-200 rounded-[1.5rem] p-2 shadow-sm flex flex-col sm:flex-row gap-3 relative z-20">
 
               {/* Dates Editor */}
               <div className="relative group flex-1">
                 <button
-                  onClick={() => setIsEditingBooking(!isEditingBooking)}
-                  className="w-full flex flex-col items-start px-5 py-3.5 rounded-xl hover:bg-stone-50 transition-colors text-left focus-within:ring-2 focus-within:ring-sky-500/20 focus-within:outline-none"
+                  onClick={() => {
+                    setIsEditingGuests(false);
+                    setIsEditingDates(!isEditingDates);
+                  }}
+                  className="w-full flex flex-col items-start px-6 py-5 rounded-xl hover:bg-stone-50 transition-colors text-left focus-within:ring-2 focus-within:ring-sky-500/20 focus-within:outline-none"
                 >
-                  <span className="text-xs font-medium text-stone-500 uppercase tracking-wider mb-1">Dates</span>
-                  <div className="flex items-center gap-2 text-stone-900 font-medium">
+                  <span className="text-xs font-medium text-stone-500 uppercase tracking-wider mb-2">Dates</span>
+                  <div className="flex items-center gap-3 text-stone-900 font-medium text-base">
                     <span>{formatDate(currentCheckIn)}</span>
-                    <iconify-icon icon="solar:arrow-right-linear" className="text-stone-400"></iconify-icon>
+                    <iconify-icon icon="solar:arrow-right-linear" className="text-stone-400" />
                     <span>{formatDate(currentCheckOut)}</span>
                   </div>
                 </button>
 
                 {/* Editing Panel */}
-                {isEditingBooking && (
+                {isEditingDates && (
                   <div className="absolute top-full left-0 mt-3 w-full sm:w-80 bg-white border border-stone-200 rounded-[1.5rem] p-6 shadow-2xl shadow-stone-200/50 z-30">
                     <div className="space-y-4">
                       <div>
@@ -353,18 +372,21 @@ function BookingPage() {
               {/* Guests Editor */}
               <div className="relative group flex-1">
                 <button
-                  onClick={() => setIsEditingBooking(!isEditingBooking)}
-                  className="w-full flex items-center justify-between px-5 py-3.5 rounded-xl hover:bg-stone-50 transition-colors text-left focus-within:ring-2 focus-within:ring-sky-500/20 focus-within:outline-none"
+                  onClick={() => {
+                    setIsEditingDates(false);
+                    setIsEditingGuests(!isEditingGuests);
+                  }}
+                  className="w-full flex items-center justify-between px-6 py-5 rounded-xl hover:bg-stone-50 transition-colors text-left focus-within:ring-2 focus-within:ring-sky-500/20 focus-within:outline-none"
                 >
                   <div>
-                    <span className="text-xs font-medium text-stone-500 uppercase tracking-wider mb-1 block">Guests</span>
-                    <div className="text-stone-900 font-medium">{currentGuests} Guest{currentGuests !== 1 ? "s" : ""}</div>
+                    <span className="text-xs font-medium text-stone-500 uppercase tracking-wider mb-2 block">Guests</span>
+                    <div className="text-stone-900 font-medium text-base">{currentGuests} Guest{currentGuests !== 1 ? "s" : ""}</div>
                   </div>
-                  <iconify-icon icon="solar:alt-arrow-down-linear" className="text-stone-400 text-xl"></iconify-icon>
+                  <iconify-icon icon="solar:alt-arrow-down-linear" className="text-stone-400 text-xl" />
                 </button>
 
                 {/* Guests Editing Panel */}
-                {isEditingBooking && (
+                {isEditingGuests && (
                   <div className="absolute top-full left-0 sm:right-0 sm:left-auto mt-3 w-full sm:w-80 bg-white border border-stone-200 rounded-[1.5rem] p-6 shadow-2xl shadow-stone-200/50 z-30">
                     <div className="space-y-4">
                       <div>

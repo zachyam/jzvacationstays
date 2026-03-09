@@ -155,16 +155,16 @@ export function DateRangePicker({
       <button
         ref={triggerRef}
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-3 bg-white border border-stone-200 px-4 py-2.5 rounded-xl shadow-sm hover:border-stone-300 transition-all text-stone-900 font-medium focus:ring-2 focus:ring-sky-500/20 focus:outline-none w-full justify-start"
+        className="flex items-center gap-3 bg-white border border-stone-200 px-5 py-4 rounded-xl shadow-sm hover:border-stone-300 transition-all text-stone-900 font-medium focus:ring-2 focus:ring-sky-500/20 focus:outline-none w-full justify-start"
       >
-        <iconify-icon icon="solar:calendar-linear" class="text-stone-400 text-lg" />
+        <iconify-icon icon="solar:calendar-linear" className="text-stone-400 text-lg" />
         <span className="flex-1 text-left">
           {checkIn && checkOut ? (
-            <>
-              <span>{formatDate(checkIn)}</span>
-              <iconify-icon icon="solar:arrow-right-linear" class="text-stone-400 text-lg mx-2 inline" />
-              <span>{formatDate(checkOut)}</span>
-            </>
+            <div className="flex items-center gap-3">
+              <span className="font-medium whitespace-nowrap">{formatDate(checkIn)}</span>
+              <iconify-icon icon="solar:arrow-right-linear" className="text-stone-400 flex-shrink-0" />
+              <span className="font-medium whitespace-nowrap">{formatDate(checkOut)}</span>
+            </div>
           ) : (
             <span className="text-stone-500">Select dates</span>
           )}
@@ -196,13 +196,13 @@ export function DateRangePicker({
                 onClick={prevMonth}
                 className="hover:text-stone-900 transition-colors flex items-center justify-center p-1"
               >
-                <iconify-icon icon="solar:alt-arrow-left-linear" class="text-xl" />
+                <iconify-icon icon="solar:alt-arrow-left-linear" className="text-xl" />
               </button>
               <button
                 onClick={nextMonth}
                 className="hover:text-stone-900 transition-colors flex items-center justify-center p-1"
               >
-                <iconify-icon icon="solar:alt-arrow-right-linear" class="text-xl" />
+                <iconify-icon icon="solar:alt-arrow-right-linear" className="text-xl" />
               </button>
             </div>
           </div>

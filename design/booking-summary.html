@@ -46,11 +46,11 @@
         <section class="space-y-4">
           <h2 class="text-2xl font-medium tracking-tight text-stone-900">Trip Details</h2>
           
-          <div class="bg-white border border-stone-200 rounded-[1.5rem] p-2 shadow-sm flex flex-col sm:flex-row gap-2 relative z-20">
+          <div class="bg-white border border-stone-200 rounded-[1.5rem] shadow-sm flex flex-col sm:flex-row gap-2 relative z-20">
             
             <!-- Dates Editor -->
-            <div class="relative group flex-1">
-              <button class="w-full flex flex-col items-start px-5 py-3.5 rounded-xl hover:bg-stone-50 transition-colors text-left focus-within:ring-2 focus-within:ring-sky-500/20 focus-within:outline-none">
+            <div class="relative flex-1">
+              <button onclick="toggleCalendar(event)" class="w-full flex flex-col items-start px-5 py-3.5 rounded-xl hover:bg-stone-50 transition-colors text-left focus-within:ring-2 focus-within:ring-sky-500/20 focus-within:outline-none">
                 <span class="text-xs font-medium text-stone-500 uppercase tracking-wider mb-1">Dates</span>
                 <div class="flex items-center gap-2 text-stone-900 font-medium">
                   <span>Jan 10, 2028</span>
@@ -59,8 +59,8 @@
                 </div>
               </button>
 
-              <!-- Calendar Popover Panel (Hidden by default, shown on hover/focus) -->
-              <div class="absolute top-full left-0 mt-3 w-[21.25rem] bg-white border border-stone-200 rounded-[1.5rem] p-6 shadow-2xl shadow-stone-200/50 opacity-0 invisible group-hover:opacity-100 group-hover:visible focus-within:opacity-100 focus-within:visible transition-all duration-200 translate-y-2 group-hover:translate-y-0 focus-within:translate-y-0">
+              <!-- Calendar Popover Panel -->
+              <div id="calendar-popup" class="absolute top-full left-0 mt-3 w-[21.25rem] bg-white border border-stone-200 rounded-[1.5rem] p-6 shadow-2xl shadow-stone-200/50 opacity-0 invisible transition-all duration-200 translate-y-2" style="display: none;">
                 <!-- Header -->
                 <div class="grid grid-cols-3 items-center mb-5 px-1">
                   <div class="justify-self-start">
@@ -140,8 +140,8 @@
             <div class="sm:hidden h-px w-full bg-stone-200 mx-3"></div>
 
             <!-- Guests Editor -->
-            <div class="relative group flex-1">
-              <button class="w-full flex items-center justify-between px-5 py-3.5 rounded-xl hover:bg-stone-50 transition-colors text-left focus-within:ring-2 focus-within:ring-sky-500/20 focus-within:outline-none">
+            <div class="relative flex-1">
+              <button onclick="toggleGuests(event)" class="w-full flex items-center justify-between px-5 py-3.5 rounded-xl hover:bg-stone-50 transition-colors text-left focus-within:ring-2 focus-within:ring-sky-500/20 focus-within:outline-none">
                 <div>
                   <span class="text-xs font-medium text-stone-500 uppercase tracking-wider mb-1 block">Guests</span>
                   <div class="text-stone-900 font-medium">2 Guests</div>
@@ -150,7 +150,7 @@
               </button>
 
               <!-- Guests Popover Panel -->
-              <div class="absolute top-full left-0 sm:right-0 sm:left-auto mt-3 w-full sm:w-[21.25rem] bg-white border border-stone-200 rounded-[1.5rem] p-6 shadow-2xl shadow-stone-200/50 opacity-0 invisible group-hover:opacity-100 group-hover:visible focus-within:opacity-100 focus-within:visible transition-all duration-200 translate-y-2 group-hover:translate-y-0 focus-within:translate-y-0">
+              <div id="guests-popup" class="absolute top-full left-0 sm:right-0 sm:left-auto mt-3 w-full sm:w-[21.25rem] bg-white border border-stone-200 rounded-[1.5rem] p-6 shadow-2xl shadow-stone-200/50 opacity-0 invisible transition-all duration-200 translate-y-2" style="display: none;">
                 
                 <!-- Adults -->
                 <div class="flex items-center justify-between mb-6 pb-6 border-b border-stone-100">
@@ -281,5 +281,56 @@
 
     </main>
 
-  
+    <script>
+      // Completely close all popups first
+      function closeAllPopups() {
+        document.getElementById('calendar-popup').style.display = 'none';
+        document.getElementById('guests-popup').style.display = 'none';
+      }
+
+      function toggleCalendar(event) {
+        event.stopPropagation();
+        event.preventDefault();
+
+        const calendarPopup = document.getElementById('calendar-popup');
+        const isOpen = calendarPopup.style.display === 'block';
+
+        // Close all popups first
+        closeAllPopups();
+
+        // If it wasn't open, open it
+        if (!isOpen) {
+          calendarPopup.style.display = 'block';
+        }
+      }
+
+      function toggleGuests(event) {
+        event.stopPropagation();
+        event.preventDefault();
+
+        const guestsPopup = document.getElementById('guests-popup');
+        const isOpen = guestsPopup.style.display === 'block';
+
+        // Close all popups first
+        closeAllPopups();
+
+        // If it wasn't open, open it
+        if (!isOpen) {
+          guestsPopup.style.display = 'block';
+        }
+      }
+
+      // Close when clicking anywhere else
+      document.addEventListener('click', function(event) {
+        if (!event.target.closest('#calendar-popup') && !event.target.closest('#guests-popup')) {
+          closeAllPopups();
+        }
+      });
+
+      // Initialize - make sure both start closed
+      document.addEventListener('DOMContentLoaded', function() {
+        closeAllPopups();
+      });
+    </script>
+
 </body></html>

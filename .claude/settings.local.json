@@ -47,7 +47,9 @@
       "Bash(curl -s http://localhost:3006/thermostat)",
       "Bash(ls -la /home/zachy/.openclaw/workspace/projects/jzvacationstays/*.config.* /home/zachy/.openclaw/workspace/projects/jzvacationstays/*.json)",
       "Bash(npx tsr generate)",
-      "Bash(pnpm build)"
+      "Bash(pnpm build)",
+      "Bash(npm run db:generate)",
+      "Bash(npm run db:migrate)"
     ]
   }
 }

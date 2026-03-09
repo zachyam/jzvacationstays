@@ -66,7 +66,7 @@ export function Header({ variant = "default" }: HeaderProps) {
           <>
             {user.role === "admin" && (
               <Link
-                to="/dashboard"
+                to="/admin"
                 className={cn(
                   "text-sm font-medium transition-colors duration-200 hidden md:block",
                   isTransparent

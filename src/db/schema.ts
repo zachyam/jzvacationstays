@@ -6,4 +6,5 @@ export * from "./schema/bookings";
 export * from "./schema/reviews";
 export * from "./schema/calendar-sync";
 export * from "./schema/checklists";
+export * from "./schema/checklist-media";
 export * from "./schema/inspections";
