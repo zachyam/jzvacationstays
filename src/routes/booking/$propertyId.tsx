@@ -131,8 +131,7 @@ function BookingPage() {
     ),
   );
 
-  // TODO: Replace with dynamic pricing from platform sync
-  const nightlyRate = 20000; // $200 in cents — placeholder
+  const nightlyRate = property.nightlyRate || 0;
   const totalAmount = nights * nightlyRate + property.cleaningFee;
 
   const isLoggedIn = !!authenticatedUserId;

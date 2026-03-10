@@ -2,6 +2,7 @@ import { Link, useMatchRoute } from "@tanstack/react-router";
 
 const NAV_ITEMS = [
   { to: "/admin/dashboard", label: "Dashboard", icon: "solar:chart-square-linear" },
+  { to: "/admin/listings", label: "Listings", icon: "solar:home-smile-linear" },
   { to: "/admin/calendar", label: "Calendar", icon: "solar:calendar-linear" },
   { to: "/admin/bookings", label: "Bookings", icon: "solar:clipboard-list-linear" },
   { to: "/admin/reviews", label: "Reviews", icon: "solar:star-linear" },
