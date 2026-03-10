@@ -59,3 +59,32 @@ export const inspectionItemUpdateSchema = z.object({
   status: z.enum(["pass", "fail", "na"]).optional(),
   comment: z.string().optional(),
 });
+
+export const propertySchema = z.object({
+  slug: z
+    .string()
+    .min(1, "Slug is required")
+    .max(100)
+    .regex(/^[a-z0-9-]+$/, "Slug must be lowercase letters, numbers, and hyphens only"),
+  name: z.string().min(1, "Name is required").max(255),
+  tagline: z.string().max(255).optional().or(z.literal("")),
+  description: z.string().optional().or(z.literal("")),
+  maxGuests: z.number().int().min(1, "At least 1 guest"),
+  bedrooms: z.number().int().min(0),
+  bathrooms: z.string().regex(/^\d+(\\.5)?$/, "Enter a valid number (e.g. 2 or 2.5)"),
+  beds: z.array(z.string()).default([]),
+  cleaningFee: z.number().int().min(0, "Cannot be negative"),
+  nightlyRate: z.number().int().min(0, "Cannot be negative"),
+  petFee: z.number().int().min(0, "Cannot be negative"),
+  maxPets: z.number().int().min(0),
+  minStay: z.number().int().min(1, "Minimum 1 night"),
+  checkInTime: z.string().max(10).optional().or(z.literal("")),
+  checkOutTime: z.string().max(10).optional().or(z.literal("")),
+  houseRules: z.string().optional().or(z.literal("")),
+  address: z.string().optional().or(z.literal("")),
+  latitude: z.string().optional().or(z.literal("")),
+  longitude: z.string().optional().or(z.literal("")),
+  amenities: z.array(z.string()).default([]),
+  highlight: z.string().max(255).optional().or(z.literal("")),
+  isActive: z.boolean().default(true),
+});
