@@ -120,9 +120,9 @@ const AdminBookingsRoute = AdminBookingsRouteImport.update({
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const InspectTokenIndexRoute = InspectTokenIndexRouteImport.update({
-  id: '/inspect/$token/',
-  path: '/inspect/$token/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => InspectTokenRoute,
 } as any)
 const AdminChecklistsIndexRoute = AdminChecklistsIndexRouteImport.update({
   id: '/checklists/',
@@ -135,9 +135,9 @@ const InspectCompleteTokenRoute = InspectCompleteTokenRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const InspectTokenRoomRoute = InspectTokenRoomRouteImport.update({
-  id: '/inspect/$token/$room',
-  path: '/inspect/$token/$room',
-  getParentRoute: () => rootRouteImport,
+  id: '/$room',
+  path: '/$room',
+  getParentRoute: () => InspectTokenRoute,
 } as any)
 const BookingConfirmationBookingIdRoute =
   BookingConfirmationBookingIdRouteImport.update({
@@ -326,9 +326,7 @@ export interface RootRouteChildren {
   PropertiesPropertyIdRoute: typeof PropertiesPropertyIdRoute
   PropertiesIndexRoute: typeof PropertiesIndexRoute
   BookingConfirmationBookingIdRoute: typeof BookingConfirmationBookingIdRoute
-  InspectTokenRoomRoute: typeof InspectTokenRoomRoute
   InspectCompleteTokenRoute: typeof InspectCompleteTokenRoute
-  InspectTokenIndexRoute: typeof InspectTokenIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -454,10 +452,10 @@ declare module '@tanstack/react-router' {
     }
     '/inspect/$token/': {
       id: '/inspect/$token/'
-      path: '/inspect/$token'
+      path: '/'
       fullPath: '/inspect/$token/'
       preLoaderRoute: typeof InspectTokenIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof InspectTokenRoute
     }
     '/admin/checklists/': {
       id: '/admin/checklists/'
@@ -475,10 +473,10 @@ declare module '@tanstack/react-router' {
     }
     '/inspect/$token/$room': {
       id: '/inspect/$token/$room'
-      path: '/inspect/$token/$room'
+      path: '/$room'
       fullPath: '/inspect/$token/$room'
       preLoaderRoute: typeof InspectTokenRoomRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof InspectTokenRoute
     }
     '/booking/confirmation/$bookingId': {
       id: '/booking/confirmation/$bookingId'
@@ -557,9 +555,7 @@ const rootRouteChildren: RootRouteChildren = {
   PropertiesPropertyIdRoute: PropertiesPropertyIdRoute,
   PropertiesIndexRoute: PropertiesIndexRoute,
   BookingConfirmationBookingIdRoute: BookingConfirmationBookingIdRoute,
-  InspectTokenRoomRoute: InspectTokenRoomRoute,
   InspectCompleteTokenRoute: InspectCompleteTokenRoute,
-  InspectTokenIndexRoute: InspectTokenIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

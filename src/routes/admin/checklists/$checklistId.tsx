@@ -4,7 +4,6 @@ import { useState, useRef } from "react";
 import {
   getChecklistById,
   addChecklistItem,
-  toggleChecklistItem,
   deleteChecklist,
   deleteChecklistItem,
   updateChecklistItem,
@@ -140,10 +139,6 @@ function ChecklistDetailPage() {
     window.location.reload();
   }
 
-  async function handleToggle(itemId: string, isCompleted: boolean) {
-    await toggleChecklistItem({ data: { itemId, isCompleted } });
-    window.location.reload();
-  }
 
   async function handleDelete() {
     if (!checklist || !confirm("Delete this checklist and all its items?")) return;
@@ -310,7 +305,6 @@ function ChecklistDetailPage() {
     window.location.reload();
   }
 
-  const completedCount = items.filter((i) => i.isCompleted).length;
   const editingItemData = editingItem ? items.find(i => i.id === editingItem) : null;
 
   return (
@@ -324,9 +318,10 @@ function ChecklistDetailPage() {
                 <h3 className="text-lg font-medium text-stone-900">Create Inspection</h3>
                 <button
                   onClick={() => setShowInspectionForm(false)}
-                  className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 hover:bg-stone-200 hover:text-stone-900 transition-colors"
+                  className="w-8 h-8 rounded-full bg-stone-50 hover:bg-red-50 flex items-center justify-center transition-colors border border-stone-200 hover:border-red-200 text-red-500 hover:text-red-600 text-xl font-bold"
+                  aria-label="Close"
                 >
-                  <iconify-icon icon="solar:close-linear" class="text-lg" />
+                  ×
                 </button>
               </div>
               <p className="text-sm text-stone-500">
@@ -396,7 +391,7 @@ function ChecklistDetailPage() {
                 {checklist.title}
               </h1>
               <p className="text-stone-500 text-lg">
-                {checklist.type} &middot; {completedCount}/{items.length} completed
+                {checklist.type} &middot; {items.length} items
               </p>
             </div>
             <div className="flex gap-2 shrink-0">
@@ -424,9 +419,10 @@ function ChecklistDetailPage() {
                 <h3 className="text-lg font-medium text-stone-900">Add New Task</h3>
                 <button
                   onClick={() => { setShowAddForm(false); setNewItem(""); setNewRoom(""); setNewDescription(""); }}
-                  className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 hover:bg-stone-200 hover:text-stone-900 transition-colors"
+                  className="w-8 h-8 rounded-full bg-stone-50 hover:bg-red-50 flex items-center justify-center transition-colors border border-stone-200 hover:border-red-200 text-red-500 hover:text-red-600 text-xl font-bold"
+                  aria-label="Close"
                 >
-                  <iconify-icon icon="solar:close-linear" class="text-lg" />
+                  ×
                 </button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -551,29 +547,11 @@ function ChecklistDetailPage() {
                       <iconify-icon icon="solar:menu-dots-bold" class="text-xl" />
                     </button>
 
-                    {/* Checkbox */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleToggle(item.id, !item.isCompleted);
-                      }}
-                      className={`w-5 h-5 shrink-0 rounded-[0.35rem] border-[1.5px] flex items-center justify-center mt-0.5 transition-colors ${
-                        item.isCompleted
-                          ? "bg-emerald-500 border-emerald-500 text-white"
-                          : "border-stone-300 hover:border-stone-400"
-                      }`}
-                    >
-                      {item.isCompleted && (
-                        <iconify-icon icon="solar:check-read-linear" class="text-xs" />
-                      )}
-                    </button>
 
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start gap-4">
                         <div>
-                          <h3 className={`font-medium text-base mb-1 ${
-                            item.isCompleted ? "text-stone-400 line-through" : "text-stone-900"
-                          }`}>
+                          <h3 className="font-medium text-base mb-1 text-stone-900">
                             {item.title}
                           </h3>
                           {item.description && (
@@ -696,9 +674,10 @@ function ChecklistDetailPage() {
                 <h4 className="text-xl font-medium tracking-tight text-stone-900">Edit Task</h4>
                 <button
                   onClick={cancelEditing}
-                  className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 hover:bg-stone-200 hover:text-stone-900 transition-colors"
+                  className="w-8 h-8 rounded-full bg-stone-50 hover:bg-red-50 flex items-center justify-center transition-colors border border-stone-200 hover:border-red-200 text-red-500 hover:text-red-600 text-xl font-bold"
+                  aria-label="Close"
                 >
-                  <iconify-icon icon="solar:close-linear" class="text-lg" />
+                  ×
                 </button>
               </div>
 
@@ -877,22 +856,7 @@ function ChecklistDetailPage() {
                   <span className="text-stone-500">Rooms</span>
                   <span className="font-medium text-stone-900">{rooms.size}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-stone-500">Progress</span>
-                  <span className="font-medium text-stone-900">{completedCount}/{items.length}</span>
-                </div>
               </div>
-              {/* Progress bar */}
-              {items.length > 0 && (
-                <div className="mt-4">
-                  <div className="w-full bg-stone-100 rounded-full h-2 overflow-hidden">
-                    <div
-                      className="bg-emerald-500 h-2 rounded-full transition-all"
-                      style={{ width: `${(completedCount / items.length) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              )}
               <div className="border-t border-stone-200 mt-6 pt-4">
                 <button
                   onClick={handleDelete}

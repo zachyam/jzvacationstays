@@ -54,7 +54,12 @@
       "Bash(npm install @aws-sdk/client-s3 @aws-sdk/s3-request-presigner)",
       "Bash(npx pnpm install)",
       "Bash(export PNPM_HOME=\"/Users/zachyam/Library/pnpm\")",
-      "Bash(export PATH=\"$PNPM_HOME:$PATH\")"
+      "Bash(export PATH=\"$PNPM_HOME:$PATH\")",
+      "Bash(curl -s http://localhost:3000/admin/checklists/test)",
+      "Bash(curl -s http://localhost:3000/admin/checklists/123)",
+      "Bash(curl -s http://localhost:3002/admin/checklists/123)",
+      "Bash(curl -sI http://localhost:3002/admin/checklists/123)",
+      "Bash(curl -s --compressed http://localhost:3000/)"
     ]
   }
 }

@@ -116,27 +116,6 @@ export const addChecklistItem = createServerFn({ method: "POST" })
     return { success: true, item };
   });
 
-export const toggleChecklistItem = createServerFn({ method: "POST" })
-  .inputValidator(
-    (data: { itemId: string; isCompleted: boolean }) => {
-      if (!data.itemId) throw new Error("Item ID is required");
-      return data;
-    },
-  )
-  .handler(async ({ data }) => {
-    const admin = await requireAdmin();
-
-    await db
-      .update(checklistItems)
-      .set({
-        isCompleted: data.isCompleted,
-        completedAt: data.isCompleted ? new Date() : null,
-        completedBy: data.isCompleted ? admin.id : null,
-      })
-      .where(eq(checklistItems.id, data.itemId));
-
-    return { success: true };
-  });
 
 export const deleteChecklist = createServerFn({ method: "POST" })
   .inputValidator((data: { checklistId: string }) => {
