@@ -59,7 +59,15 @@
       "Bash(curl -s http://localhost:3000/admin/checklists/123)",
       "Bash(curl -s http://localhost:3002/admin/checklists/123)",
       "Bash(curl -sI http://localhost:3002/admin/checklists/123)",
-      "Bash(curl -s --compressed http://localhost:3000/)"
+      "Bash(curl -s --compressed http://localhost:3000/)",
+      "Bash(curl -s http://localhost:3001/)",
+      "Bash(psql $DATABASE_URL -c \"SELECT id, title, type, property_id FROM checklists;\")",
+      "Bash(curl -s http://localhost:3001/admin/checklists)",
+      "Bash(npx tsx test-checklists.ts)",
+      "Bash(source .env)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:yBoLdrVPjNroFsgbyKrfNQwPoSUfBbTm@turntable.proxy.rlwy.net:57268/railway\" npx tsx test-checklists.ts)",
+      "Bash(pnpm db:generate)",
+      "Bash(pnpm db:migrate)"
     ]
   }
 }

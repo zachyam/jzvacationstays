@@ -75,7 +75,7 @@ function HomePage() {
               <>
                 {user.role === "admin" && (
                   <Link
-                    to="/admin"
+                    to="/admin/dashboard"
                     className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors hidden md:block"
                   >
                     Admin
