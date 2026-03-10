@@ -6,6 +6,7 @@ import {
   startInspection,
   updateInspectionItem,
   addInspectionMedia,
+  deleteInspectionMedia,
   completeInspection,
 } from "../../server/functions/inspections";
 import { getUploadUrl } from "../../server/functions/uploads";
@@ -205,10 +206,28 @@ function InspectionPage() {
     }
   }
 
+  async function handleDeleteMedia(mediaId: string, itemId: string) {
+    if (!confirm("Delete this file? This action cannot be undone.")) return;
+
+    try {
+      await deleteInspectionMedia({
+        data: { token, mediaId },
+      });
+
+      // Update local state to remove the deleted media
+      setMedia((prev: MediaMap) => ({
+        ...prev,
+        [itemId]: (prev[itemId] || []).filter(m => m.id !== mediaId),
+      }));
+    } catch {
+      alert("Failed to delete file. Please try again.");
+    }
+  }
+
   async function handleComplete() {
     await completeInspection({ data: { token, notes: completionNotes } });
-    setStatus("completed");
-    setShowCompleteForm(false);
+    // Redirect to summary page
+    window.location.href = `/inspect/complete/${token}`;
   }
 
   return (
@@ -287,6 +306,7 @@ function InspectionPage() {
                   onStatus={handleStatus}
                   onComment={handleComment}
                   onUpload={handleFileUpload}
+                  onDeleteMedia={handleDeleteMedia}
                 />
               ))}
             </div>
@@ -345,6 +365,7 @@ function InspectionItemRow({
   onStatus,
   onComment,
   onUpload,
+  onDeleteMedia,
 }: {
   item: {
     id: string;
@@ -361,6 +382,7 @@ function InspectionItemRow({
   onStatus: (id: string, status: string) => void;
   onComment: (id: string, comment: string) => void;
   onUpload: (id: string, files: FileList) => void;
+  onDeleteMedia: (mediaId: string, itemId: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [comment, setComment] = useState(item.comment || "");
@@ -488,37 +510,50 @@ function InspectionItemRow({
           {/* Media thumbnails */}
           {media.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {media.map((m) =>
-                m.fileType === "image" ? (
-                  <a
-                    key={m.id}
-                    href={m.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <img
-                      src={m.url}
-                      alt={m.fileName || "Photo"}
-                      className="w-16 h-16 rounded-lg object-cover border border-stone-200"
-                    />
-                  </a>
-                ) : (
-                  <a
-                    key={m.id}
-                    href={m.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-16 h-16 rounded-lg bg-stone-100 border border-stone-200 flex items-center justify-center"
-                  >
-                    <iconify-icon
-                      icon="solar:videocamera-record-linear"
-                      width="20"
-                      height="20"
-                      class="text-stone-400"
-                    />
-                  </a>
-                ),
-              )}
+              {media.map((m) => (
+                <div key={m.id} className="relative group">
+                  {m.fileType === "image" ? (
+                    <a
+                      href={m.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        src={m.url}
+                        alt={m.fileName || "Photo"}
+                        className="w-16 h-16 rounded-lg object-cover border border-stone-200"
+                      />
+                    </a>
+                  ) : (
+                    <a
+                      href={m.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-16 h-16 rounded-lg bg-stone-100 border border-stone-200 flex items-center justify-center"
+                    >
+                      <iconify-icon
+                        icon="solar:videocamera-record-linear"
+                        width="20"
+                        height="20"
+                        class="text-stone-400"
+                      />
+                    </a>
+                  )}
+                  {/* Delete button - only show when not disabled */}
+                  {!disabled && (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onDeleteMedia(m.id, item.id);
+                      }}
+                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                      title="Delete file"
+                    >
+                      <iconify-icon icon="solar:close-circle-bold" width="12" height="12" />
+                    </button>
+                  )}
+                </div>
+              ))}
             </div>
           )}
 

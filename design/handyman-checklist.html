@@ -1,0 +1,301 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Checklist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <style>
+      body {
+        font-family: 'Outfit', sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      iconify-icon {
+        stroke-width: 1.5;
+      }
+      /* Hide scrollbar for clean editor areas if needed */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+  </head>
+  <body class="bg-stone-50 text-stone-900 min-h-screen">
+    
+    <!-- Navbar -->
+    <header class="bg-white border-b border-stone-200 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+      <div class="flex items-center gap-2 text-stone-900">
+        <div class="w-8 h-8 bg-sky-500 rounded-lg flex items-center justify-center text-white">
+          <iconify-icon icon="solar:home-smile-linear" class="text-xl"></iconify-icon>
+        </div>
+        <span class="text-xl font-medium tracking-tight">StayScapes Admin</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <button class="text-sm font-medium text-stone-500 hover:text-stone-900 transition-colors">Dashboard</button>
+        <button class="text-sm font-medium text-stone-900 transition-colors">Checklists</button>
+        <div class="w-px h-4 bg-stone-200 mx-2"></div>
+        <div class="w-8 h-8 rounded-full bg-stone-200 border border-stone-300 overflow-hidden">
+          <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&amp;auto=format&amp;fit=facearea&amp;facepad=2&amp;w=256&amp;h=256&amp;q=80" alt="Admin" class="w-full h-full object-cover">
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto w-full p-6 sm:p-12 lg:p-16 flex flex-col lg:flex-row gap-10 lg:gap-16 items-start">
+      
+      <!-- Left Column: Checklist Builder -->
+      <div class="flex-1 w-full space-y-10">
+        
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+          <div>
+            <h1 class="text-4xl font-medium tracking-tight text-stone-900 mb-2">Handyman Checklist</h1>
+            <p class="text-stone-500 text-lg">Manage inspection tasks and media instructions for properties.</p>
+          </div>
+          <button class="flex items-center justify-center gap-2 bg-white border border-stone-200 text-stone-900 font-medium px-5 py-2.5 rounded-xl hover:bg-stone-50 hover:border-stone-300 transition-all shadow-sm shrink-0">
+            <iconify-icon icon="solar:add-circle-linear" class="text-lg text-stone-400"></iconify-icon>
+            Add Room
+          </button>
+        </div>
+
+        <!-- Room Section: Kitchen -->
+        <section class="space-y-4">
+          <div class="flex items-center justify-between px-2">
+            <h2 class="text-2xl font-medium tracking-tight text-stone-900 flex items-center gap-3">
+              Kitchen
+              <span class="text-xs font-medium bg-stone-200 text-stone-600 px-2.5 py-1 rounded-full">3 Tasks</span>
+            </h2>
+            <div class="flex gap-2">
+              <button class="w-8 h-8 rounded-lg flex items-center justify-center text-stone-400 hover:text-stone-900 hover:bg-stone-200/50 transition-colors"><iconify-icon icon="solar:pen-linear"></iconify-icon></button>
+              <button class="w-8 h-8 rounded-lg flex items-center justify-center text-stone-400 hover:text-red-500 hover:bg-red-50 transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear"></iconify-icon></button>
+            </div>
+          </div>
+          
+          <div class="bg-white border border-stone-200 rounded-[1.5rem] shadow-sm overflow-hidden flex flex-col">
+            
+            <!-- Task Item 1 (Active/Editing State) -->
+            <div class="group flex items-start gap-4 p-5 border-b border-stone-100 bg-sky-50/30 relative">
+              <div class="absolute left-0 top-0 bottom-0 w-1 bg-sky-500 rounded-r-full"></div>
+              <button class="mt-1 text-stone-300 cursor-grab active:cursor-grabbing hover:text-stone-500 transition-colors">
+                <iconify-icon icon="solar:menu-dots-bold" class="text-xl"></iconify-icon>
+              </button>
+              
+              <!-- Custom Checkbox (Visual only for Admin) -->
+              <div class="w-5 h-5 shrink-0 rounded-[0.35rem] border-[1.5px] border-stone-300 flex items-center justify-center mt-0.5"></div>
+              
+              <div class="flex-1 min-w-0">
+                <div class="flex justify-between items-start gap-4">
+                  <div>
+                    <h3 class="font-medium text-stone-900 text-base mb-1">Inspect sink plumbing</h3>
+                    <p class="text-sm text-stone-500 leading-relaxed">Check for any leaks under the sink and ensure the garbage disposal is functioning.</p>
+                  </div>
+                </div>
+                <!-- Media Indicators -->
+                <div class="flex flex-wrap items-center gap-2 mt-3">
+                  <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-stone-100 border border-stone-200 text-xs font-medium text-stone-600">
+                    <iconify-icon icon="solar:camera-linear" class="text-sm"></iconify-icon>
+                    Photo required
+                  </div>
+                  <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-stone-100 border border-stone-200 text-xs font-medium text-stone-600">
+                    <iconify-icon icon="solar:document-text-linear" class="text-sm"></iconify-icon>
+                    Notes required
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Task Item 2 -->
+            <div class="group flex items-start gap-4 p-5 border-b border-stone-100 hover:bg-stone-50 transition-colors">
+              <button class="mt-1 text-stone-300 cursor-grab active:cursor-grabbing hover:text-stone-500 transition-colors">
+                <iconify-icon icon="solar:menu-dots-bold" class="text-xl"></iconify-icon>
+              </button>
+              <div class="w-5 h-5 shrink-0 rounded-[0.35rem] border-[1.5px] border-stone-300 flex items-center justify-center mt-0.5"></div>
+              
+              <div class="flex-1 min-w-0">
+                <div class="flex justify-between items-start gap-4">
+                  <div>
+                    <h3 class="font-medium text-stone-900 text-base mb-1">Check refrigerator filter</h3>
+                    <p class="text-sm text-stone-500 leading-relaxed">Replace if the indicator is red. Extra filters are in the top right pantry cabinet.</p>
+                  </div>
+                </div>
+                <!-- Attached Media Preview -->
+                <div class="flex gap-2 mt-3">
+                  <div class="relative w-14 h-14 rounded-lg border border-stone-200 overflow-hidden group/img cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=150&amp;q=80" alt="Filter location" class="w-full h-full object-cover transition-transform group-hover/img:scale-110">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Add Task Row -->
+            <button class="w-full flex items-center gap-3 p-5 text-stone-500 hover:text-stone-900 hover:bg-stone-50 transition-colors text-left group">
+              <div class="w-5 h-5 flex items-center justify-center ml-8 text-stone-400 group-hover:text-stone-900 transition-colors">
+                <iconify-icon icon="solar:add-circle-linear" class="text-xl"></iconify-icon>
+              </div>
+              <span class="font-medium text-base">Add new task</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Room Section: Master Bathroom -->
+        <section class="space-y-4">
+          <div class="flex items-center justify-between px-2">
+            <h2 class="text-2xl font-medium tracking-tight text-stone-900 flex items-center gap-3">
+              Master Bathroom
+              <span class="text-xs font-medium bg-stone-200 text-stone-600 px-2.5 py-1 rounded-full">1 Task</span>
+            </h2>
+            <div class="flex gap-2">
+              <button class="w-8 h-8 rounded-lg flex items-center justify-center text-stone-400 hover:text-stone-900 hover:bg-stone-200/50 transition-colors"><iconify-icon icon="solar:pen-linear"></iconify-icon></button>
+              <button class="w-8 h-8 rounded-lg flex items-center justify-center text-stone-400 hover:text-red-500 hover:bg-red-50 transition-colors"><iconify-icon icon="solar:trash-bin-trash-linear"></iconify-icon></button>
+            </div>
+          </div>
+          
+          <div class="bg-white border border-stone-200 rounded-[1.5rem] shadow-sm overflow-hidden flex flex-col">
+            <!-- Task Item 1 -->
+            <div class="group flex items-start gap-4 p-5 border-b border-stone-100 hover:bg-stone-50 transition-colors">
+              <button class="mt-1 text-stone-300 cursor-grab active:cursor-grabbing hover:text-stone-500 transition-colors">
+                <iconify-icon icon="solar:menu-dots-bold" class="text-xl"></iconify-icon>
+              </button>
+              <div class="w-5 h-5 shrink-0 rounded-[0.35rem] border-[1.5px] border-stone-300 flex items-center justify-center mt-0.5"></div>
+              
+              <div class="flex-1 min-w-0">
+                <div class="flex justify-between items-start gap-4">
+                  <div>
+                    <h3 class="font-medium text-stone-900 text-base mb-1">Check shower grout</h3>
+                    <p class="text-sm text-stone-500 leading-relaxed">Look for any discoloration or mold buildup in the corners of the walk-in shower.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Add Task Row -->
+            <button class="w-full flex items-center gap-3 p-5 text-stone-500 hover:text-stone-900 hover:bg-stone-50 transition-colors text-left group">
+              <div class="w-5 h-5 flex items-center justify-center ml-8 text-stone-400 group-hover:text-stone-900 transition-colors">
+                <iconify-icon icon="solar:add-circle-linear" class="text-xl"></iconify-icon>
+              </div>
+              <span class="font-medium text-base">Add new task</span>
+            </button>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Right Column: Task Editor Card -->
+      <div class="w-full lg:w-[26rem] shrink-0 sticky top-24 z-10">
+        <div class="bg-white border border-stone-200 rounded-[1.5rem] p-7 shadow-xl shadow-stone-200/50 flex flex-col h-auto max-h-[calc(100vh-8rem)] overflow-y-auto no-scrollbar">
+          
+          <div class="flex items-center justify-between mb-6">
+            <h4 class="text-xl font-medium tracking-tight text-stone-900">Edit Task</h4>
+            <button class="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 hover:bg-stone-200 hover:text-stone-900 transition-colors">
+              <iconify-icon icon="solar:close-linear" class="text-lg"></iconify-icon>
+            </button>
+          </div>
+
+          <form class="space-y-6 flex-1">
+            
+            <!-- Room Selection (Custom Dropdown) -->
+            <div>
+              <label class="block text-xs font-medium text-stone-500 uppercase tracking-wider mb-2">Room / Section</label>
+              <div class="relative group">
+                <button type="button" class="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 focus-within:ring-2 focus-within:ring-sky-500/20 focus-within:border-sky-500 outline-none transition-all text-sm text-stone-900 font-medium">
+                  <div class="flex items-center gap-2">
+                    <iconify-icon icon="solar:map-point-linear" class="text-stone-400 text-lg"></iconify-icon>
+                    <span>Kitchen</span>
+                  </div>
+                  <iconify-icon icon="solar:alt-arrow-down-linear" class="text-stone-400 text-lg"></iconify-icon>
+                </button>
+                <!-- Dropdown Menu -->
+                <div class="absolute top-full left-0 w-full mt-2 bg-white border border-stone-200 rounded-xl py-2 shadow-xl shadow-stone-200/50 opacity-0 invisible group-hover:opacity-100 group-hover:visible focus-within:opacity-100 focus-within:visible transition-all duration-200 z-50">
+                   <button type="button" class="w-full text-left px-4 py-2.5 text-sm text-stone-900 font-medium bg-stone-50 flex items-center gap-2">
+                     <iconify-icon icon="solar:check-read-linear" class="text-sky-500 text-lg"></iconify-icon>
+                     Kitchen
+                   </button>
+                   <button type="button" class="w-full text-left px-4 py-2.5 text-sm text-stone-600 hover:bg-stone-50 font-medium transition-colors flex items-center gap-2">
+                     <div class="w-[18px]"></div>
+                     Master Bathroom
+                   </button>
+                   <button type="button" class="w-full text-left px-4 py-2.5 text-sm text-stone-600 hover:bg-stone-50 font-medium transition-colors flex items-center gap-2">
+                     <div class="w-[18px]"></div>
+                     Exterior
+                   </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Task Name -->
+            <div>
+              <label class="block text-xs font-medium text-stone-500 uppercase tracking-wider mb-2">Task Name</label>
+              <input type="text" value="Inspect sink plumbing" class="w-full px-4 py-3 rounded-xl border border-stone-200 bg-white focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all text-sm text-stone-900 font-medium placeholder-stone-400" placeholder="e.g. Check air filters">
+            </div>
+
+            <!-- Instructions -->
+            <div>
+              <label class="block text-xs font-medium text-stone-500 uppercase tracking-wider mb-2">Instructions</label>
+              <textarea rows="4" class="w-full px-4 py-3 rounded-xl border border-stone-200 bg-white focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all text-sm text-stone-900 font-medium placeholder-stone-400 resize-none" placeholder="Provide detailed steps for the handyman...">Check for any leaks under the sink and ensure the garbage disposal is functioning.</textarea>
+            </div>
+
+            <!-- Reference Media -->
+            <div>
+              <label class="block text-xs font-medium text-stone-500 uppercase tracking-wider mb-2 flex justify-between items-center">
+                <span>Reference Media</span>
+                <span class="text-stone-400 normal-case tracking-normal">Optional</span>
+              </label>
+              <div class="border-2 border-dashed border-stone-200 rounded-[1rem] p-6 flex flex-col items-center justify-center text-center hover:bg-stone-50 hover:border-stone-300 transition-colors cursor-pointer group">
+                <div class="w-10 h-10 bg-white border border-stone-200 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 group-hover:shadow-sm transition-all">
+                  <iconify-icon icon="solar:gallery-add-linear" class="text-stone-500 text-xl"></iconify-icon>
+                </div>
+                <span class="text-sm font-medium text-stone-900 block mb-1">Click to upload media</span>
+                <span class="text-xs text-stone-500">Add photos to help locate items</span>
+              </div>
+            </div>
+
+            <div class="h-px w-full bg-stone-200 my-6"></div>
+
+            <!-- Requirements / Toggles -->
+            <div class="space-y-5">
+              <label class="block text-xs font-medium text-stone-500 uppercase tracking-wider mb-1">Handyman Requirements</label>
+              
+              <!-- Custom Toggle 1 -->
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="block font-medium text-stone-900 text-sm">Require photo proof</span>
+                  <span class="text-xs text-stone-500">Handyman must upload a photo</span>
+                </div>
+                <button type="button" class="w-11 h-6 bg-sky-500 rounded-full relative transition-colors focus:outline-none focus:ring-4 focus:ring-sky-500/20 shrink-0">
+                  <span class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform translate-x-5 shadow-sm"></span>
+                </button>
+              </div>
+
+              <!-- Custom Toggle 2 -->
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="block font-medium text-stone-900 text-sm">Require notes</span>
+                  <span class="text-xs text-stone-500">Handyman must write a comment</span>
+                </div>
+                <button type="button" class="w-11 h-6 bg-sky-500 rounded-full relative transition-colors focus:outline-none focus:ring-4 focus:ring-sky-500/20 shrink-0">
+                  <span class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform translate-x-5 shadow-sm"></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="pt-6 mt-6 border-t border-stone-200 flex items-center justify-between gap-4">
+              <button type="button" class="text-sm font-medium text-red-500 hover:text-red-600 transition-colors px-2">
+                Delete Task
+              </button>
+              <button type="button" class="bg-sky-500 text-white font-medium px-6 py-3 rounded-xl shadow-md shadow-sky-500/20 hover:bg-sky-400 hover:shadow-lg hover:-translate-y-0.5 transition-all focus:ring-4 focus:ring-sky-500/20 focus:outline-none text-sm">
+                Save Changes
+              </button>
+            </div>
+
+          </form>
+          
+        </div>
+      </div>
+
+    </main>
+
+  
+</body></html>

@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { eq, asc, desc } from "drizzle-orm";
+import { eq, asc, desc, sql } from "drizzle-orm";
 import { randomBytes } from "crypto";
 
 import { db } from "../../db";
@@ -10,10 +10,123 @@ import {
   checklists,
   checklistItems,
   properties,
+  checklistItemMedia,
 } from "../../db/schema";
 import { requireAdmin } from "../middleware/admin";
+import { deleteObject } from "../../lib/s3";
 
 // --- Admin functions ---
+
+export const getInspectionDetails = createServerFn({ method: "GET" })
+  .inputValidator((data: { inspectionId: string }) => {
+    if (!data.inspectionId) throw new Error("Inspection ID is required");
+    return data;
+  })
+  .handler(async ({ data }) => {
+    await requireAdmin();
+
+    // Get inspection details
+    const [inspection] = await db
+      .select({
+        id: inspections.id,
+        token: inspections.token,
+        status: inspections.status,
+        notes: inspections.notes,
+        startedAt: inspections.startedAt,
+        completedAt: inspections.completedAt,
+        createdAt: inspections.createdAt,
+        checklistId: inspections.checklistId,
+        checklistTitle: checklists.title,
+        checklistType: checklists.type,
+        propertyName: properties.name,
+      })
+      .from(inspections)
+      .leftJoin(checklists, eq(inspections.checklistId, checklists.id))
+      .leftJoin(properties, eq(inspections.propertyId, properties.id))
+      .where(eq(inspections.id, data.inspectionId))
+      .limit(1);
+
+    if (!inspection) throw new Error("Inspection not found");
+
+    // Get checklist items
+    const items = await db
+      .select()
+      .from(checklistItems)
+      .where(eq(checklistItems.checklistId, inspection.checklistId))
+      .orderBy(asc(checklistItems.sortOrder));
+
+    // Get media for all items
+    const mediaByItem: Record<string, any[]> = {};
+    for (const item of items) {
+      const media = await db
+        .select()
+        .from(checklistItemMedia)
+        .where(eq(checklistItemMedia.checklistItemId, item.id))
+        .orderBy(asc(checklistItemMedia.createdAt));
+
+      mediaByItem[item.id] = media;
+    }
+
+    return { inspection, items, mediaByItem };
+  });
+
+export const getAllInspections = createServerFn({ method: "GET" }).handler(
+  async () => {
+    await requireAdmin();
+
+    const result = await db
+      .select({
+        id: inspections.id,
+        token: inspections.token,
+        status: inspections.status,
+        notes: inspections.notes,
+        startedAt: inspections.startedAt,
+        completedAt: inspections.completedAt,
+        createdAt: inspections.createdAt,
+        checklistTitle: checklists.title,
+        checklistType: checklists.type,
+        propertyName: properties.name,
+      })
+      .from(inspections)
+      .leftJoin(checklists, eq(inspections.checklistId, checklists.id))
+      .leftJoin(properties, eq(inspections.propertyId, properties.id))
+      .orderBy(desc(inspections.createdAt));
+
+    // Get item counts and media counts for each inspection
+    const inspectionsWithCounts = await Promise.all(
+      result.map(async (inspection) => {
+        // Get checklist items count
+        const items = await db
+          .select({
+            total: sql<number>`count(*)`,
+            completed: sql<number>`count(case when ${checklistItems.isCompleted} then 1 end)`,
+          })
+          .from(checklistItems)
+          .leftJoin(checklists, eq(checklistItems.checklistId, checklists.id))
+          .leftJoin(inspections, eq(inspections.checklistId, checklists.id))
+          .where(eq(inspections.id, inspection.id));
+
+        // Get media count
+        const mediaCount = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(checklistItemMedia)
+          .innerJoin(checklistItems, eq(checklistItemMedia.checklistItemId, checklistItems.id))
+          .innerJoin(checklists, eq(checklistItems.checklistId, checklists.id))
+          .innerJoin(inspections, eq(inspections.checklistId, checklists.id))
+          .where(eq(inspections.id, inspection.id));
+
+        return {
+          ...inspection,
+          totalItems: Number(items[0]?.total || 0),
+          completedItems: Number(items[0]?.completed || 0),
+          mediaCount: Number(mediaCount[0]?.count || 0),
+        };
+      })
+    );
+
+    return inspectionsWithCounts;
+  },
+);
 
 export const createInspection = createServerFn({ method: "POST" })
   .inputValidator(
@@ -339,6 +452,57 @@ export const addInspectionMedia = createServerFn({ method: "POST" })
     return { success: true, media };
   });
 
+export const deleteInspectionMedia = createServerFn({ method: "POST" })
+  .inputValidator(
+    (data: {
+      token: string;
+      mediaId: string;
+    }) => {
+      if (!data.token || !data.mediaId) {
+        throw new Error("Token and media ID are required");
+      }
+      return data;
+    },
+  )
+  .handler(async ({ data }) => {
+    // Verify token
+    const [inspection] = await db
+      .select()
+      .from(inspections)
+      .where(eq(inspections.token, data.token))
+      .limit(1);
+
+    if (!inspection) throw new Error("Inspection not found");
+
+    // Get media info and verify it belongs to this inspection
+    const [media] = await db
+      .select({
+        media: inspectionMedia,
+        item: inspectionItems,
+      })
+      .from(inspectionMedia)
+      .leftJoin(inspectionItems, eq(inspectionMedia.inspectionItemId, inspectionItems.id))
+      .where(eq(inspectionMedia.id, data.mediaId))
+      .limit(1);
+
+    if (!media || media.item?.inspectionId !== inspection.id) {
+      throw new Error("Media not found or access denied");
+    }
+
+    // Delete from R2
+    try {
+      await deleteObject(media.media.url);
+    } catch (error) {
+      console.error("Failed to delete file from R2:", error);
+      // Continue with database deletion even if R2 fails
+    }
+
+    // Delete from database
+    await db.delete(inspectionMedia).where(eq(inspectionMedia.id, data.mediaId));
+
+    return { success: true };
+  });
+
 export const completeInspection = createServerFn({ method: "POST" })
   .inputValidator((data: { token: string; notes?: string }) => {
     if (!data.token) throw new Error("Token is required");
@@ -365,4 +529,66 @@ export const completeInspection = createServerFn({ method: "POST" })
       .where(eq(inspections.id, inspection.id));
 
     return { success: true };
+  });
+
+export const getInspectionSummary = createServerFn({ method: "GET" })
+  .inputValidator((data: { token: string }) => {
+    if (!data.token) throw new Error("Token is required");
+    return data;
+  })
+  .handler(async ({ data }) => {
+    // Get inspection with checklist and property info
+    const [inspection] = await db
+      .select({
+        id: inspections.id,
+        status: inspections.status,
+        notes: inspections.notes,
+        completedAt: inspections.completedAt,
+        checklistTitle: checklists.title,
+        propertyName: properties.name,
+      })
+      .from(inspections)
+      .leftJoin(checklists, eq(inspections.checklistId, checklists.id))
+      .leftJoin(properties, eq(inspections.propertyId, properties.id))
+      .where(eq(inspections.token, data.token))
+      .limit(1);
+
+    if (!inspection) throw new Error("Inspection not found");
+
+    // Get all items with media count
+    const items = await db
+      .select({
+        id: checklistItems.id,
+        title: checklistItems.title,
+        room: checklistItems.room,
+        isCompleted: checklistItems.isCompleted,
+      })
+      .from(checklistItems)
+      .leftJoin(inspections, eq(inspections.token, data.token))
+      .where(eq(checklistItems.checklistId, inspections.checklistId))
+      .orderBy(asc(checklistItems.sortOrder));
+
+    // Get media count for each item
+    const itemsWithMedia = await Promise.all(
+      items.map(async (item) => {
+        const mediaCount = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(checklistItemMedia)
+          .where(eq(checklistItemMedia.checklistItemId, item.id));
+
+        return {
+          ...item,
+          mediaCount: Number(mediaCount[0]?.count || 0),
+        };
+      })
+    );
+
+    // Calculate total media
+    const totalMedia = itemsWithMedia.reduce((sum, item) => sum + item.mediaCount, 0);
+
+    return {
+      ...inspection,
+      items: itemsWithMedia,
+      totalMedia,
+    };
   });

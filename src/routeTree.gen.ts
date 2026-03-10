@@ -20,16 +20,18 @@ import { Route as BookingPropertyIdRouteImport } from './routes/booking/$propert
 import { Route as AuthVerifyRouteImport } from './routes/auth/verify'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AdminThermostatRouteImport } from './routes/admin/thermostat'
+import { Route as AdminTestUploadRouteImport } from './routes/admin/test-upload'
 import { Route as AdminReviewsRouteImport } from './routes/admin/reviews'
+import { Route as AdminInspectionsRouteImport } from './routes/admin/inspections'
 import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
 import { Route as AdminCalendarSyncRouteImport } from './routes/admin/calendar-sync'
 import { Route as AdminCalendarRouteImport } from './routes/admin/calendar'
 import { Route as AdminBookingsRouteImport } from './routes/admin/bookings'
 import { Route as AdminChecklistsIndexRouteImport } from './routes/admin/checklists/index'
-import { Route as AdminInspectionsIndexRouteImport } from './routes/_admin/inspections/index'
+import { Route as InspectCompleteTokenRouteImport } from './routes/inspect/complete.$token'
 import { Route as BookingConfirmationBookingIdRouteImport } from './routes/booking/confirmation.$bookingId'
+import { Route as AdminInspectionsInspectionIdRouteImport } from './routes/admin/inspections/$inspectionId'
 import { Route as AdminChecklistsChecklistIdRouteImport } from './routes/admin/checklists/$checklistId'
-import { Route as AdminInspectionsInspectionIdRouteImport } from './routes/_admin/inspections/$inspectionId'
 
 const AccountRoute = AccountRouteImport.update({
   id: '/account',
@@ -86,9 +88,19 @@ const AdminThermostatRoute = AdminThermostatRouteImport.update({
   path: '/thermostat',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminTestUploadRoute = AdminTestUploadRouteImport.update({
+  id: '/test-upload',
+  path: '/test-upload',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminReviewsRoute = AdminReviewsRouteImport.update({
   id: '/reviews',
   path: '/reviews',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminInspectionsRoute = AdminInspectionsRouteImport.update({
+  id: '/inspections',
+  path: '/inspections',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
@@ -116,9 +128,9 @@ const AdminChecklistsIndexRoute = AdminChecklistsIndexRouteImport.update({
   path: '/checklists/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
-const AdminInspectionsIndexRoute = AdminInspectionsIndexRouteImport.update({
-  id: '/_admin/inspections/',
-  path: '/inspections/',
+const InspectCompleteTokenRoute = InspectCompleteTokenRouteImport.update({
+  id: '/inspect/complete/$token',
+  path: '/inspect/complete/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BookingConfirmationBookingIdRoute =
@@ -127,17 +139,17 @@ const BookingConfirmationBookingIdRoute =
     path: '/booking/confirmation/$bookingId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AdminInspectionsInspectionIdRoute =
+  AdminInspectionsInspectionIdRouteImport.update({
+    id: '/$inspectionId',
+    path: '/$inspectionId',
+    getParentRoute: () => AdminInspectionsRoute,
+  } as any)
 const AdminChecklistsChecklistIdRoute =
   AdminChecklistsChecklistIdRouteImport.update({
     id: '/checklists/$checklistId',
     path: '/checklists/$checklistId',
     getParentRoute: () => AdminRouteRoute,
-  } as any)
-const AdminInspectionsInspectionIdRoute =
-  AdminInspectionsInspectionIdRouteImport.update({
-    id: '/_admin/inspections/$inspectionId',
-    path: '/inspections/$inspectionId',
-    getParentRoute: () => rootRouteImport,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -148,7 +160,9 @@ export interface FileRoutesByFullPath {
   '/admin/calendar': typeof AdminCalendarRoute
   '/admin/calendar-sync': typeof AdminCalendarSyncRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/inspections': typeof AdminInspectionsRouteWithChildren
   '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/test-upload': typeof AdminTestUploadRoute
   '/admin/thermostat': typeof AdminThermostatRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/verify': typeof AuthVerifyRoute
@@ -157,10 +171,10 @@ export interface FileRoutesByFullPath {
   '/properties/$propertyId': typeof PropertiesPropertyIdRoute
   '/admin/': typeof AdminIndexRoute
   '/properties/': typeof PropertiesIndexRoute
-  '/inspections/$inspectionId': typeof AdminInspectionsInspectionIdRoute
   '/admin/checklists/$checklistId': typeof AdminChecklistsChecklistIdRoute
+  '/admin/inspections/$inspectionId': typeof AdminInspectionsInspectionIdRoute
   '/booking/confirmation/$bookingId': typeof BookingConfirmationBookingIdRoute
-  '/inspections/': typeof AdminInspectionsIndexRoute
+  '/inspect/complete/$token': typeof InspectCompleteTokenRoute
   '/admin/checklists/': typeof AdminChecklistsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -170,7 +184,9 @@ export interface FileRoutesByTo {
   '/admin/calendar': typeof AdminCalendarRoute
   '/admin/calendar-sync': typeof AdminCalendarSyncRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/inspections': typeof AdminInspectionsRouteWithChildren
   '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/test-upload': typeof AdminTestUploadRoute
   '/admin/thermostat': typeof AdminThermostatRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/verify': typeof AuthVerifyRoute
@@ -179,10 +195,10 @@ export interface FileRoutesByTo {
   '/properties/$propertyId': typeof PropertiesPropertyIdRoute
   '/admin': typeof AdminIndexRoute
   '/properties': typeof PropertiesIndexRoute
-  '/inspections/$inspectionId': typeof AdminInspectionsInspectionIdRoute
   '/admin/checklists/$checklistId': typeof AdminChecklistsChecklistIdRoute
+  '/admin/inspections/$inspectionId': typeof AdminInspectionsInspectionIdRoute
   '/booking/confirmation/$bookingId': typeof BookingConfirmationBookingIdRoute
-  '/inspections': typeof AdminInspectionsIndexRoute
+  '/inspect/complete/$token': typeof InspectCompleteTokenRoute
   '/admin/checklists': typeof AdminChecklistsIndexRoute
 }
 export interface FileRoutesById {
@@ -194,7 +210,9 @@ export interface FileRoutesById {
   '/admin/calendar': typeof AdminCalendarRoute
   '/admin/calendar-sync': typeof AdminCalendarSyncRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/inspections': typeof AdminInspectionsRouteWithChildren
   '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/test-upload': typeof AdminTestUploadRoute
   '/admin/thermostat': typeof AdminThermostatRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/verify': typeof AuthVerifyRoute
@@ -203,10 +221,10 @@ export interface FileRoutesById {
   '/properties/$propertyId': typeof PropertiesPropertyIdRoute
   '/admin/': typeof AdminIndexRoute
   '/properties/': typeof PropertiesIndexRoute
-  '/_admin/inspections/$inspectionId': typeof AdminInspectionsInspectionIdRoute
   '/admin/checklists/$checklistId': typeof AdminChecklistsChecklistIdRoute
+  '/admin/inspections/$inspectionId': typeof AdminInspectionsInspectionIdRoute
   '/booking/confirmation/$bookingId': typeof BookingConfirmationBookingIdRoute
-  '/_admin/inspections/': typeof AdminInspectionsIndexRoute
+  '/inspect/complete/$token': typeof InspectCompleteTokenRoute
   '/admin/checklists/': typeof AdminChecklistsIndexRoute
 }
 export interface FileRouteTypes {
@@ -219,7 +237,9 @@ export interface FileRouteTypes {
     | '/admin/calendar'
     | '/admin/calendar-sync'
     | '/admin/dashboard'
+    | '/admin/inspections'
     | '/admin/reviews'
+    | '/admin/test-upload'
     | '/admin/thermostat'
     | '/auth/login'
     | '/auth/verify'
@@ -228,10 +248,10 @@ export interface FileRouteTypes {
     | '/properties/$propertyId'
     | '/admin/'
     | '/properties/'
-    | '/inspections/$inspectionId'
     | '/admin/checklists/$checklistId'
+    | '/admin/inspections/$inspectionId'
     | '/booking/confirmation/$bookingId'
-    | '/inspections/'
+    | '/inspect/complete/$token'
     | '/admin/checklists/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -241,7 +261,9 @@ export interface FileRouteTypes {
     | '/admin/calendar'
     | '/admin/calendar-sync'
     | '/admin/dashboard'
+    | '/admin/inspections'
     | '/admin/reviews'
+    | '/admin/test-upload'
     | '/admin/thermostat'
     | '/auth/login'
     | '/auth/verify'
@@ -250,10 +272,10 @@ export interface FileRouteTypes {
     | '/properties/$propertyId'
     | '/admin'
     | '/properties'
-    | '/inspections/$inspectionId'
     | '/admin/checklists/$checklistId'
+    | '/admin/inspections/$inspectionId'
     | '/booking/confirmation/$bookingId'
-    | '/inspections'
+    | '/inspect/complete/$token'
     | '/admin/checklists'
   id:
     | '__root__'
@@ -264,7 +286,9 @@ export interface FileRouteTypes {
     | '/admin/calendar'
     | '/admin/calendar-sync'
     | '/admin/dashboard'
+    | '/admin/inspections'
     | '/admin/reviews'
+    | '/admin/test-upload'
     | '/admin/thermostat'
     | '/auth/login'
     | '/auth/verify'
@@ -273,10 +297,10 @@ export interface FileRouteTypes {
     | '/properties/$propertyId'
     | '/admin/'
     | '/properties/'
-    | '/_admin/inspections/$inspectionId'
     | '/admin/checklists/$checklistId'
+    | '/admin/inspections/$inspectionId'
     | '/booking/confirmation/$bookingId'
-    | '/_admin/inspections/'
+    | '/inspect/complete/$token'
     | '/admin/checklists/'
   fileRoutesById: FileRoutesById
 }
@@ -290,9 +314,8 @@ export interface RootRouteChildren {
   InspectTokenRoute: typeof InspectTokenRoute
   PropertiesPropertyIdRoute: typeof PropertiesPropertyIdRoute
   PropertiesIndexRoute: typeof PropertiesIndexRoute
-  AdminInspectionsInspectionIdRoute: typeof AdminInspectionsInspectionIdRoute
   BookingConfirmationBookingIdRoute: typeof BookingConfirmationBookingIdRoute
-  AdminInspectionsIndexRoute: typeof AdminInspectionsIndexRoute
+  InspectCompleteTokenRoute: typeof InspectCompleteTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -374,11 +397,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminThermostatRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/test-upload': {
+      id: '/admin/test-upload'
+      path: '/test-upload'
+      fullPath: '/admin/test-upload'
+      preLoaderRoute: typeof AdminTestUploadRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/reviews': {
       id: '/admin/reviews'
       path: '/reviews'
       fullPath: '/admin/reviews'
       preLoaderRoute: typeof AdminReviewsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/inspections': {
+      id: '/admin/inspections'
+      path: '/inspections'
+      fullPath: '/admin/inspections'
+      preLoaderRoute: typeof AdminInspectionsRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/dashboard': {
@@ -416,11 +453,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminChecklistsIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/_admin/inspections/': {
-      id: '/_admin/inspections/'
-      path: '/inspections'
-      fullPath: '/inspections/'
-      preLoaderRoute: typeof AdminInspectionsIndexRouteImport
+    '/inspect/complete/$token': {
+      id: '/inspect/complete/$token'
+      path: '/inspect/complete/$token'
+      fullPath: '/inspect/complete/$token'
+      preLoaderRoute: typeof InspectCompleteTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/booking/confirmation/$bookingId': {
@@ -430,6 +467,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BookingConfirmationBookingIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/inspections/$inspectionId': {
+      id: '/admin/inspections/$inspectionId'
+      path: '/$inspectionId'
+      fullPath: '/admin/inspections/$inspectionId'
+      preLoaderRoute: typeof AdminInspectionsInspectionIdRouteImport
+      parentRoute: typeof AdminInspectionsRoute
+    }
     '/admin/checklists/$checklistId': {
       id: '/admin/checklists/$checklistId'
       path: '/checklists/$checklistId'
@@ -437,22 +481,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminChecklistsChecklistIdRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/_admin/inspections/$inspectionId': {
-      id: '/_admin/inspections/$inspectionId'
-      path: '/inspections/$inspectionId'
-      fullPath: '/inspections/$inspectionId'
-      preLoaderRoute: typeof AdminInspectionsInspectionIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
+
+interface AdminInspectionsRouteChildren {
+  AdminInspectionsInspectionIdRoute: typeof AdminInspectionsInspectionIdRoute
+}
+
+const AdminInspectionsRouteChildren: AdminInspectionsRouteChildren = {
+  AdminInspectionsInspectionIdRoute: AdminInspectionsInspectionIdRoute,
+}
+
+const AdminInspectionsRouteWithChildren =
+  AdminInspectionsRoute._addFileChildren(AdminInspectionsRouteChildren)
 
 interface AdminRouteRouteChildren {
   AdminBookingsRoute: typeof AdminBookingsRoute
   AdminCalendarRoute: typeof AdminCalendarRoute
   AdminCalendarSyncRoute: typeof AdminCalendarSyncRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminInspectionsRoute: typeof AdminInspectionsRouteWithChildren
   AdminReviewsRoute: typeof AdminReviewsRoute
+  AdminTestUploadRoute: typeof AdminTestUploadRoute
   AdminThermostatRoute: typeof AdminThermostatRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminChecklistsChecklistIdRoute: typeof AdminChecklistsChecklistIdRoute
@@ -464,7 +514,9 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminCalendarRoute: AdminCalendarRoute,
   AdminCalendarSyncRoute: AdminCalendarSyncRoute,
   AdminDashboardRoute: AdminDashboardRoute,
+  AdminInspectionsRoute: AdminInspectionsRouteWithChildren,
   AdminReviewsRoute: AdminReviewsRoute,
+  AdminTestUploadRoute: AdminTestUploadRoute,
   AdminThermostatRoute: AdminThermostatRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminChecklistsChecklistIdRoute: AdminChecklistsChecklistIdRoute,
@@ -485,9 +537,8 @@ const rootRouteChildren: RootRouteChildren = {
   InspectTokenRoute: InspectTokenRoute,
   PropertiesPropertyIdRoute: PropertiesPropertyIdRoute,
   PropertiesIndexRoute: PropertiesIndexRoute,
-  AdminInspectionsInspectionIdRoute: AdminInspectionsInspectionIdRoute,
   BookingConfirmationBookingIdRoute: BookingConfirmationBookingIdRoute,
-  AdminInspectionsIndexRoute: AdminInspectionsIndexRoute,
+  InspectCompleteTokenRoute: InspectCompleteTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

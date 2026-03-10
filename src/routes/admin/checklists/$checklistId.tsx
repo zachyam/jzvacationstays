@@ -8,11 +8,10 @@ import {
   deleteChecklist,
   deleteChecklistItem,
   updateChecklistItem,
-  uploadChecklistItemMedia,
-  deleteChecklistItemMedia,
-  updateChecklistItemMedia,
+  saveChecklistMedia,
+  deleteChecklistMedia,
 } from "../../../server/functions/admin-checklists";
-import { uploadFileForAdmin } from "../../../server/functions/file-upload";
+import { getChecklistUploadUrl } from "../../../server/functions/uploads";
 import { createInspection } from "../../../server/functions/inspections";
 import { getProperties } from "../../../server/functions/properties";
 
@@ -51,6 +50,18 @@ function ChecklistDetailPage() {
   const [customEditRoom, setCustomEditRoom] = useState("");
   const [showCustomNewRoom, setShowCustomNewRoom] = useState(false);
   const [customNewRoom, setCustomNewRoom] = useState("");
+  const [expandedMedia, setExpandedMedia] = useState<Record<string, boolean>>({});
+
+  // State for pending media uploads (not yet saved to DB)
+  const [pendingMedia, setPendingMedia] = useState<Record<string, Array<{
+    fileName: string;
+    originalName: string;
+    mimeType: string;
+    fileSize: number;
+    filePath: string;
+    tempKey: string;
+    tempId: string;
+  }>>>({});
 
   if (!checklist) {
     return (
@@ -104,7 +115,7 @@ function ChecklistDetailPage() {
     if (!newItem || !checklist) return;
 
     // Determine the actual room value
-    let roomValue = newRoom;
+    let roomValue: string | undefined = newRoom;
     if (newRoom === "__CUSTOM__" && customNewRoom.trim()) {
       roomValue = customNewRoom.trim();
     } else if (newRoom === "__CUSTOM__" || !newRoom) {
@@ -173,6 +184,15 @@ function ChecklistDetailPage() {
   }
 
   function cancelEditing() {
+    // Clear any pending media for the item being edited
+    if (editingItem) {
+      setPendingMedia(prev => {
+        const newPending = { ...prev };
+        delete newPending[editingItem];
+        return newPending;
+      });
+    }
+
     setEditingItem(null);
     setEditTitle("");
     setEditRoom("");
@@ -185,13 +205,32 @@ function ChecklistDetailPage() {
     if (!editingItem) return;
 
     // Determine the actual room value
-    let roomValue = editRoom;
+    let roomValue: string | undefined | null = editRoom;
     if (editRoom === "__CUSTOM__" && customEditRoom.trim()) {
       roomValue = customEditRoom.trim();
     } else if (editRoom === "__CUSTOM__" || !editRoom) {
       roomValue = null;
     }
 
+    // Save any pending media for this item
+    const pending = pendingMedia[editingItem] || [];
+    if (pending.length > 0) {
+      for (const media of pending) {
+        await saveChecklistMedia({
+          data: {
+            checklistItemId: editingItem,
+            fileName: media.fileName,
+            originalName: media.originalName,
+            mimeType: media.mimeType,
+            fileSize: media.fileSize,
+            filePath: media.filePath,
+            tempKey: media.tempKey, // Pass the temp key for moving
+          },
+        });
+      }
+    }
+
+    // Update the checklist item
     await updateChecklistItem({
       data: {
         itemId: editingItem,
@@ -200,12 +239,28 @@ function ChecklistDetailPage() {
         description: editDescription || null,
       },
     });
+
+    // Clear pending media for this item
+    setPendingMedia(prev => {
+      const newPending = { ...prev };
+      delete newPending[editingItem];
+      return newPending;
+    });
+
     cancelEditing();
     window.location.reload();
   }
 
   async function handleDeleteItem(itemId: string) {
-    if (!confirm("Delete this item?")) return;
+    if (!confirm("Delete this item? All associated media will also be deleted.")) return;
+
+    // Clear any pending media for this item
+    setPendingMedia(prev => {
+      const newPending = { ...prev };
+      delete newPending[itemId];
+      return newPending;
+    });
+
     await deleteChecklistItem({ data: { itemId } });
     window.location.reload();
   }
@@ -217,32 +272,61 @@ function ChecklistDetailPage() {
     setUploadingFiles(prev => ({ ...prev, [itemId]: true }));
 
     try {
-      // First upload the file
-      const formData = new FormData();
-      formData.append("file", file);
+      // Get item details for room information
+      const item = items.find(i => i.id === itemId);
+      const property = properties.find(p => p.id === checklist?.propertyId);
 
-      const uploadResult = await fetch("/_server/uploadFileForAdmin", {
-        method: "POST",
-        body: formData,
-      }).then(res => res.json());
-
-      if (!uploadResult.success) {
-        throw new Error(uploadResult.message || "Upload failed");
-      }
-
-      // Then save to database
-      await uploadChecklistItemMedia({
+      // Step 1: Get presigned upload URL for temporary storage
+      const { uploadUrl, publicUrl, key } = await getChecklistUploadUrl({
         data: {
-          checklistItemId: itemId,
-          fileName: uploadResult.fileName,
-          originalName: uploadResult.originalName,
-          mimeType: uploadResult.mimeType,
-          fileSize: uploadResult.fileSize,
-          filePath: uploadResult.filePath,
+          checklistId: checklist?.id || '',
+          itemId,
+          contentType: file.type,
+          fileName: file.name,
+          fileSize: file.size,
+          propertyName: property?.name,
+          roomName: item?.room,
+          temporary: true, // Use temporary storage for admin uploads
         },
       });
 
-      window.location.reload();
+      // Step 2: Upload directly to R2
+      const uploadResponse = await fetch(uploadUrl, {
+        method: "PUT",
+        body: file,
+        headers: {
+          "Content-Type": file.type,
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error(`Upload failed with status ${uploadResponse.status}`);
+      }
+
+      // Step 3: Store in pending media (NOT saving to DB yet)
+      const fileName = publicUrl.split("/").pop() || file.name;
+      const newMedia = {
+        fileName,
+        originalName: file.name,
+        mimeType: file.type,
+        fileSize: file.size,
+        filePath: publicUrl,
+        tempKey: key, // Store the temporary key for moving later
+        tempId: `temp-${Date.now()}-${Math.random()}`,
+      };
+
+      console.log("Adding pending media:", { itemId, newMedia });
+
+      setPendingMedia(prev => {
+        const updated = {
+          ...prev,
+          [itemId]: [...(prev[itemId] || []), newMedia],
+        };
+        console.log("Updated pending media state:", updated);
+        return updated;
+      });
+
+      // Don't reload - just update state
     } catch (error) {
       console.error("Upload failed:", error);
       alert("Upload failed. Please try again.");
@@ -252,9 +336,68 @@ function ChecklistDetailPage() {
     }
   }
 
+  async function handleSavePendingMedia(itemId: string) {
+    const pending = pendingMedia[itemId] || [];
+    if (pending.length === 0) return;
+
+    try {
+      // Save all pending media for this item
+      for (const media of pending) {
+        await saveChecklistMedia({
+          data: {
+            checklistItemId: itemId,
+            fileName: media.fileName,
+            originalName: media.originalName,
+            mimeType: media.mimeType,
+            fileSize: media.fileSize,
+            filePath: media.filePath,
+            tempKey: media.tempKey, // Pass the temp key for moving
+          },
+        });
+      }
+
+      // Clear pending media for this item and reload
+      setPendingMedia(prev => {
+        const newPending = { ...prev };
+        delete newPending[itemId];
+        return newPending;
+      });
+
+      window.location.reload();
+    } catch (error) {
+      console.error("Failed to save media:", error);
+      alert("Failed to save media. Please try again.");
+    }
+  }
+
+  function handleCancelPendingMedia(itemId: string) {
+    // Clear pending media for this item without saving
+    setPendingMedia(prev => {
+      const newPending = { ...prev };
+      delete newPending[itemId];
+      return newPending;
+    });
+  }
+
+  function removePendingMedia(itemId: string, tempId: string) {
+    // Find the media to get its temp key for cleanup
+    const mediaToRemove = pendingMedia[itemId]?.find(m => m.tempId === tempId);
+
+    // Clean up the temporary file from R2
+    if (mediaToRemove?.tempKey) {
+      // Note: We could call a cleanup function here, but for now we'll rely on periodic cleanup
+      console.log("TODO: Clean up temporary file:", mediaToRemove.tempKey);
+    }
+
+    setPendingMedia(prev => ({
+      ...prev,
+      [itemId]: (prev[itemId] || []).filter(m => m.tempId !== tempId),
+    }));
+  }
+
   async function handleDeleteMedia(mediaId: string) {
     if (!confirm("Delete this media file?")) return;
-    await deleteChecklistItemMedia({ data: { mediaId } });
+    await deleteChecklistMedia({ data: { mediaId } });
     window.location.reload();
   }
 
@@ -434,10 +577,11 @@ function ChecklistDetailPage() {
                         <label className="block text-xs text-stone-500 mb-2">Attached Media</label>
 
                         {/* Existing Media */}
-                        {item.media?.length > 0 && (
+                        {(item.media?.length > 0 || pendingMedia[item.id]?.length > 0) && (
                           <div className="mb-3">
                             <div className="grid grid-cols-3 gap-2">
-                              {item.media.map((media: any) => (
+                              {/* Saved media */}
+                              {item.media?.map((media: any) => (
                                 <div key={media.id} className="relative group">
                                   {media.mimeType.startsWith('image/') ? (
                                     <img
@@ -468,6 +612,39 @@ function ChecklistDetailPage() {
                                   </p>
                                 </div>
                               ))}
+
+                              {/* Pending media in edit mode */}
+                              {pendingMedia[item.id]?.map((media) => (
+                                <div key={media.tempId} className="relative group">
+                                  {media.mimeType.startsWith('image/') ? (
+                                    <img
+                                      src={media.filePath}
+                                      alt={media.originalName}
+                                      className="w-full h-16 object-cover rounded border-2 border-orange-400"
+                                    />
+                                  ) : media.mimeType.startsWith('video/') ? (
+                                    <video
+                                      src={media.filePath}
+                                      className="w-full h-16 object-cover rounded border-2 border-orange-400"
+                                      preload="metadata"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-16 bg-orange-50 rounded border-2 border-orange-400 flex items-center justify-center">
+                                      <iconify-icon icon="solar:document-linear" width="20" height="20" className="text-orange-600" />
+                                    </div>
+                                  )}
+                                  <button
+                                    onClick={() => removePendingMedia(item.id, media.tempId)}
+                                    className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                                    title="Remove"
+                                  >
+                                    <iconify-icon icon="solar:close-circle-bold" width="10" height="10" />
+                                  </button>
+                                  <p className="text-xs text-orange-600 mt-1 truncate text-center font-medium" title={`${media.originalName} (unsaved)`}>
+                                    {media.originalName} (NEW)
+                                  </p>
+                                </div>
+                              ))}
                             </div>
                           </div>
                         )}
@@ -493,9 +670,15 @@ function ChecklistDetailPage() {
                       <div className="flex gap-2 pt-2">
                         <button
                           onClick={saveEdit}
-                          className="px-3 py-1.5 bg-sky-600 text-white rounded-lg text-xs font-medium hover:bg-sky-700"
+                          className="px-3 py-1.5 bg-sky-600 text-white rounded-lg text-xs font-medium hover:bg-sky-700 flex items-center gap-1"
                         >
+                          <iconify-icon icon="solar:diskette-linear" width="14" height="14" />
                           Save
+                          {pendingMedia[item.id]?.length > 0 && (
+                            <span className="bg-white/20 px-1 rounded text-[10px]">
+                              +{pendingMedia[item.id].length} media
+                            </span>
+                          )}
                         </button>
                         <button
                           onClick={cancelEditing}
@@ -542,9 +725,35 @@ function ChecklistDetailPage() {
                           {item.title}
                         </span>
                         {item.description && (
-                          <span className="text-xs text-stone-400 mt-0.5">
+                          <span className="text-xs text-stone-400 mt-0.5 block">
                             {item.description}
                           </span>
+                        )}
+                        {/* Media indicator */}
+                        {(item.media?.length > 0 || pendingMedia[item.id]?.length > 0) && (
+                          <button
+                            onClick={() => setExpandedMedia(prev => ({ ...prev, [item.id]: !prev[item.id] }))}
+                            className="flex items-center gap-2 mt-1 hover:bg-stone-50 rounded px-1 py-0.5 -ml-1"
+                          >
+                            {item.media?.length > 0 && (
+                              <span className="inline-flex items-center gap-1 text-xs text-stone-500">
+                                <iconify-icon icon="solar:paperclip-linear" width="12" height="12" />
+                                {item.media.length} file{item.media.length !== 1 ? 's' : ''}
+                              </span>
+                            )}
+                            {pendingMedia[item.id]?.length > 0 && (
+                              <span className="inline-flex items-center gap-1 text-xs text-orange-600 font-medium">
+                                <iconify-icon icon="solar:add-circle-linear" width="12" height="12" />
+                                {pendingMedia[item.id].length} unsaved
+                              </span>
+                            )}
+                            <iconify-icon
+                              icon={expandedMedia[item.id] ? "solar:alt-arrow-up-linear" : "solar:alt-arrow-down-linear"}
+                              width="12"
+                              height="12"
+                              className="text-stone-400"
+                            />
+                          </button>
                         )}
                       </div>
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
@@ -567,10 +776,11 @@ function ChecklistDetailPage() {
                   )}
 
                   {/* Media Preview (when not editing) */}
-                  {!editingItem && item.media?.length > 0 && (
+                  {editingItem !== item.id && expandedMedia[item.id] && (item.media?.length > 0 || pendingMedia[item.id]?.length > 0) && (
                     <div className="px-4 pb-3">
                       <div className="flex flex-wrap gap-1">
-                        {item.media.map((media: any, idx: number) => (
+                        {/* Existing saved media */}
+                        {item.media?.map((media: any, idx: number) => (
                           <div key={media.id} className="relative">
                             {media.mimeType.startsWith('image/') ? (
                               <img
@@ -593,8 +803,45 @@ function ChecklistDetailPage() {
                             )}
                           </div>
                         ))}
+
+                        {/* Pending unsaved media */}
+                        {pendingMedia[item.id]?.map((media) => (
+                          <div key={media.tempId} className="relative group">
+                            <div className="relative">
+                              {media.mimeType.startsWith('image/') ? (
+                                <img
+                                  src={media.filePath}
+                                  alt={media.originalName}
+                                  className="w-12 h-12 object-cover rounded border-2 border-orange-400"
+                                  title={`${media.originalName} (unsaved)`}
+                                />
+                              ) : media.mimeType.startsWith('video/') ? (
+                                <div className="w-12 h-12 bg-orange-50 rounded border-2 border-orange-400 flex items-center justify-center" title={`${media.originalName} (unsaved)`}>
+                                  <iconify-icon icon="solar:videocamera-record-linear" width="16" height="16" className="text-orange-600" />
+                                </div>
+                              ) : (
+                                <div className="w-12 h-12 bg-orange-50 rounded border-2 border-orange-400 flex items-center justify-center" title={`${media.originalName} (unsaved)`}>
+                                  <iconify-icon icon="solar:document-linear" width="16" height="16" className="text-orange-600" />
+                                </div>
+                              )}
+                              {/* Remove button for individual pending media */}
+                              <button
+                                onClick={() => removePendingMedia(item.id, media.tempId)}
+                                className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                title="Remove"
+                              >
+                                <iconify-icon icon="solar:close-circle-bold" width="12" height="12" />
+                              </button>
+                            </div>
+                            <span className="absolute -bottom-1 -right-1 text-[10px] bg-orange-400 text-white px-1 rounded">NEW</span>
+                          </div>
+                        ))}
+
                         <span className="text-xs text-stone-400 self-center ml-1">
-                          {item.media.length} file{item.media.length !== 1 ? 's' : ''}
+                          {item.media?.length || 0} saved
+                          {pendingMedia[item.id]?.length > 0 && (
+                            <span className="text-orange-600 font-medium"> +{pendingMedia[item.id].length} unsaved</span>
+                          )}
                         </span>
                       </div>
                     </div>

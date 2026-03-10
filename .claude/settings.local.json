@@ -49,7 +49,12 @@
       "Bash(npx tsr generate)",
       "Bash(pnpm build)",
       "Bash(npm run db:generate)",
-      "Bash(npm run db:migrate)"
+      "Bash(npm run db:migrate)",
+      "Bash(pnpm add @aws-sdk/client-s3 @aws-sdk/s3-request-presigner)",
+      "Bash(npm install @aws-sdk/client-s3 @aws-sdk/s3-request-presigner)",
+      "Bash(npx pnpm install)",
+      "Bash(export PNPM_HOME=\"/Users/zachyam/Library/pnpm\")",
+      "Bash(export PATH=\"$PNPM_HOME:$PATH\")"
     ]
   }
 }

@@ -4,6 +4,7 @@ import { getCookie } from "@tanstack/react-start/server";
 
 import { db } from "../../db";
 import { checklists, checklistItems, checklistItemMedia, inspections } from "../../db/schema";
+import { deleteObject } from "../../lib/s3";
 
 // For public handyman access, we need to validate via inspection token
 async function validateHandymanAccess(checklistId: string) {
@@ -121,6 +122,36 @@ export const toggleChecklistItemForHandyman = createServerFn({ method: "POST" })
         completedBy: data.isCompleted ? inspection.id : null, // Use inspection ID
       })
       .where(eq(checklistItems.id, data.itemId));
+
+    return { success: true };
+  });
+
+export const deleteHandymanMedia = createServerFn({ method: "POST" })
+  .inputValidator((data: {
+    checklistId: string;
+    mediaId: string;
+  }) => {
+    if (!data.checklistId || !data.mediaId) throw new Error("Checklist ID and media ID are required");
+    return data;
+  })
+  .handler(async ({ data }) => {
+    // Validate access
+    await validateHandymanAccess(data.checklistId);
+
+    // Get the media record to get the file path
+    const [media] = await db
+      .select()
+      .from(checklistItemMedia)
+      .where(eq(checklistItemMedia.id, data.mediaId))
+      .limit(1);
+
+    if (media && media.uploaderType === "handyman") {
+      // Delete from R2
+      await deleteObject(media.filePath);
+
+      // Delete from database
+      await db.delete(checklistItemMedia).where(eq(checklistItemMedia.id, data.mediaId));
+    }
 
     return { success: true };
   });
