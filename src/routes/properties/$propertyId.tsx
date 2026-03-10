@@ -63,8 +63,7 @@ function PropertyDetailPage() {
     coverPhoto?.url ||
     "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=2800&q=80";
 
-  // Pricing placeholder
-  const nightlyRate = 45000; // $450 in cents — placeholder until dynamic pricing
+  const nightlyRate = property.nightlyRate || 0;
   const nights =
     checkIn && checkOut
       ? Math.max(
