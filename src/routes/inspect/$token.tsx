@@ -82,11 +82,12 @@ function InspectionPage() {
   const [completionNotes, setCompletionNotes] = useState("");
   const [showCompleteForm, setShowCompleteForm] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
+  const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
   if (!data.inspection) {
     return (
       <div className="min-h-screen bg-stone-50 flex items-center justify-center p-4">
-        <div className="bg-white border border-stone-200 rounded-2xl p-8 text-center max-w-sm">
+        <div className="bg-white border border-stone-200 rounded-[1.5rem] p-8 text-center max-w-sm shadow-sm">
           <iconify-icon
             icon="solar:clipboard-remove-linear"
             width="48"
@@ -96,7 +97,7 @@ function InspectionPage() {
           <h1 className="text-lg font-medium text-stone-900 mt-4">
             Inspection Not Found
           </h1>
-          <p className="text-sm text-stone-400 mt-2">
+          <p className="text-sm text-stone-500 mt-2">
             This link may be invalid or expired.
           </p>
         </div>
@@ -115,6 +116,8 @@ function InspectionPage() {
   }
 
   const completedCount = items.filter((i) => i.isCompleted).length;
+  const progressPercent = items.length > 0 ? Math.round((completedCount / items.length) * 100) : 0;
+  const remainingCount = items.length - completedCount;
 
   async function handleStart() {
     await startInspection({ data: { token } });
@@ -163,14 +166,12 @@ function InspectionPage() {
           },
         });
 
-        // Upload directly to S3
         await fetch(uploadUrl, {
           method: "PUT",
           body: file,
           headers: { "Content-Type": file.type },
         });
 
-        // Record in database
         const result = await addInspectionMedia({
           data: {
             token,
@@ -182,7 +183,6 @@ function InspectionPage() {
           },
         });
 
-        // Update local state
         setMedia((prev: MediaMap) => ({
           ...prev,
           [itemId]: [
@@ -208,13 +208,8 @@ function InspectionPage() {
 
   async function handleDeleteMedia(mediaId: string, itemId: string) {
     if (!confirm("Delete this file? This action cannot be undone.")) return;
-
     try {
-      await deleteInspectionMedia({
-        data: { token, mediaId },
-      });
-
-      // Update local state to remove the deleted media
+      await deleteInspectionMedia({ data: { token, mediaId } });
       setMedia((prev: MediaMap) => ({
         ...prev,
         [itemId]: (prev[itemId] || []).filter(m => m.id !== mediaId),
@@ -226,82 +221,92 @@ function InspectionPage() {
 
   async function handleComplete() {
     await completeInspection({ data: { token, notes: completionNotes } });
-    // Redirect to summary page
     window.location.href = `/inspect/complete/${token}`;
   }
 
   return (
-    <div className="min-h-screen bg-stone-50">
-      {/* Header */}
-      <div className="bg-white border-b border-stone-200 sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto px-4 py-4">
-          <h1 className="text-lg font-medium text-stone-900">
-            {data.checklistTitle}
-          </h1>
-          <p className="text-xs text-stone-400 mt-0.5">
-            {data.propertyName || "Property Inspection"}
-          </p>
-          {/* Progress */}
-          <div className="flex items-center gap-3 mt-3">
-            <div className="flex-1 bg-stone-100 rounded-full h-2">
+    <div className="min-h-screen bg-stone-50 text-stone-900 pb-24 relative">
+      {/* Header & Progress */}
+      <header className="bg-white border-b border-stone-200 sticky top-0 z-50 shadow-sm shadow-stone-200/50">
+        <div className="max-w-3xl mx-auto w-full px-4 sm:px-8 pt-5 pb-4">
+          {/* Top Nav */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-10 h-10" /> {/* Spacer */}
+            <div className="text-center">
+              <h1 className="text-xl font-medium tracking-tight text-stone-900">
+                {data.propertyName || "Property Inspection"}
+              </h1>
+              <p className="text-sm text-stone-500">{data.checklistTitle}</p>
+            </div>
+            <div className="w-10 h-10" /> {/* Spacer */}
+          </div>
+
+          {/* Progress Bar */}
+          <div className="flex items-center gap-4 mt-2">
+            <span className="text-xs font-semibold text-stone-500 uppercase tracking-widest shrink-0">
+              {completedCount} of {items.length} Done
+            </span>
+            <div className="flex-1 h-2 bg-stone-100 rounded-full overflow-hidden">
               <div
-                className="bg-emerald-500 h-2 rounded-full transition-all"
-                style={{
-                  width: `${items.length > 0 ? (completedCount / items.length) * 100 : 0}%`,
-                }}
+                className="h-full bg-sky-500 rounded-full transition-all duration-500 ease-out"
+                style={{ width: `${progressPercent}%` }}
               />
             </div>
-            <span className="text-xs text-stone-400 tabular-nums">
-              {completedCount}/{items.length}
+            <span className="text-xs font-semibold text-sky-500 uppercase tracking-widest shrink-0">
+              {progressPercent}%
             </span>
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+      <main className="max-w-3xl mx-auto w-full p-4 sm:p-8 space-y-10">
         {/* Start button */}
         {status === "pending" && (
-          <button
-            onClick={handleStart}
-            className="w-full py-3 bg-sky-600 text-white rounded-xl text-sm font-medium hover:bg-sky-700"
-          >
-            Start Inspection
-          </button>
+          <div className="bg-white border border-sky-200 rounded-[1.5rem] p-8 text-center shadow-md shadow-sky-500/5 ring-4 ring-sky-500/5">
+            <iconify-icon icon="solar:clipboard-check-linear" class="text-5xl text-sky-500 mb-4" />
+            <h2 className="text-xl font-medium text-stone-900 mb-2">Ready to Begin</h2>
+            <p className="text-sm text-stone-500 mb-6">
+              Tap the button below to start the inspection. You can save your progress and return later.
+            </p>
+            <button
+              onClick={handleStart}
+              className="bg-sky-500 text-white font-medium px-8 py-3.5 rounded-xl shadow-md shadow-sky-500/20 hover:bg-sky-400 hover:shadow-lg hover:-translate-y-0.5 transition-all text-base"
+            >
+              Start Inspection
+            </button>
+          </div>
         )}
 
         {isCompleted && (
-          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
-            <iconify-icon
-              icon="solar:check-circle-linear"
-              width="32"
-              height="32"
-              class="text-emerald-500"
-            />
-            <p className="text-sm font-medium text-emerald-700 mt-2">
+          <div className="bg-emerald-50 border border-emerald-200 rounded-[1.5rem] p-6 text-center">
+            <iconify-icon icon="solar:check-circle-bold" class="text-4xl text-emerald-500 mb-2" />
+            <p className="text-base font-medium text-emerald-700">
               Inspection Complete
             </p>
             {data.inspection.notes && (
-              <p className="text-xs text-emerald-600 mt-1">
-                {data.inspection.notes}
-              </p>
+              <p className="text-sm text-emerald-600 mt-1">{data.inspection.notes}</p>
             )}
           </div>
         )}
 
         {/* Items by room */}
         {Array.from(rooms.entries()).map(([room, roomItems]) => (
-          <div key={room}>
-            <h2 className="text-xs font-medium text-stone-400 uppercase tracking-wider mb-2 px-1">
+          <section key={room} className="space-y-4">
+            <h2 className="text-2xl font-medium tracking-tight text-stone-900 flex items-center gap-2 px-2">
+              <iconify-icon icon="solar:map-point-linear" class="text-stone-400" />
               {room}
             </h2>
-            <div className="bg-white border border-stone-200 rounded-xl divide-y divide-stone-100">
+
+            <div className="space-y-4">
               {roomItems.map((item) => (
-                <InspectionItemRow
+                <InspectionItemCard
                   key={item.id}
                   item={item}
                   media={media[item.id] || []}
                   disabled={isCompleted}
                   uploading={uploading === item.id}
+                  expanded={expandedItem === item.id}
+                  onExpand={() => setExpandedItem(expandedItem === item.id ? null : item.id)}
                   onToggle={handleToggle}
                   onStatus={handleStatus}
                   onComment={handleComment}
@@ -310,288 +315,320 @@ function InspectionPage() {
                 />
               ))}
             </div>
-          </div>
+          </section>
         ))}
 
         {/* Complete button */}
         {status === "in_progress" && !showCompleteForm && (
-          <button
-            onClick={() => setShowCompleteForm(true)}
-            className="w-full py-3 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700"
-          >
-            Complete Inspection
-          </button>
+          <div className="pt-4" />
         )}
 
         {showCompleteForm && (
-          <div className="bg-white border border-stone-200 rounded-xl p-4 space-y-3">
-            <p className="text-sm font-medium text-stone-900">
-              Complete Inspection
+          <div className="bg-white border border-emerald-200 rounded-[1.5rem] p-6 shadow-md shadow-emerald-500/5 ring-4 ring-emerald-500/5 space-y-4">
+            <h3 className="text-lg font-medium text-stone-900">Complete Inspection</h3>
+            <p className="text-sm text-stone-500">
+              Add any overall notes before finishing.
             </p>
             <textarea
               value={completionNotes}
               onChange={(e) => setCompletionNotes(e.target.value)}
               placeholder="Any overall notes? (optional)"
               rows={3}
-              className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm resize-none"
+              className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 focus:bg-white focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all text-sm font-medium placeholder-stone-400 resize-none"
             />
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <button
                 onClick={handleComplete}
-                className="flex-1 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700"
+                className="flex-1 bg-emerald-500 text-white font-medium py-3.5 rounded-xl shadow-md shadow-emerald-500/20 hover:bg-emerald-400 hover:shadow-lg transition-all text-sm"
               >
                 Confirm Complete
               </button>
               <button
                 onClick={() => setShowCompleteForm(false)}
-                className="px-4 py-2.5 border border-stone-200 text-stone-600 rounded-lg text-sm hover:bg-stone-50"
+                className="px-6 py-3.5 bg-white border border-stone-200 text-stone-700 rounded-xl text-sm font-medium hover:bg-stone-50 transition-colors"
               >
                 Cancel
               </button>
             </div>
           </div>
         )}
-      </div>
+      </main>
+
+      {/* Floating Action Bottom Bar */}
+      {status === "in_progress" && !showCompleteForm && (
+        <div className="fixed bottom-0 left-0 w-full bg-white/80 backdrop-blur-md border-t border-stone-200 px-4 py-4 z-50">
+          <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
+            <div className="hidden sm:block">
+              <p className="text-sm font-medium text-stone-900">
+                {remainingCount > 0 ? "Remaining Tasks" : "All Tasks Done!"}
+              </p>
+              <p className="text-xs text-stone-500">
+                {remainingCount > 0
+                  ? `${remainingCount} task${remainingCount !== 1 ? "s" : ""} need${remainingCount === 1 ? "s" : ""} your attention`
+                  : "You can now complete the inspection"
+                }
+              </p>
+            </div>
+            <button
+              onClick={() => setShowCompleteForm(true)}
+              className={`w-full sm:w-auto flex-1 sm:flex-none flex items-center justify-center gap-2 font-medium px-8 py-3.5 rounded-xl transition-all text-base ${
+                completedCount === items.length
+                  ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20 hover:bg-emerald-400 hover:shadow-lg hover:-translate-y-0.5"
+                  : "bg-stone-900 text-white shadow-sm hover:bg-stone-800"
+              }`}
+            >
+              Complete Inspection
+              <iconify-icon icon="solar:check-circle-linear" class="text-xl" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function InspectionItemRow({
+function InspectionItemCard({
   item,
   media,
   disabled,
   uploading,
+  expanded,
+  onExpand,
   onToggle,
   onStatus,
   onComment,
   onUpload,
   onDeleteMedia,
 }: {
-  item: {
-    id: string;
-    title: string;
-    description: string | null;
-    isCompleted: boolean;
-    status: string | null;
-    comment: string | null;
-  };
+  item: InspectionItem;
   media: { id: string; url: string; fileType: string; fileName: string | null }[];
   disabled: boolean;
   uploading: boolean;
+  expanded: boolean;
+  onExpand: () => void;
   onToggle: (id: string, completed: boolean) => void;
   onStatus: (id: string, status: string) => void;
   onComment: (id: string, comment: string) => void;
   onUpload: (id: string, files: FileList) => void;
   onDeleteMedia: (mediaId: string, itemId: string) => void;
 }) {
-  const [expanded, setExpanded] = useState(false);
   const [comment, setComment] = useState(item.comment || "");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const isActive = expanded && !item.isCompleted && !disabled;
+
   return (
-    <div className="px-4 py-3">
-      {/* Main row */}
-      <div className="flex items-start gap-3">
-        <button
-          disabled={disabled}
-          onClick={() => onToggle(item.id, !item.isCompleted)}
-          className={`mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-colors ${
-            item.isCompleted
-              ? "bg-emerald-500 border-emerald-500 text-white"
-              : "border-stone-300 hover:border-stone-400"
-          } ${disabled ? "opacity-50" : ""}`}
-        >
-          {item.isCompleted && (
-            <svg
-              className="w-3.5 h-3.5"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={3}
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M4.5 12.75l6 6 9-13.5"
-              />
-            </svg>
-          )}
-        </button>
-        <div className="flex-1 min-w-0">
+    <div
+      className={`bg-white border rounded-[1.5rem] p-5 sm:p-6 transition-all ${
+        isActive
+          ? "border-sky-200 shadow-md shadow-sky-500/5 ring-4 ring-sky-500/5"
+          : item.isCompleted
+            ? "border-emerald-200 shadow-sm"
+            : "border-stone-200 shadow-sm hover:border-stone-300"
+      }`}
+    >
+      <div
+        className="flex gap-4 cursor-pointer"
+        onClick={() => {
+          if (!disabled && !item.isCompleted) onExpand();
+        }}
+      >
+        {/* Checkbox */}
+        <div className="pt-0.5 shrink-0">
           <button
-            onClick={() => setExpanded(!expanded)}
-            className="text-left w-full"
+            disabled={disabled}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle(item.id, !item.isCompleted);
+            }}
+            className={`w-7 h-7 rounded-[0.5rem] border-2 flex items-center justify-center transition-colors ${
+              item.isCompleted
+                ? "bg-emerald-500 border-emerald-500 text-white"
+                : "border-stone-300 hover:border-sky-500 text-transparent hover:text-sky-200"
+            } ${disabled ? "opacity-50" : ""}`}
           >
-            <span
-              className={`text-sm ${
-                item.isCompleted
-                  ? "text-stone-400 line-through"
-                  : "text-stone-900"
-              }`}
-            >
-              {item.title}
-            </span>
-            {item.description && (
-              <p className="text-xs text-stone-400 mt-0.5">
-                {item.description}
-              </p>
-            )}
+            <iconify-icon icon="solar:check-read-linear" class="text-xl" />
           </button>
         </div>
-        <div className="flex items-center gap-1">
-          {item.status && (
-            <span
-              className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+
+        <div className="flex-1 min-w-0">
+          <h3 className={`font-medium text-lg mb-1 leading-snug ${
+            item.isCompleted ? "text-stone-400 line-through" : "text-stone-900"
+          }`}>
+            {item.title}
+          </h3>
+          {item.description && (
+            <p className="text-sm text-stone-500 leading-relaxed">
+              {item.description}
+            </p>
+          )}
+
+          {/* Status badge when collapsed */}
+          {!expanded && item.status && (
+            <div className="mt-2">
+              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium ${
                 item.status === "pass"
                   ? "bg-emerald-100 text-emerald-700"
                   : item.status === "fail"
                     ? "bg-red-100 text-red-700"
-                    : "bg-stone-100 text-stone-500"
-              }`}
-            >
-              {item.status.toUpperCase()}
-            </span>
+                    : "bg-stone-100 text-stone-600"
+              }`}>
+                {item.status === "na" ? "N/A" : item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+              </span>
+            </div>
           )}
-          {media.length > 0 && (
-            <span className="text-[10px] text-stone-300">
-              {media.length} file{media.length !== 1 ? "s" : ""}
-            </span>
+
+          {/* Media count when collapsed */}
+          {!expanded && media.length > 0 && (
+            <div className="flex items-center gap-1.5 mt-2 text-xs text-stone-500">
+              <iconify-icon icon="solar:camera-linear" class="text-sm" />
+              {media.length} photo{media.length !== 1 ? "s" : ""}
+            </div>
           )}
-          <iconify-icon
-            icon={expanded ? "solar:alt-arrow-up-linear" : "solar:alt-arrow-down-linear"}
-            width="16"
-            height="16"
-            class="text-stone-300"
-          />
         </div>
       </div>
 
       {/* Expanded section */}
-      {expanded && (
-        <div className="mt-3 ml-9 space-y-3">
-          {/* Pass/Fail/NA */}
-          {!disabled && (
-            <div className="flex gap-1.5">
-              {["pass", "fail", "na"].map((s) => (
-                <button
-                  key={s}
-                  onClick={() => onStatus(item.id, s)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    item.status === s
-                      ? s === "pass"
-                        ? "bg-emerald-500 text-white"
-                        : s === "fail"
-                          ? "bg-red-500 text-white"
-                          : "bg-stone-500 text-white"
-                      : "bg-stone-100 text-stone-500 hover:bg-stone-200"
-                  }`}
-                >
-                  {s === "na" ? "N/A" : s.charAt(0).toUpperCase() + s.slice(1)}
-                </button>
-              ))}
-            </div>
-          )}
+      {isActive && (
+        <div className="mt-5 ml-11 space-y-5">
+          <div className="h-px w-full bg-stone-100" />
 
-          {/* Comment */}
-          <textarea
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            onBlur={() => {
-              if (comment !== (item.comment || "")) {
-                onComment(item.id, comment);
-              }
-            }}
-            disabled={disabled}
-            placeholder="Add a comment..."
-            rows={2}
-            className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm resize-none disabled:bg-stone-50"
-          />
-
-          {/* Media thumbnails */}
-          {media.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {media.map((m) => (
-                <div key={m.id} className="relative group">
-                  {m.fileType === "image" ? (
-                    <a
-                      href={m.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <img
-                        src={m.url}
-                        alt={m.fileName || "Photo"}
-                        className="w-16 h-16 rounded-lg object-cover border border-stone-200"
-                      />
-                    </a>
-                  ) : (
-                    <a
-                      href={m.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-16 h-16 rounded-lg bg-stone-100 border border-stone-200 flex items-center justify-center"
-                    >
-                      <iconify-icon
-                        icon="solar:videocamera-record-linear"
-                        width="20"
-                        height="20"
-                        class="text-stone-400"
-                      />
-                    </a>
-                  )}
-                  {/* Delete button - only show when not disabled */}
-                  {!disabled && (
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        onDeleteMedia(m.id, item.id);
-                      }}
-                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                      title="Delete file"
-                    >
-                      <iconify-icon icon="solar:close-circle-bold" width="12" height="12" />
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Upload button */}
-          {!disabled && (
-            <>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*,video/*"
-                multiple
-                className="hidden"
-                onChange={(e) => {
-                  if (e.target.files?.length) {
-                    onUpload(item.id, e.target.files);
-                    e.target.value = "";
-                  }
-                }}
-              />
+          {/* Pass/Fail/NA buttons */}
+          <div className="flex gap-2">
+            {(["pass", "fail", "na"] as const).map((s) => (
               <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-                className="flex items-center gap-1.5 px-3 py-1.5 border border-stone-200 rounded-lg text-xs text-stone-500 hover:bg-stone-50 disabled:opacity-50"
+                key={s}
+                onClick={() => onStatus(item.id, s)}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                  item.status === s
+                    ? s === "pass"
+                      ? "bg-emerald-500 text-white shadow-sm"
+                      : s === "fail"
+                        ? "bg-red-500 text-white shadow-sm"
+                        : "bg-stone-600 text-white shadow-sm"
+                    : "bg-stone-100 text-stone-500 hover:bg-stone-200"
+                }`}
               >
-                {uploading ? (
-                  "Uploading..."
-                ) : (
-                  <>
-                    <iconify-icon
-                      icon="solar:camera-add-linear"
-                      width="14"
-                      height="14"
-                    />
-                    Add Photo / Video
-                  </>
-                )}
+                {s === "na" ? "N/A" : s.charAt(0).toUpperCase() + s.slice(1)}
               </button>
-            </>
+            ))}
+          </div>
+
+          {/* Photo Upload Area */}
+          <div className="space-y-4">
+            <h4 className="text-xs font-semibold text-stone-500 uppercase tracking-widest">
+              Photos & Notes
+            </h4>
+
+            {/* Existing media */}
+            {media.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {media.map((m) => (
+                  <div key={m.id} className="relative group">
+                    {m.fileType === "image" ? (
+                      <a href={m.url} target="_blank" rel="noopener noreferrer">
+                        <img
+                          src={m.url}
+                          alt={m.fileName || "Photo"}
+                          className="w-20 h-20 rounded-xl object-cover border border-stone-200"
+                        />
+                      </a>
+                    ) : (
+                      <a
+                        href={m.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-20 h-20 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center"
+                      >
+                        <iconify-icon icon="solar:videocamera-record-linear" class="text-xl text-stone-400" />
+                      </a>
+                    )}
+                    {!disabled && (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onDeleteMedia(m.id, item.id);
+                        }}
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                      >
+                        <iconify-icon icon="solar:close-circle-bold" class="text-xs" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Upload area */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,video/*"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                if (e.target.files?.length) {
+                  onUpload(item.id, e.target.files);
+                  e.target.value = "";
+                }
+              }}
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="w-full border-2 border-dashed border-sky-200 bg-sky-50/50 rounded-[1rem] p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:border-sky-300 transition-colors group disabled:opacity-50"
+            >
+              <div className="w-12 h-12 bg-white border border-sky-100 rounded-full flex items-center justify-center mb-3 text-sky-500 group-hover:scale-110 group-hover:shadow-sm transition-all">
+                {uploading ? (
+                  <iconify-icon icon="solar:refresh-linear" class="text-2xl animate-spin" />
+                ) : (
+                  <iconify-icon icon="solar:camera-linear" class="text-2xl" />
+                )}
+              </div>
+              <span className="text-sm font-medium text-sky-900 block mb-1">
+                {uploading ? "Uploading..." : "Tap to take a photo"}
+              </span>
+              <span className="text-xs text-sky-600">
+                Add photos or videos
+              </span>
+            </button>
+
+            {/* Notes Input */}
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              onBlur={() => {
+                if (comment !== (item.comment || "")) {
+                  onComment(item.id, comment);
+                }
+              }}
+              disabled={disabled}
+              rows={2}
+              className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 focus:bg-white focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all text-sm text-stone-900 font-medium placeholder-stone-400 resize-none"
+              placeholder="Add notes about this task..."
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Collapsed completed state with media preview */}
+      {item.isCompleted && media.length > 0 && (
+        <div className="mt-3 ml-11 flex flex-wrap gap-2">
+          {media.slice(0, 4).map((m) => (
+            <div key={m.id} className="w-12 h-12 rounded-lg overflow-hidden border border-stone-200">
+              {m.fileType === "image" ? (
+                <img src={m.url} alt={m.fileName || "Photo"} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-stone-100 flex items-center justify-center">
+                  <iconify-icon icon="solar:videocamera-record-linear" class="text-stone-400" />
+                </div>
+              )}
+            </div>
+          ))}
+          {media.length > 4 && (
+            <div className="w-12 h-12 rounded-lg bg-stone-100 border border-stone-200 flex items-center justify-center text-xs font-medium text-stone-500">
+              +{media.length - 4}
+            </div>
           )}
         </div>
       )}

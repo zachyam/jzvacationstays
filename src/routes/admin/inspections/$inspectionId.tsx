@@ -18,13 +18,13 @@ function InspectionDetailPage() {
   if (!data) {
     return (
       <div className="text-center py-12">
-        <iconify-icon icon="solar:close-circle-broken" class="w-16 h-16 text-red-500 mx-auto mb-4" />
+        <iconify-icon icon="solar:close-circle-broken" class="text-5xl text-red-500 mb-4" />
         <p className="text-stone-400 text-lg">Inspection not found.</p>
         <Link
           to="/admin/inspections"
           className="text-sky-600 hover:text-sky-700 font-medium text-sm mt-2 inline-block"
         >
-          ← Back to inspections
+          Back to inspections
         </Link>
       </div>
     );
@@ -35,31 +35,39 @@ function InspectionDetailPage() {
   const completionRate = items.length > 0 ? Math.round((completedCount / items.length) * 100) : 0;
   const totalMedia = Object.values(mediaByItem).reduce((sum, media) => sum + media.length, 0);
 
-  function getStatusBadge(status: string) {
+  function getStatusConfig(status: string) {
     switch (status) {
       case 'completed':
-        return (
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-700">
-            <iconify-icon icon="solar:check-circle-bold" class="w-4 h-4" />
-            Completed
-          </span>
-        );
+        return {
+          label: "Completed",
+          icon: "solar:check-circle-bold",
+          bg: "bg-emerald-50",
+          border: "border-emerald-100",
+          text: "text-emerald-700",
+          iconColor: "text-emerald-500",
+        };
       case 'in_progress':
-        return (
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-sky-100 text-sky-700">
-            <iconify-icon icon="solar:play-circle-bold" class="w-4 h-4" />
-            In Progress
-          </span>
-        );
+        return {
+          label: "In Progress",
+          icon: "solar:play-circle-bold",
+          bg: "bg-sky-50",
+          border: "border-sky-100",
+          text: "text-sky-700",
+          iconColor: "text-sky-500",
+        };
       default:
-        return (
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-stone-100 text-stone-600">
-            <iconify-icon icon="solar:hourglass-line-linear" class="w-4 h-4" />
-            Pending
-          </span>
-        );
+        return {
+          label: "Pending",
+          icon: "solar:hourglass-line-linear",
+          bg: "bg-stone-50",
+          border: "border-stone-200",
+          text: "text-stone-600",
+          iconColor: "text-stone-400",
+        };
     }
   }
+
+  const statusConfig = getStatusConfig(inspection.status);
 
   // Group items by room
   const itemsByRoom = items.reduce((acc, item) => {
@@ -70,18 +78,23 @@ function InspectionDetailPage() {
   }, {} as Record<string, typeof items>);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
         <div>
-          <div className="flex items-center gap-2 text-sm text-stone-500 mb-2">
-            <Link to="/admin/inspections" className="hover:text-stone-700">
-              Inspections
-            </Link>
-            <iconify-icon icon="solar:alt-arrow-right-linear" class="w-3 h-3" />
-            <span className="text-stone-900">{inspection.checklistTitle}</span>
-          </div>
-          <h1 className="text-2xl font-semibold text-stone-900">Inspection Report</h1>
+          <Link
+            to="/admin/inspections"
+            className="text-sm text-stone-400 hover:text-stone-600 mb-2 inline-flex items-center gap-1 transition-colors"
+          >
+            <iconify-icon icon="solar:arrow-left-linear" class="text-sm" />
+            Inspections
+          </Link>
+          <h1 className="text-4xl font-medium tracking-tight text-stone-900 mb-2">
+            Inspection Report
+          </h1>
+          <p className="text-stone-500 text-lg">
+            {inspection.propertyName || "No property"} &middot; {inspection.checklistTitle}
+          </p>
         </div>
         {inspection.status !== 'completed' && (
           <button
@@ -91,22 +104,26 @@ function InspectionDetailPage() {
               );
               alert('Inspection link copied to clipboard!');
             }}
-            className="px-4 py-2 bg-sky-600 text-white rounded-lg text-sm font-medium hover:bg-sky-700 flex items-center gap-2"
+            className="flex items-center justify-center gap-2 bg-white border border-stone-200 text-stone-900 font-medium px-5 py-2.5 rounded-xl hover:bg-stone-50 hover:border-stone-300 transition-all shadow-sm shrink-0 text-sm"
           >
-            <iconify-icon icon="solar:link-linear" class="w-4 h-4" />
+            <iconify-icon icon="solar:link-linear" class="text-lg text-stone-400" />
             Copy Link
           </button>
         )}
       </div>
 
       {/* Info Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white border border-stone-200 rounded-xl p-4">
-          <h3 className="text-sm font-medium text-stone-700 mb-3">Details</h3>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Details Card */}
+        <div className="bg-white border border-stone-200 rounded-[1.5rem] p-6 shadow-sm">
+          <h3 className="text-lg font-medium text-stone-900 mb-5">Details</h3>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center text-sm">
               <span className="text-stone-500">Status</span>
-              <span>{getStatusBadge(inspection.status)}</span>
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${statusConfig.bg} border ${statusConfig.border} ${statusConfig.text}`}>
+                <iconify-icon icon={statusConfig.icon} class={`text-base ${statusConfig.iconColor}`} />
+                {statusConfig.label}
+              </span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-stone-500">Property</span>
@@ -119,44 +136,49 @@ function InspectionDetailPage() {
             <div className="flex justify-between text-sm">
               <span className="text-stone-500">Created</span>
               <span className="text-stone-700">
-                {new Date(inspection.createdAt).toLocaleDateString()}
+                {new Date(inspection.createdAt).toLocaleDateString('en-US', {
+                  month: 'short', day: 'numeric', year: 'numeric',
+                })}
               </span>
             </div>
             {inspection.completedAt && (
               <div className="flex justify-between text-sm">
                 <span className="text-stone-500">Completed</span>
                 <span className="text-stone-700">
-                  {new Date(inspection.completedAt).toLocaleDateString()}
+                  {new Date(inspection.completedAt).toLocaleDateString('en-US', {
+                    month: 'short', day: 'numeric', year: 'numeric',
+                  })}
                 </span>
               </div>
             )}
           </div>
         </div>
 
-        <div className="bg-white border border-stone-200 rounded-xl p-4">
-          <h3 className="text-sm font-medium text-stone-700 mb-3">Statistics</h3>
+        {/* Statistics Card */}
+        <div className="bg-white border border-stone-200 rounded-[1.5rem] p-6 shadow-sm">
+          <h3 className="text-lg font-medium text-stone-900 mb-5">Statistics</h3>
           <div className="grid grid-cols-3 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-stone-900">{completedCount}</div>
-              <div className="text-xs text-stone-500 mt-1">Completed</div>
+            <div className="text-center p-3 bg-stone-50 rounded-xl">
+              <div className="text-3xl font-medium text-stone-900">{completedCount}</div>
+              <div className="text-xs text-stone-500 mt-1 font-medium">Completed</div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-emerald-600">{completionRate}%</div>
-              <div className="text-xs text-stone-500 mt-1">Progress</div>
+            <div className="text-center p-3 bg-emerald-50 rounded-xl">
+              <div className="text-3xl font-medium text-emerald-600">{completionRate}%</div>
+              <div className="text-xs text-emerald-600 mt-1 font-medium">Progress</div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-stone-900">{totalMedia}</div>
-              <div className="text-xs text-stone-500 mt-1">Media</div>
+            <div className="text-center p-3 bg-sky-50 rounded-xl">
+              <div className="text-3xl font-medium text-sky-600">{totalMedia}</div>
+              <div className="text-xs text-sky-600 mt-1 font-medium">Media</div>
             </div>
           </div>
-          <div className="mt-4">
-            <div className="flex justify-between text-xs text-stone-500 mb-1">
+          <div className="mt-5">
+            <div className="flex justify-between text-xs text-stone-500 mb-2 font-medium">
               <span>Progress</span>
               <span>{completedCount} of {items.length}</span>
             </div>
             <div className="w-full bg-stone-100 rounded-full h-2 overflow-hidden">
               <div
-                className={`h-full transition-all ${
+                className={`h-full rounded-full transition-all ${
                   completionRate === 100
                     ? 'bg-emerald-500'
                     : completionRate > 0
@@ -172,99 +194,115 @@ function InspectionDetailPage() {
 
       {/* Notes */}
       {inspection.notes && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-          <h3 className="text-sm font-medium text-amber-900 mb-2 flex items-center gap-2">
-            <iconify-icon icon="solar:notes-linear" class="w-4 h-4" />
+        <div className="bg-amber-50 border border-amber-200 rounded-[1.5rem] p-6">
+          <h3 className="text-base font-medium text-amber-900 mb-2 flex items-center gap-2">
+            <iconify-icon icon="solar:notes-linear" class="text-lg" />
             Notes from Inspector
           </h3>
-          <p className="text-sm text-amber-800 whitespace-pre-wrap">{inspection.notes}</p>
+          <p className="text-sm text-amber-800 whitespace-pre-wrap leading-relaxed">{inspection.notes}</p>
         </div>
       )}
 
-      {/* Checklist Items */}
-      <div className="bg-white border border-stone-200 rounded-xl">
-        <div className="p-4 border-b border-stone-200">
-          <h3 className="text-lg font-medium text-stone-900">Checklist Items</h3>
-        </div>
-        <div className="divide-y divide-stone-100">
-          {Object.entries(itemsByRoom).map(([room, roomItems]) => (
-            <div key={room} className="p-4">
-              <h4 className="text-sm font-medium text-stone-700 mb-3">{room}</h4>
-              <div className="space-y-2">
-                {roomItems.map((item) => {
-                  const media = mediaByItem[item.id] || [];
+      {/* Checklist Items by Room */}
+      {Object.entries(itemsByRoom).map(([room, roomItems]) => (
+        <section key={room} className="space-y-4">
+          <h2 className="text-2xl font-medium tracking-tight text-stone-900 flex items-center gap-2 px-2">
+            <iconify-icon icon="solar:map-point-linear" class="text-stone-400" />
+            {room}
+          </h2>
 
-                  return (
-                    <div
-                      key={item.id}
-                      className={`flex items-start gap-3 p-3 rounded-lg ${
-                        item.isCompleted ? 'bg-emerald-50' : 'bg-stone-50'
-                      }`}
-                    >
-                      <div className="pt-0.5">
-                        {item.isCompleted ? (
-                          <iconify-icon icon="solar:check-circle-bold" class="w-5 h-5 text-emerald-500" />
-                        ) : (
-                          <iconify-icon icon="solar:close-circle-linear" class="w-5 h-5 text-stone-400" />
-                        )}
+          <div className="space-y-4">
+            {roomItems.map((item) => {
+              const itemMedia = mediaByItem[item.id] || [];
+
+              return (
+                <div
+                  key={item.id}
+                  className={`bg-white border rounded-[1.5rem] p-5 sm:p-6 shadow-sm ${
+                    item.isCompleted ? "border-emerald-200" : "border-stone-200"
+                  }`}
+                >
+                  <div className="flex gap-4">
+                    {/* Status icon */}
+                    <div className="pt-0.5 shrink-0">
+                      <div className={`w-7 h-7 rounded-[0.5rem] flex items-center justify-center ${
+                        item.isCompleted
+                          ? "bg-emerald-500 text-white"
+                          : "bg-stone-100 text-stone-400"
+                      }`}>
+                        <iconify-icon
+                          icon={item.isCompleted ? "solar:check-read-linear" : "solar:close-circle-linear"}
+                          class="text-lg"
+                        />
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <span className={`text-sm ${
-                              item.isCompleted ? 'text-stone-700' : 'text-stone-500'
-                            }`}>
-                              {item.title}
-                            </span>
-                            {item.description && (
-                              <p className="text-xs text-stone-500 mt-1">{item.description}</p>
-                            )}
-                            {item.completedAt && (
-                              <p className="text-xs text-stone-500 mt-1">
-                                Completed: {new Date(item.completedAt).toLocaleString()}
-                              </p>
-                            )}
-                          </div>
-                          {media.length > 0 && (
-                            <span className="inline-flex items-center gap-1 text-xs text-stone-500 ml-4">
-                              <iconify-icon icon="solar:camera-linear" class="w-3 h-3" />
-                              {media.length}
-                            </span>
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h3 className={`font-medium text-lg mb-1 leading-snug ${
+                            item.isCompleted ? "text-stone-900" : "text-stone-500"
+                          }`}>
+                            {item.title}
+                          </h3>
+                          {item.description && (
+                            <p className="text-sm text-stone-500 leading-relaxed">{item.description}</p>
+                          )}
+                          {item.completedAt && (
+                            <p className="text-xs text-stone-400 mt-1 flex items-center gap-1">
+                              <iconify-icon icon="solar:clock-circle-linear" class="text-sm" />
+                              {new Date(item.completedAt).toLocaleString()}
+                            </p>
                           )}
                         </div>
+                        {itemMedia.length > 0 && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-stone-100 border border-stone-200 text-xs font-medium text-stone-600 shrink-0">
+                            <iconify-icon icon="solar:camera-linear" class="text-sm" />
+                            {itemMedia.length}
+                          </span>
+                        )}
+                      </div>
 
-                        {/* Media Preview */}
-                        {media.length > 0 && (
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            {media.map((m) => (
-                              <div key={m.id} className="relative group">
-                                {m.mimeType.startsWith('image/') ? (
+                      {/* Media Preview */}
+                      {itemMedia.length > 0 && (
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {itemMedia.map((m) => (
+                            <div key={m.id} className="relative group">
+                              {m.mimeType.startsWith('image/') ? (
+                                <a href={m.filePath} target="_blank" rel="noopener noreferrer">
                                   <img
                                     src={m.filePath}
                                     alt={m.originalName}
-                                    className="w-20 h-20 object-cover rounded border border-stone-200"
+                                    className="w-20 h-20 object-cover rounded-xl border border-stone-200 hover:border-stone-300 transition-colors"
                                   />
-                                ) : (
-                                  <div className="w-20 h-20 bg-stone-100 rounded border border-stone-200 flex items-center justify-center">
-                                    <iconify-icon icon="solar:video-library-linear" class="w-6 h-6 text-stone-400" />
-                                  </div>
-                                )}
-                                {m.uploaderType === 'handyman' && (
-                                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full" title="Handyman upload" />
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                                </a>
+                              ) : (
+                                <a
+                                  href={m.filePath}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="w-20 h-20 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center hover:border-stone-300 transition-colors"
+                                >
+                                  <iconify-icon icon="solar:videocamera-record-linear" class="text-xl text-stone-400" />
+                                </a>
+                              )}
+                              {m.uploaderType === 'handyman' && (
+                                <span className="absolute -top-1 -right-1 w-4 h-4 bg-sky-500 rounded-full flex items-center justify-center" title="Handyman upload">
+                                  <iconify-icon icon="solar:user-circle-bold" class="text-[10px] text-white" />
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      ))}
     </div>
   );
 }
