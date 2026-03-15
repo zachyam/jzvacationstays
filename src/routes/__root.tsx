@@ -3,10 +3,12 @@ import {
   createRootRouteWithContext,
   HeadContent,
   Outlet,
+  redirect,
   Scripts,
 } from "@tanstack/react-router";
 
 import type { AuthUser } from "../hooks/use-auth";
+import { getRedirectUrl, isAdminSubdomain } from "../lib/subdomain";
 import { getSession } from "../server/functions/auth";
 import appCss from "../styles/global.css?url";
 
@@ -14,9 +16,28 @@ export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
   user: AuthUser | null;
 }>()({
-  beforeLoad: async () => {
+  beforeLoad: async ({ location }) => {
     try {
       const { user } = await getSession();
+
+      // Only do subdomain checking on client side where we have access to window
+      if (typeof window !== "undefined") {
+        const hostname = window.location.hostname + (window.location.port ? `:${window.location.port}` : "");
+        const isAdminDomain = isAdminSubdomain(hostname);
+
+        // If on admin subdomain but accessing non-admin route, redirect to main domain
+        if (isAdminDomain && !location.pathname.startsWith("/admin")) {
+          window.location.href = getRedirectUrl(hostname, "www", location.pathname);
+          return { user };
+        }
+
+        // If on main domain but accessing admin route, redirect to admin subdomain
+        if (!isAdminDomain && location.pathname.startsWith("/admin")) {
+          window.location.href = getRedirectUrl(hostname, "app", location.pathname);
+          return { user };
+        }
+      }
+
       return { user };
     } catch {
       return { user: null };

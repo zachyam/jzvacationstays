@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 
 import { useAuth } from "../hooks/use-auth";
-import { getProperties } from "../server/functions/properties";
 import { logout } from "../server/functions/auth";
+import { getProperties } from "../server/functions/properties";
 
 export const Route = createFileRoute("/")({
   loader: async () => {
@@ -73,14 +73,6 @@ function HomePage() {
           <div className="flex items-center space-x-4 md:space-x-6">
             {user ? (
               <>
-                {user.role === "admin" && (
-                  <Link
-                    to="/admin/dashboard"
-                    className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors hidden md:block"
-                  >
-                    Admin
-                  </Link>
-                )}
                 <Link
                   to="/account"
                   className="flex items-center gap-2 group"
