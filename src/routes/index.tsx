@@ -1,10 +1,19 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 
 import { useAuth } from "../hooks/use-auth";
 import { logout } from "../server/functions/auth";
 import { getProperties } from "../server/functions/properties";
 
 export const Route = createFileRoute("/")({
+  beforeLoad: ({ context }) => {
+    // If on app subdomain (admin), redirect to admin dashboard
+    if (typeof window !== "undefined") {
+      const hostname = window.location.hostname;
+      if (hostname.startsWith("app.")) {
+        throw redirect({ to: "/admin/dashboard" });
+      }
+    }
+  },
   loader: async () => {
     try {
       const properties = await getProperties();

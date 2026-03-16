@@ -25,10 +25,14 @@ export const Route = createRootRouteWithContext<{
         const hostname = window.location.hostname + (window.location.port ? `:${window.location.port}` : "");
         const isAdminDomain = isAdminSubdomain(hostname);
 
-        // If on admin subdomain but accessing non-admin route, redirect to main domain
-        if (isAdminDomain && !location.pathname.startsWith("/admin")) {
-          window.location.href = getRedirectUrl(hostname, "www", location.pathname);
-          return { user };
+        // If on admin subdomain but accessing non-admin routes (except root which redirects separately)
+        if (isAdminDomain && !location.pathname.startsWith("/admin") && location.pathname !== "/") {
+          // Only redirect if it's not an admin-related path
+          const nonAdminPaths = ["/properties", "/booking", "/auth/login"];
+          if (nonAdminPaths.some(path => location.pathname.startsWith(path))) {
+            window.location.href = getRedirectUrl(hostname, "www", location.pathname);
+            return { user };
+          }
         }
 
         // If on main domain but accessing admin route, redirect to admin subdomain
