@@ -7,10 +7,15 @@ let _db: ReturnType<typeof drizzle<typeof schema>>;
 
 export function getDb() {
   if (!_db) {
-    const connectionString = process.env.DATABASE_URL;
+    // Try to get DATABASE_URL from environment
+    const connectionString = process.env.DATABASE_URL || process.env.database_url;
+
     if (!connectionString) {
+      // In production, this should never happen if Railway is configured correctly
+      console.error("DATABASE_URL is not set in environment variables");
       throw new Error("DATABASE_URL is not set");
     }
+
     const client = postgres(connectionString);
     _db = drizzle(client, { schema });
   }
