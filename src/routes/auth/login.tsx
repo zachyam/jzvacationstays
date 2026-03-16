@@ -39,7 +39,7 @@ function LoginPage() {
         return;
       }
 
-      // Admin users skip OTP and go directly to admin subdomain
+      // Admin users skip OTP and go directly to admin subdomain dashboard
       if (result.skipOtp) {
         // Get the current hostname to build admin URL
         const currentHost = window.location.hostname;
@@ -47,10 +47,10 @@ function LoginPage() {
           ? "localhost:3001"
           : currentHost.split(".").slice(-2).join(".");
 
-        // Redirect to admin subdomain root (which will show dashboard)
+        // Redirect directly to admin subdomain dashboard
         const adminUrl = currentHost.includes("localhost")
-          ? "http://localhost:3001/"
-          : `https://admin.${domain}/`;
+          ? "http://localhost:3001/admin/dashboard"
+          : `https://admin.${domain}/admin/dashboard`;
 
         window.location.href = adminUrl;
         return;
