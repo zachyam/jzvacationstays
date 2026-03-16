@@ -3,7 +3,6 @@ import { getCookie, setCookie, deleteCookie } from "@tanstack/react-start/server
 import { eq, and, gt } from "drizzle-orm";
 import crypto from "crypto";
 
-import { db } from "../../db";
 import { users, sessions, otpCodes } from "../../db/schema";
 import { sendOtpEmail } from "../services/email";
 
@@ -30,6 +29,8 @@ export const sendOtp = createServerFn({ method: "POST" })
     },
   )
   .handler(async ({ data }) => {
+    // Import db inside the handler to ensure it only runs server-side
+    const { db } = await import("../../db");
     const { email, name } = data;
 
     // Check if user exists
@@ -113,6 +114,8 @@ export const verifyOtp = createServerFn({ method: "POST" })
     },
   )
   .handler(async ({ data }) => {
+    // Import db inside the handler to ensure it only runs server-side
+    const { db } = await import("../../db");
     const { email, code, name } = data;
     const normalizedEmail = email.toLowerCase();
 
@@ -191,6 +194,8 @@ export const verifyOtp = createServerFn({ method: "POST" })
  */
 export const getSession = createServerFn({ method: "GET" }).handler(
   async () => {
+    // Import db inside the handler to ensure it only runs server-side
+    const { db } = await import("../../db");
     const token = getCookie("session_token");
     if (!token) return { user: null };
 
@@ -223,6 +228,8 @@ export const getSession = createServerFn({ method: "GET" }).handler(
  * Log out — delete session and clear cookie.
  */
 export const logout = createServerFn({ method: "POST" }).handler(async () => {
+  // Import db inside the handler to ensure it only runs server-side
+  const { db } = await import("../../db");
   const token = getCookie("session_token");
   if (token) {
     await db.delete(sessions).where(eq(sessions.token, token));
