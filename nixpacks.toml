@@ -8,7 +8,7 @@ cmds = ["pnpm install --frozen-lockfile"]
 cmds = ["pnpm run build"]
 
 [start]
-cmd = "node .output/server/index.mjs"
+cmd = "pnpm start"
 
 [variables]
 NODE_ENV = "production"

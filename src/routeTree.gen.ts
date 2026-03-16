@@ -18,6 +18,7 @@ import { Route as PropertiesPropertyIdRouteImport } from './routes/properties/$p
 import { Route as BookingPropertyIdRouteImport } from './routes/booking/$propertyId'
 import { Route as AuthVerifyRouteImport } from './routes/auth/verify'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
+import { Route as ApiDebugRouteImport } from './routes/api/debug'
 import { Route as AdminThermostatRouteImport } from './routes/admin/thermostat'
 import { Route as AdminTestUploadRouteImport } from './routes/admin/test-upload'
 import { Route as AdminReviewsRouteImport } from './routes/admin/reviews'
@@ -80,6 +81,11 @@ const AuthVerifyRoute = AuthVerifyRouteImport.update({
 const AuthLoginRoute = AuthLoginRouteImport.update({
   id: '/auth/login',
   path: '/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDebugRoute = ApiDebugRouteImport.update({
+  id: '/api/debug',
+  path: '/api/debug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminThermostatRoute = AdminThermostatRouteImport.update({
@@ -188,6 +194,7 @@ export interface FileRoutesByFullPath {
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/test-upload': typeof AdminTestUploadRoute
   '/admin/thermostat': typeof AdminThermostatRoute
+  '/api/debug': typeof ApiDebugRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/verify': typeof AuthVerifyRoute
   '/booking/$propertyId': typeof BookingPropertyIdRoute
@@ -216,6 +223,7 @@ export interface FileRoutesByTo {
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/test-upload': typeof AdminTestUploadRoute
   '/admin/thermostat': typeof AdminThermostatRoute
+  '/api/debug': typeof ApiDebugRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/verify': typeof AuthVerifyRoute
   '/booking/$propertyId': typeof BookingPropertyIdRoute
@@ -246,6 +254,7 @@ export interface FileRoutesById {
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/test-upload': typeof AdminTestUploadRoute
   '/admin/thermostat': typeof AdminThermostatRoute
+  '/api/debug': typeof ApiDebugRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/verify': typeof AuthVerifyRoute
   '/booking/$propertyId': typeof BookingPropertyIdRoute
@@ -277,6 +286,7 @@ export interface FileRouteTypes {
     | '/admin/reviews'
     | '/admin/test-upload'
     | '/admin/thermostat'
+    | '/api/debug'
     | '/auth/login'
     | '/auth/verify'
     | '/booking/$propertyId'
@@ -305,6 +315,7 @@ export interface FileRouteTypes {
     | '/admin/reviews'
     | '/admin/test-upload'
     | '/admin/thermostat'
+    | '/api/debug'
     | '/auth/login'
     | '/auth/verify'
     | '/booking/$propertyId'
@@ -334,6 +345,7 @@ export interface FileRouteTypes {
     | '/admin/reviews'
     | '/admin/test-upload'
     | '/admin/thermostat'
+    | '/api/debug'
     | '/auth/login'
     | '/auth/verify'
     | '/booking/$propertyId'
@@ -356,6 +368,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   AccountRoute: typeof AccountRoute
+  ApiDebugRoute: typeof ApiDebugRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthVerifyRoute: typeof AuthVerifyRoute
   BookingPropertyIdRoute: typeof BookingPropertyIdRoute
@@ -430,6 +443,13 @@ declare module '@tanstack/react-router' {
       path: '/auth/login'
       fullPath: '/auth/login'
       preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/debug': {
+      id: '/api/debug'
+      path: '/api/debug'
+      fullPath: '/api/debug'
+      preLoaderRoute: typeof ApiDebugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/thermostat': {
@@ -614,6 +634,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRouteRoute: AdminRouteRouteWithChildren,
   AccountRoute: AccountRoute,
+  ApiDebugRoute: ApiDebugRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthVerifyRoute: AuthVerifyRoute,
   BookingPropertyIdRoute: BookingPropertyIdRoute,
