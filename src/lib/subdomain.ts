@@ -3,7 +3,7 @@ export function getSubdomain(hostname: string): string | null {
   if (hostname.includes("localhost") || hostname.includes("127.0.0.1")) {
     // For local dev: use localhost:3001 for admin, localhost:3000 for main
     const port = hostname.split(":")[1];
-    if (port === "3001") return "app";
+    if (port === "3001") return "admin";
     return null;
   }
 
@@ -16,7 +16,7 @@ export function getSubdomain(hostname: string): string | null {
     if (parts[0] === "www") {
       return null;
     }
-    // Return the first part as subdomain (app, admin, etc.)
+    // Return the first part as subdomain
     return parts[0];
   }
 
@@ -25,18 +25,18 @@ export function getSubdomain(hostname: string): string | null {
 
 export function isAdminSubdomain(hostname: string): boolean {
   const subdomain = getSubdomain(hostname);
-  // Check if subdomain is 'app' or 'admin'
-  return subdomain === "app" || subdomain === "admin";
+  // Check if subdomain is 'admin'
+  return subdomain === "admin";
 }
 
 export function getRedirectUrl(
   currentHost: string,
-  targetSubdomain: "www" | "app",
+  targetSubdomain: "www" | "admin",
   path: string = "/"
 ): string {
   // For localhost development
   if (currentHost.includes("localhost") || currentHost.includes("127.0.0.1")) {
-    const port = targetSubdomain === "app" ? "3001" : "3000";
+    const port = targetSubdomain === "admin" ? "3001" : "3000";
     return `http://localhost:${port}${path}`;
   }
 
@@ -46,6 +46,12 @@ export function getRedirectUrl(
     .slice(-2)
     .join("."); // Gets "domain.com" from any subdomain
 
-  const subdomain = targetSubdomain === "www" ? "www" : "app";
+  const subdomain = targetSubdomain === "www" ? "www" : "admin";
+
+  // For admin subdomain, strip /admin prefix from path if present
+  if (targetSubdomain === "admin" && path.startsWith("/admin")) {
+    path = path.substring(6) || "/"; // Remove "/admin" prefix
+  }
+
   return `https://${subdomain}.${domain}${path}`;
 }

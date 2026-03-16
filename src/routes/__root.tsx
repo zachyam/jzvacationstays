@@ -25,6 +25,9 @@ export const Route = createRootRouteWithContext<{
         const hostname = window.location.hostname + (window.location.port ? `:${window.location.port}` : "");
         const isAdminDomain = isAdminSubdomain(hostname);
 
+        // Check if we've already tried to redirect (prevent infinite loops)
+        const redirectAttempted = sessionStorage.getItem("subdomain-redirect-attempted");
+
         // If on admin subdomain but accessing non-admin routes (except root which redirects separately)
         if (isAdminDomain && !location.pathname.startsWith("/admin") && location.pathname !== "/") {
           // Only redirect if it's not an admin-related path
@@ -36,8 +39,20 @@ export const Route = createRootRouteWithContext<{
         }
 
         // If on main domain but accessing admin route, redirect to admin subdomain
-        if (!isAdminDomain && location.pathname.startsWith("/admin")) {
-          window.location.href = getRedirectUrl(hostname, "app", location.pathname);
+        // BUT skip if we've already attempted and failed (DNS not ready)
+        if (!isAdminDomain && location.pathname.startsWith("/admin") && !redirectAttempted) {
+          // Set flag to prevent infinite redirects
+          sessionStorage.setItem("subdomain-redirect-attempted", "true");
+
+          // Try to redirect to admin subdomain
+          const targetUrl = getRedirectUrl(hostname, "admin", location.pathname);
+
+          // Clear the flag after a delay (so it can retry later)
+          setTimeout(() => {
+            sessionStorage.removeItem("subdomain-redirect-attempted");
+          }, 5000);
+
+          window.location.href = targetUrl;
           return { user };
         }
       }

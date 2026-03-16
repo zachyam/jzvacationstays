@@ -6,10 +6,10 @@ import { getProperties } from "../server/functions/properties";
 
 export const Route = createFileRoute("/")({
   beforeLoad: ({ context }) => {
-    // If on app subdomain (admin), redirect to admin dashboard
+    // If on admin subdomain, redirect to dashboard
     if (typeof window !== "undefined") {
       const hostname = window.location.hostname;
-      if (hostname.startsWith("app.")) {
+      if (hostname.startsWith("admin.")) {
         throw redirect({ to: "/admin/dashboard" });
       }
     }

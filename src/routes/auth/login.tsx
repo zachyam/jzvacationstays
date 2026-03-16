@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { sendOtp } from "../../server/functions/auth";
@@ -9,6 +9,8 @@ export const Route = createFileRoute("/auth/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
+  const search = useSearch({ from: "/auth/login" });
+  const redirectTo = (search as any)?.redirect || "/";
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [showName, setShowName] = useState(false);
@@ -37,9 +39,20 @@ function LoginPage() {
         return;
       }
 
-      // Admin users skip OTP and go directly to admin dashboard
+      // Admin users skip OTP and go directly to admin subdomain
       if (result.skipOtp) {
-        window.location.href = "/admin/dashboard";
+        // Get the current hostname to build admin URL
+        const currentHost = window.location.hostname;
+        const domain = currentHost.includes("localhost")
+          ? "localhost:3001"
+          : currentHost.split(".").slice(-2).join(".");
+
+        // Redirect to admin subdomain root (which will show dashboard)
+        const adminUrl = currentHost.includes("localhost")
+          ? "http://localhost:3001/"
+          : `https://admin.${domain}/`;
+
+        window.location.href = adminUrl;
         return;
       }
 
