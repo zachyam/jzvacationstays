@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { getBookingById } from "../../server/functions/bookings";
+import { Header } from "../../components/layout/header";
 import { formatCurrency, formatDate } from "../../lib/utils";
 
 export const Route = createFileRoute("/booking/confirmation/$bookingId")({
@@ -49,6 +50,9 @@ function ConfirmationPage() {
 
   return (
     <main className="min-h-screen bg-stone-100">
+      <div className="max-w-screen-xl mx-auto px-6 py-8">
+        <Header />
+      </div>
       <div className="max-w-screen-sm mx-auto px-6 py-16">
         {/* Success icon */}
         <div className="text-center mb-8">

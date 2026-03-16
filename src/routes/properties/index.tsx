@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { getProperties } from "../../server/functions/properties";
 import { PropertyCard } from "../../components/property/property-card";
+import { Header } from "../../components/layout/header";
 
 export const Route = createFileRoute("/properties/")({
   loader: async () => {
@@ -20,6 +21,9 @@ function PropertiesPage() {
 
   return (
     <main className="min-h-screen bg-stone-100">
+      <div className="max-w-screen-xl mx-auto px-6 md:px-10 lg:px-12 py-8">
+        <Header />
+      </div>
       <div className="max-w-screen-xl mx-auto px-6 md:px-10 lg:px-12 py-12">
         <div className="mb-10">
           <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-stone-900">
