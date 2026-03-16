@@ -19,9 +19,10 @@ export const Route = createFileRoute("/properties/$propertyId")({
 
       if (!property) return { property: null, photos: [], reviews: [], blockedDates: [] };
 
+      // Fetch reviews and availability separately so failures don't hide the property
       const [reviews, availability] = await Promise.all([
-        getReviewsByProperty({ data: { propertyId: property.id } }),
-        getAvailability({ data: { propertySlug: property.slug } }),
+        getReviewsByProperty({ data: { propertyId: property.id } }).catch(() => []),
+        getAvailability({ data: { propertySlug: property.slug } }).catch(() => ({ blockedDates: [] })),
       ]);
 
       return { property, photos, reviews, blockedDates: availability.blockedDates };
