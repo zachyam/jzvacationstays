@@ -3,7 +3,11 @@ import { Resend } from "resend";
 let resend: Resend;
 function getResend() {
   if (!resend) {
-    resend = new Resend(process.env.RESEND_API_KEY);
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      throw new Error("RESEND_API_KEY environment variable is not set");
+    }
+    resend = new Resend(apiKey);
   }
   return resend;
 }

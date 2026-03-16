@@ -89,7 +89,12 @@ export const sendOtp = createServerFn({ method: "POST" })
     });
 
     // Send email
-    await sendOtpEmail(email, code);
+    try {
+      await sendOtpEmail(email, code);
+    } catch (error) {
+      console.error("Failed to send OTP email:", error);
+      throw new Error("Failed to send verification email. Please check your email configuration.");
+    }
 
     return { success: true, isNewUser };
   });

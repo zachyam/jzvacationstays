@@ -47,7 +47,8 @@ function LoginPage() {
         to: "/auth/verify",
         search: { email, isNewUser: result.isNewUser, name: showName ? name : undefined },
       });
-    } catch {
+    } catch (err) {
+      console.error("Login error:", err);
       setError("Failed to send code. Please try again.");
       setLoading(false);
     }
