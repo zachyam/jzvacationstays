@@ -88,10 +88,9 @@ function ChecklistDetailPage() {
 
   // Comprehensive room list
   const commonRooms = [
-    "Living Room", "Kitchen", "Master Bedroom", "Bedroom 2", "Bedroom 3",
-    "Master Bathroom", "Guest Bathroom", "Bathroom 2", "Dining Room",
-    "Laundry Room", "Garage", "Patio/Deck", "Pool Area",
-    "Entrance/Foyer", "Hallway", "Closets", "Exterior", "General",
+    "Living Room", "Kitchen", "Master Bedroom", "Master Bathroom", "Blue Bedroom", "Bunk Bedroom 1", "Bunk Bedroom 2", "Bathroom",
+    "Laundry Room", "Garage", "Outdoor Patio", "Pool Area", "Game Area", "Outdoor Kitchen", "Basement Living Room", "Basement Bedroom",
+    "Basement Bathroom", "Entrance Hallway", "Exterior", "General",
   ];
   const existingRooms = [...new Set(items.map((i) => i.room).filter(Boolean))] as string[];
   const allRooms = [...new Set([...commonRooms, ...existingRooms])].sort();
