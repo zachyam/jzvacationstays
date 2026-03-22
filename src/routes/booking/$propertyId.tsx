@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 declare global {
@@ -271,12 +271,20 @@ function BookingPage() {
     <main className="bg-stone-50 text-stone-900 selection:bg-sky-500/20 flex flex-col min-h-screen relative">
       {/* Header */}
       <header className="bg-white border-b border-stone-200 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-stone-900">
+        <Link to="/" className="flex items-center gap-2 text-stone-900 hover:opacity-80 transition-opacity">
           <div className="w-8 h-8 bg-sky-500 rounded-lg flex items-center justify-center text-white">
             <iconify-icon icon="solar:home-smile-linear" className="text-xl"></iconify-icon>
           </div>
           <span className="text-xl font-medium tracking-tight">JZ Vacation Stays</span>
-        </div>
+        </Link>
+        <nav className="hidden md:flex items-center space-x-8">
+          <Link
+            to="/properties"
+            className="text-sm text-stone-500 hover:text-stone-900 transition-colors"
+          >
+            Browse Properties
+          </Link>
+        </nav>
       </header>
 
       <div className="max-w-7xl mx-auto w-full p-6 sm:p-8 lg:p-12 flex flex-col xl:flex-row gap-8 lg:gap-12 items-start">
