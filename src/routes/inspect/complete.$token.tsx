@@ -29,11 +29,6 @@ function InspectionCompletePage() {
     );
   }
 
-  const completedCount = summary.items.filter(i => i.isCompleted).length;
-  const totalCount = summary.items.length;
-  const completionRate = Math.round((completedCount / totalCount) * 100);
-  const mediaCount = summary.totalMedia || 0;
-
   return (
     <div className="min-h-screen bg-stone-50">
       {/* Success Header */}
@@ -52,7 +47,7 @@ function InspectionCompletePage() {
             <h2 className="text-lg font-semibold text-stone-900 mb-4">Inspection Summary</h2>
 
             {/* Property Info */}
-            <div className="space-y-3 mb-6">
+            <div className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-stone-600">Property</span>
                 <span className="font-medium text-stone-900">{summary.propertyName || "N/A"}</span>
@@ -77,72 +72,6 @@ function InspectionCompletePage() {
                 </span>
               </div>
             </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-4 py-4 border-t border-b border-stone-100">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-stone-900">{completedCount}</div>
-                <div className="text-xs text-stone-600 mt-1">Items Completed</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-emerald-600">{completionRate}%</div>
-                <div className="text-xs text-stone-600 mt-1">Completion Rate</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-stone-900">{mediaCount}</div>
-                <div className="text-xs text-stone-600 mt-1">Photos/Videos</div>
-              </div>
-            </div>
-
-            {/* Completed Items */}
-            {completedCount > 0 && (
-              <div className="mt-6">
-                <h3 className="text-sm font-medium text-stone-700 mb-3">Completed Items</h3>
-                <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {summary.items
-                    .filter(item => item.isCompleted)
-                    .map(item => (
-                      <div key={item.id} className="flex items-start gap-2 text-sm">
-                        <Icon icon="solar:check-circle-linear" className="w-4 h-4 text-emerald-500 mt-0.5" />
-                        <div className="flex-1">
-                          <span className="text-stone-700">{item.title}</span>
-                          {item.room && (
-                            <span className="text-stone-500 text-xs ml-2">({item.room})</span>
-                          )}
-                          {item.mediaCount > 0 && (
-                            <span className="inline-flex items-center gap-1 ml-2 text-xs text-stone-500">
-                              <Icon icon="solar:camera-linear" className="w-3 h-3" />
-                              {item.mediaCount}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              </div>
-            )}
-
-            {/* Incomplete Items */}
-            {completedCount < totalCount && (
-              <div className="mt-6">
-                <h3 className="text-sm font-medium text-stone-700 mb-3">Not Completed</h3>
-                <div className="space-y-2 max-h-40 overflow-y-auto">
-                  {summary.items
-                    .filter(item => !item.isCompleted)
-                    .map(item => (
-                      <div key={item.id} className="flex items-start gap-2 text-sm">
-                        <Icon icon="solar:close-circle-linear" className="w-4 h-4 text-stone-400 mt-0.5" />
-                        <div className="flex-1">
-                          <span className="text-stone-500">{item.title}</span>
-                          {item.room && (
-                            <span className="text-stone-400 text-xs ml-2">({item.room})</span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              </div>
-            )}
 
             {/* Notes */}
             {summary.notes && (

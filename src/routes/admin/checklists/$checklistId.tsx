@@ -13,6 +13,7 @@ import {
 import { getChecklistUploadUrl } from "../../../server/functions/uploads";
 import { createInspection } from "../../../server/functions/inspections";
 import { getProperties } from "../../../server/functions/properties";
+import { getInspectionUrl } from "../../../lib/inspection-url";
 
 export const Route = createFileRoute("/admin/checklists/$checklistId")({
   loader: async ({ params }) => {
@@ -153,7 +154,7 @@ function ChecklistDetailPage() {
         propertyId: inspectionPropertyId || undefined,
       },
     });
-    const url = `${window.location.origin}/inspect/${result.token}`;
+    const url = getInspectionUrl(result.token);
     setInspectionLink(url);
   }
 

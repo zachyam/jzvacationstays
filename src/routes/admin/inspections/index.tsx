@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { getAllInspections } from "../../../server/functions/inspections";
+import { getInspectionUrl } from "../../../lib/inspection-url";
 
 export const Route = createFileRoute("/admin/inspections/")({
   loader: async () => {
@@ -263,7 +264,7 @@ function InspectionsPage() {
                       onClick={(e) => {
                         e.stopPropagation();
                         navigator.clipboard.writeText(
-                          `${window.location.origin}/inspect/${inspection.token}`
+                          getInspectionUrl(inspection.token)
                         );
                         alert('Inspection link copied to clipboard!');
                       }}

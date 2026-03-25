@@ -540,7 +540,7 @@ function InspectionItemCard({
                     ? "bg-red-100 text-red-700"
                     : "bg-stone-100 text-stone-600"
               }`}>
-                {item.status === "na" ? "N/A" : item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                {item.status ? item.status.charAt(0).toUpperCase() + item.status.slice(1) : "Not Set"}
               </span>
             </div>
           )}
@@ -560,9 +560,9 @@ function InspectionItemCard({
         <div className="mt-5 ml-11 space-y-5">
           <div className="h-px w-full bg-stone-100" />
 
-          {/* Pass/Fail/NA buttons */}
+          {/* Pass/Fail buttons */}
           <div className="flex gap-2">
-            {(["pass", "fail", "na"] as const).map((s) => (
+            {(["pass", "fail"] as const).map((s) => (
               <button
                 key={s}
                 onClick={() => onStatus(item.id, s)}
@@ -570,13 +570,11 @@ function InspectionItemCard({
                   item.status === s
                     ? s === "pass"
                       ? "bg-emerald-500 text-white shadow-sm"
-                      : s === "fail"
-                        ? "bg-red-500 text-white shadow-sm"
-                        : "bg-stone-600 text-white shadow-sm"
+                      : "bg-red-500 text-white shadow-sm"
                     : "bg-stone-100 text-stone-500 hover:bg-stone-200"
                 }`}
               >
-                {s === "na" ? "N/A" : s.charAt(0).toUpperCase() + s.slice(1)}
+                {s.charAt(0).toUpperCase() + s.slice(1)}
               </button>
             ))}
           </div>

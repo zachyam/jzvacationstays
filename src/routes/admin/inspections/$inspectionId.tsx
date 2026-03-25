@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { getInspectionDetails } from "../../../server/functions/inspections";
+import { getInspectionUrl } from "../../../lib/inspection-url";
 
 export const Route = createFileRoute("/admin/inspections/$inspectionId")({
   loader: async ({ params }) => {
@@ -100,7 +101,7 @@ function InspectionDetailPage() {
           <button
             onClick={() => {
               navigator.clipboard.writeText(
-                `${window.location.origin}/inspect/${inspection.token}`
+                getInspectionUrl(inspection.token)
               );
               alert('Inspection link copied to clipboard!');
             }}
@@ -221,6 +222,30 @@ function InspectionDetailPage() {
                           </h3>
                           {item.description && (
                             <p className="text-sm text-stone-500 leading-relaxed">{item.description}</p>
+                          )}
+                          {item.status && (
+                            <div className="mt-2">
+                              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium ${
+                                item.status === "pass"
+                                  ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                                  : item.status === "fail"
+                                    ? "bg-red-100 text-red-700 border border-red-200"
+                                    : "bg-stone-100 text-stone-600 border border-stone-200"
+                              }`}>
+                                <iconify-icon
+                                  icon={item.status === "pass" ? "solar:check-circle-bold" : item.status === "fail" ? "solar:close-circle-bold" : "solar:question-circle-linear"}
+                                  class="text-sm"
+                                />
+                                {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                              </span>
+                            </div>
+                          )}
+                          {item.comment && (
+                            <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                              <p className="text-sm text-amber-800">
+                                <span className="font-medium">Note:</span> {item.comment}
+                              </p>
+                            </div>
                           )}
                           {item.completedAt && (
                             <p className="text-xs text-stone-400 mt-1 flex items-center gap-1">
