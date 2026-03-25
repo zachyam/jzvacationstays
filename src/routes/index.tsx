@@ -36,8 +36,8 @@ function HomePage() {
   }
 
   // Map DB properties to display data, with fallbacks for hardcoded values
-  const seaglass = properties.find((p) => p.slug === "seaglass-villa");
-  const coral = properties.find((p) => p.slug === "coral-retreat");
+  const blueOasis = properties.find((p) => p.slug === "the-blue-oasis");
+  const surfersSerenity = properties.find((p) => p.slug === "surfers-serenity");
 
   return (
     <main className="relative min-h-screen w-full overflow-hidden flex flex-col">
@@ -155,20 +155,20 @@ function HomePage() {
             </h2>
 
             <HeroPropertyCard
-              slug={seaglass?.slug || "seaglass-villa"}
-              name={seaglass?.name || "Seaglass Villa"}
-              tagline={`${seaglass?.tagline || "Oceanfront"} • ${seaglass?.maxGuests || 8} Guests`}
-              highlight={seaglass?.highlight || "Family favorite"}
+              slug={blueOasis?.slug || "the-blue-oasis"}
+              name={blueOasis?.name || "The Blue Oasis"}
+              tagline={`${blueOasis?.tagline || "Oceanfront"} • ${blueOasis?.maxGuests || 8} Guests`}
+              highlight={blueOasis?.highlight || "Family favorite"}
               highlightColor="bg-emerald-500/90 shadow-emerald-500/50"
               imageUrl="https://images.unsplash.com/photo-1519046904884-53103b34b206?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
               imageAlt="Family on the beach"
             />
 
             <HeroPropertyCard
-              slug={coral?.slug || "coral-retreat"}
-              name={coral?.name || "Coral Retreat"}
-              tagline={`${coral?.tagline || "Private Pool"} • ${coral?.maxGuests || 4} Guests`}
-              highlight={coral?.highlight || "Kid-friendly pool"}
+              slug={surfersSerenity?.slug || "surfers-serenity"}
+              name={surfersSerenity?.name || "Surfer's Serenity"}
+              tagline={`${surfersSerenity?.tagline || "Private Pool"} • ${surfersSerenity?.maxGuests || 4} Guests`}
+              highlight={surfersSerenity?.highlight || "Kid-friendly pool"}
               highlightColor="bg-sky-500/90 shadow-sky-500/50"
               imageUrl="https://images.unsplash.com/photo-1572331165267-854da2b10ccc?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
               imageAlt="Sunny pool area"

@@ -1,6 +1,6 @@
 export const PROPERTY_SLUGS = {
-  SEAGLASS_VILLA: "seaglass-villa",
-  CORAL_RETREAT: "coral-retreat",
+  THE_BLUE_OASIS: "the-blue-oasis",
+  SURFERS_SERENITY: "surfers-serenity",
 } as const;
 
 export const BOOKING_STATUS = {

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { getAllInspections } from "../../server/functions/inspections";
+import { getAllInspections } from "../../../server/functions/inspections";
 
-export const Route = createFileRoute("/admin/inspections")({
+export const Route = createFileRoute("/admin/inspections/")({
   loader: async () => {
     try {
       return await getAllInspections();
@@ -228,51 +228,51 @@ function InspectionsPage() {
 
               <div className="space-y-4">
                 {pendingInspections.map((inspection) => (
-                  <Link
-                    key={inspection.id}
-                    to="/admin/inspections/$inspectionId"
-                    params={{ inspectionId: inspection.id }}
-                    className="block bg-white border border-stone-200 rounded-[1.5rem] p-5 sm:p-6 shadow-sm hover:border-stone-300 transition-all cursor-pointer group"
-                  >
-                    <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
-                      <div className="flex gap-4 items-center">
-                        <div className="w-12 h-12 rounded-full bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-400 shrink-0 group-hover:bg-stone-50 group-hover:border-stone-300 transition-colors">
-                          <iconify-icon icon="solar:clock-circle-bold" class="text-2xl" />
+                  <div key={inspection.id} className="relative">
+                    <Link
+                      to="/admin/inspections/$inspectionId"
+                      params={{ inspectionId: inspection.id }}
+                      className="block bg-white border border-stone-200 rounded-[1.5rem] p-5 sm:p-6 shadow-sm hover:border-stone-300 transition-all cursor-pointer group"
+                    >
+                      <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
+                        <div className="flex gap-4 items-center">
+                          <div className="w-12 h-12 rounded-full bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-400 shrink-0 group-hover:bg-stone-50 group-hover:border-stone-300 transition-colors">
+                            <iconify-icon icon="solar:clock-circle-bold" class="text-2xl" />
+                          </div>
+                          <div>
+                            <h3 className="font-medium text-stone-900 text-lg mb-0.5 leading-snug group-hover:text-sky-600 transition-colors">
+                              {inspection.propertyName || 'No property'}
+                            </h3>
+                            <p className="text-sm text-stone-500 flex items-center gap-2">
+                              <iconify-icon icon="solar:calendar-linear" />
+                              {formatDate(inspection.createdAt)}
+                              <span className="w-1 h-1 rounded-full bg-stone-300" />
+                              {inspection.checklistTitle}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="font-medium text-stone-900 text-lg mb-0.5 leading-snug group-hover:text-sky-600 transition-colors">
-                            {inspection.propertyName || 'No property'}
-                          </h3>
-                          <p className="text-sm text-stone-500 flex items-center gap-2">
-                            <iconify-icon icon="solar:calendar-linear" />
-                            {formatDate(inspection.createdAt)}
-                            <span className="w-1 h-1 rounded-full bg-stone-300" />
-                            {inspection.checklistTitle}
-                          </p>
-                        </div>
-                      </div>
 
-                      <div className="flex items-center gap-3 border-t sm:border-t-0 border-stone-100 pt-4 sm:pt-0">
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            navigator.clipboard.writeText(
-                              `${window.location.origin}/inspect/${inspection.token}`
-                            );
-                            alert('Inspection link copied to clipboard!');
-                          }}
-                          className="flex items-center gap-2 text-sm font-medium text-stone-600 bg-stone-50 px-4 py-2 rounded-xl border border-stone-200 hover:bg-stone-100 transition-colors"
-                        >
-                          <iconify-icon icon="solar:link-linear" class="text-stone-400" />
-                          Copy Link
-                        </button>
-                        <div className="w-10 h-10 bg-white border border-stone-200 rounded-xl flex items-center justify-center text-stone-500 group-hover:bg-sky-50 group-hover:text-sky-600 group-hover:border-sky-200 transition-colors">
-                          <iconify-icon icon="solar:alt-arrow-right-linear" class="text-xl" />
+                        <div className="flex items-center gap-3 border-t sm:border-t-0 border-stone-100 pt-4 sm:pt-0">
+                          <div className="w-10 h-10 bg-white border border-stone-200 rounded-xl flex items-center justify-center text-stone-500 group-hover:bg-sky-50 group-hover:text-sky-600 group-hover:border-sky-200 transition-colors">
+                            <iconify-icon icon="solar:alt-arrow-right-linear" class="text-xl" />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </Link>
+                    </Link>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(
+                          `${window.location.origin}/inspect/${inspection.token}`
+                        );
+                        alert('Inspection link copied to clipboard!');
+                      }}
+                      className="absolute bottom-5 right-20 flex items-center gap-2 text-sm font-medium text-stone-600 bg-stone-50 px-4 py-2 rounded-xl border border-stone-200 hover:bg-stone-100 transition-colors z-10"
+                    >
+                      <iconify-icon icon="solar:link-linear" class="text-stone-400" />
+                      Copy Link
+                    </button>
+                  </div>
                 ))}
               </div>
             </section>

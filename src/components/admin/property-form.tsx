@@ -178,7 +178,7 @@ export function PropertyForm({
               onChange={(e) => handleNameChange(e.target.value)}
               required
               className="w-full border border-stone-300 rounded-lg px-4 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
-              placeholder="e.g. Seaglass Villa"
+              placeholder="e.g. The Blue Oasis"
             />
           </div>
 
@@ -193,7 +193,7 @@ export function PropertyForm({
               required
               pattern="^[a-z0-9-]+$"
               className="w-full border border-stone-300 rounded-lg px-4 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
-              placeholder="e.g. seaglass-villa"
+              placeholder="e.g. the-blue-oasis"
             />
           </div>
 

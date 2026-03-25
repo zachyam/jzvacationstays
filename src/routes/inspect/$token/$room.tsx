@@ -1,12 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
-  getInspectionByToken,
+  getInspectionRoomData,
   updateInspectionItem,
   addInspectionMedia,
   deleteInspectionMedia,
 } from "../../../server/functions/inspections";
-import { getUploadUrl } from "../../../server/functions/uploads";
+import { uploadInspectionFile } from "../../../server/functions/uploads";
 
 type InspectionItem = {
   id: string;
@@ -57,22 +57,15 @@ type LoaderData = {
 export const Route = createFileRoute("/inspect/$token/$room")({
   loader: async ({ params }): Promise<LoaderData> => {
     try {
-      const data = await getInspectionByToken({ data: { token: params.token } }) as any;
+      // Use the optimized room-specific data fetching
+      const data = await getInspectionRoomData({
+        data: {
+          token: params.token,
+          room: params.room
+        }
+      }) as LoaderData;
 
-      // Get all unique rooms
-      const allRooms = [...new Set(data.items.map((item: InspectionItem) => item.room || "General"))];
-
-      // Filter items for this room
-      const roomName = decodeURIComponent(params.room);
-      const roomItems = data.items.filter((item: InspectionItem) =>
-        (item.room || "General") === roomName
-      );
-
-      return {
-        ...data,
-        items: roomItems,
-        allRooms,
-      };
+      return data;
     } catch {
       return {
         inspection: null,
@@ -88,13 +81,19 @@ export const Route = createFileRoute("/inspect/$token/$room")({
 });
 
 function RoomInspectionPage() {
-  const { token, room: encodedRoom } = Route.useParams();
-  const room = decodeURIComponent(encodedRoom);
+  const { token, room } = Route.useParams();
   const data = Route.useLoaderData() as LoaderData;
   const [items, setItems] = useState<InspectionItem[]>(data.items);
   const [media, setMedia] = useState<MediaMap>(data.media);
   const [uploading, setUploading] = useState<string | null>(null);
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+
+  // Update state when room changes
+  useEffect(() => {
+    setItems(data.items);
+    setMedia(data.media);
+    setExpandedItem(null); // Reset expanded item when changing rooms
+  }, [room, data.items, data.media]);
 
   if (!data.inspection) {
     return (
@@ -169,22 +168,29 @@ function RoomInspectionPage() {
     setUploading(itemId);
     try {
       for (const file of Array.from(files)) {
-        const { uploadUrl, publicUrl, fileType } = await getUploadUrl({
+        console.log('Uploading file:', file.name, file.type, file.size);
+
+        // Convert file to base64
+        const reader = new FileReader();
+        const fileData = await new Promise<string>((resolve, reject) => {
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+
+        // Upload through server to avoid CORS issues
+        const { publicUrl, fileType } = await uploadInspectionFile({
           data: {
             inspectionId: data.inspection!.id,
             itemId,
+            file: fileData,
             contentType: file.type,
             fileName: file.name,
             fileSize: file.size,
           },
         });
 
-        await fetch(uploadUrl, {
-          method: "PUT",
-          body: file,
-          headers: { "Content-Type": file.type },
-        });
-
+        console.log('File uploaded successfully, saving to database...');
         const result = await addInspectionMedia({
           data: {
             token,
@@ -212,8 +218,9 @@ function RoomInspectionPage() {
           ],
         }));
       }
-    } catch {
-      alert("Upload failed. Please try again.");
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setUploading(null);
     }
@@ -242,7 +249,8 @@ function RoomInspectionPage() {
           {/* Top Nav with Back Button */}
           <div className="flex items-center justify-between mb-4">
             <Link
-              to={`/inspect/${token}`}
+              to="/inspect/$token/"
+              params={{ token }}
               className="w-10 h-10 rounded-xl bg-stone-100 hover:bg-stone-200 flex items-center justify-center transition-colors"
             >
               <iconify-icon icon="solar:arrow-left-linear" class="text-lg text-stone-600" />
@@ -286,7 +294,8 @@ function RoomInspectionPage() {
               Return to the overview page to start the inspection.
             </p>
             <Link
-              to={`/inspect/${token}`}
+              to="/inspect/$token/"
+              params={{ token }}
               className="inline-flex items-center gap-2 mt-4 text-sm font-medium text-amber-700 hover:text-amber-800 transition-colors"
             >
               <iconify-icon icon="solar:arrow-left-linear" class="text-sm" />
@@ -313,7 +322,8 @@ function RoomInspectionPage() {
           <div className="flex items-center justify-between gap-4">
             {previousRoom ? (
               <Link
-                to={`/inspect/${token}/${encodeURIComponent(previousRoom)}`}
+                to="/inspect/$token/$room"
+                params={{ token, room: previousRoom }}
                 className="flex items-center gap-2 text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors"
               >
                 <iconify-icon icon="solar:arrow-left-linear" class="text-base" />
@@ -329,7 +339,8 @@ function RoomInspectionPage() {
 
             {nextRoom ? (
               <Link
-                to={`/inspect/${token}/${encodeURIComponent(nextRoom)}`}
+                to="/inspect/$token/$room"
+                params={{ token, room: nextRoom }}
                 className="flex items-center gap-2 text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors"
               >
                 {nextRoom}
@@ -371,7 +382,8 @@ function RoomInspectionPage() {
             <div className="flex gap-3 justify-center">
               {nextRoom ? (
                 <Link
-                  to={`/inspect/${token}/${encodeURIComponent(nextRoom)}`}
+                  to="/inspect/$token/$room"
+                  params={{ token, room: nextRoom }}
                   className="bg-emerald-500 text-white font-medium px-6 py-3 rounded-xl shadow-sm hover:bg-emerald-400 transition-colors flex items-center gap-2"
                 >
                   Next Room
@@ -379,7 +391,8 @@ function RoomInspectionPage() {
                 </Link>
               ) : (
                 <Link
-                  to={`/inspect/${token}`}
+                  to="/inspect/$token/"
+                  params={{ token }}
                   className="bg-emerald-500 text-white font-medium px-6 py-3 rounded-xl shadow-sm hover:bg-emerald-400 transition-colors flex items-center gap-2"
                 >
                   Complete Inspection
@@ -387,7 +400,8 @@ function RoomInspectionPage() {
                 </Link>
               )}
               <Link
-                to={`/inspect/${token}`}
+                to="/inspect/$token/"
+                params={{ token }}
                 className="bg-white border border-stone-200 text-stone-700 font-medium px-6 py-3 rounded-xl hover:bg-stone-50 transition-colors"
               >
                 Back to Overview
@@ -412,7 +426,8 @@ function RoomInspectionPage() {
             <div className="flex gap-2 flex-1 sm:flex-none">
               {nextRoom ? (
                 <Link
-                  to={`/inspect/${token}/${encodeURIComponent(nextRoom)}`}
+                  to="/inspect/$token/$room"
+                  params={{ token, room: nextRoom }}
                   className="flex-1 sm:flex-none bg-stone-900 text-white font-medium px-6 py-3 rounded-xl hover:bg-stone-800 transition-colors text-sm flex items-center justify-center gap-2"
                 >
                   Next Room
@@ -420,7 +435,8 @@ function RoomInspectionPage() {
                 </Link>
               ) : (
                 <Link
-                  to={`/inspect/${token}`}
+                  to="/inspect/$token/"
+                  params={{ token }}
                   className="flex-1 sm:flex-none bg-sky-500 text-white font-medium px-6 py-3 rounded-xl hover:bg-sky-400 transition-colors text-sm flex items-center justify-center gap-2"
                 >
                   Back to Overview

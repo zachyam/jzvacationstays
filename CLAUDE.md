@@ -66,6 +66,6 @@
 - Roles: "guest" (default), "admin"
 
 ## Properties
-- 2 properties: "seaglass-villa" and "coral-retreat" (slugs)
+- 2 properties: "the-blue-oasis" and "surfers-serenity" (slugs)
 - Pricing is dynamic (fetched from platforms), cleaning fee is fixed
 - Calendar synced via iCal with Airbnb, VRBO, Hospitable

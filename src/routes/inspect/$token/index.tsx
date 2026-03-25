@@ -75,6 +75,7 @@ function InspectionOverviewPage() {
   const [status, setStatus] = useState(data.inspection?.status || "pending");
   const [completionNotes, setCompletionNotes] = useState("");
   const [showCompleteForm, setShowCompleteForm] = useState(false);
+  const [showIncompleteWarning, setShowIncompleteWarning] = useState(false);
 
   if (!data.inspection) {
     return (
@@ -210,7 +211,8 @@ function InspectionOverviewPage() {
                 >
                   {canAccess ? (
                     <Link
-                      to={`/inspect/${token}/${encodeURIComponent(room)}`}
+                      to="/inspect/$token/$room"
+                      params={{ token, room }}
                       className={`block bg-white border rounded-[1.5rem] p-6 transition-all ${
                         isRoomComplete
                           ? 'border-emerald-200 shadow-sm'
@@ -310,16 +312,65 @@ function InspectionOverviewPage() {
           </div>
         </section>
 
-        {/* Complete button */}
-        {status === "in_progress" && progressPercent === 100 && !showCompleteForm && (
+        {/* Complete button - now shown when in progress regardless of completion percentage */}
+        {status === "in_progress" && !showCompleteForm && !showIncompleteWarning && (
           <div className="flex justify-center pt-4">
             <button
-              onClick={() => setShowCompleteForm(true)}
+              onClick={() => {
+                if (progressPercent < 100) {
+                  setShowIncompleteWarning(true);
+                } else {
+                  setShowCompleteForm(true);
+                }
+              }}
               className="bg-emerald-500 text-white font-medium px-8 py-3.5 rounded-xl shadow-md shadow-emerald-500/20 hover:bg-emerald-400 hover:shadow-lg hover:-translate-y-0.5 transition-all text-base flex items-center gap-2"
             >
               Complete Inspection
               <iconify-icon icon="solar:check-circle-linear" class="text-xl" />
             </button>
+          </div>
+        )}
+
+        {/* Warning popup for incomplete inspection */}
+        {showIncompleteWarning && (
+          <div className="bg-white border-2 border-amber-200 rounded-[1.5rem] p-6 shadow-lg shadow-amber-500/10 ring-4 ring-amber-500/10 space-y-4">
+            <div className="flex items-start gap-3">
+              <iconify-icon icon="solar:danger-triangle-bold" class="text-3xl text-amber-500 mt-1" />
+              <div className="flex-1">
+                <h3 className="text-lg font-medium text-stone-900 mb-2">Incomplete Inspection</h3>
+                <p className="text-sm text-stone-600 mb-3">
+                  This inspection is only {progressPercent}% complete. You have {data.items.length - completedCount} unchecked items remaining.
+                </p>
+                <p className="text-sm text-stone-500">
+                  Are you sure you want to complete this inspection with incomplete items? You can add notes to explain any skipped items.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+              <p className="text-xs font-medium text-amber-700">
+                Incomplete rooms/items will be marked in the final report.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowIncompleteWarning(false);
+                  setShowCompleteForm(true);
+                }}
+                className="flex-1 bg-amber-500 text-white font-medium py-3.5 rounded-xl shadow-md shadow-amber-500/20 hover:bg-amber-400 hover:shadow-lg transition-all text-sm flex items-center justify-center gap-2"
+              >
+                <iconify-icon icon="solar:alt-arrow-right-linear" class="text-lg" />
+                Continue to Complete
+              </button>
+              <button
+                onClick={() => setShowIncompleteWarning(false)}
+                className="px-6 py-3.5 bg-white border border-stone-200 text-stone-700 rounded-xl text-sm font-medium hover:bg-stone-50 transition-colors"
+              >
+                Go Back
+              </button>
+            </div>
           </div>
         )}
 
@@ -329,6 +380,14 @@ function InspectionOverviewPage() {
             <p className="text-sm text-stone-500">
               Add any overall notes before finishing.
             </p>
+            {progressPercent < 100 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-2">
+                <iconify-icon icon="solar:info-circle-linear" class="text-amber-600" />
+                <p className="text-xs text-amber-700">
+                  This inspection has {data.items.length - completedCount} incomplete items.
+                </p>
+              </div>
+            )}
             <textarea
               value={completionNotes}
               onChange={(e) => setCompletionNotes(e.target.value)}

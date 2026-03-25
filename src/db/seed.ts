@@ -28,11 +28,11 @@ async function seed() {
   console.log("Created admin user:", adminUser.email);
 
   // Create properties
-  const [seaglassVilla] = await db
+  const [theBlueOasis] = await db
     .insert(schema.properties)
     .values({
-      slug: "seaglass-villa",
-      name: "Seaglass Villa",
+      slug: "the-blue-oasis",
+      name: "The Blue Oasis",
       tagline: "Oceanfront",
       description:
         "A stunning oceanfront villa perfect for family vacations. Wake up to the sound of waves and enjoy breathtaking views from every room. Features a spacious open floor plan, gourmet kitchen, and direct beach access.",
@@ -56,11 +56,11 @@ async function seed() {
     })
     .returning();
 
-  const [coralRetreat] = await db
+  const [surfersSerenity] = await db
     .insert(schema.properties)
     .values({
-      slug: "coral-retreat",
-      name: "Coral Retreat",
+      slug: "surfers-serenity",
+      name: "Surfer's Serenity",
       tagline: "Private Pool",
       description:
         "A charming retreat with a private heated pool, perfect for families with young children. Located just minutes from the beach with a fully fenced yard and kid-friendly amenities throughout.",
@@ -84,12 +84,12 @@ async function seed() {
     })
     .returning();
 
-  console.log("Created properties:", seaglassVilla.name, coralRetreat.name);
+  console.log("Created properties:", theBlueOasis.name, surfersSerenity.name);
 
   // Create sample reviews
   await db.insert(schema.reviews).values([
     {
-      propertyId: seaglassVilla.id,
+      propertyId: theBlueOasis.id,
       guestName: "Sarah M.",
       rating: 5,
       comment:
@@ -98,7 +98,7 @@ async function seed() {
       stayDate: "2025-06-15",
     },
     {
-      propertyId: seaglassVilla.id,
+      propertyId: theBlueOasis.id,
       guestName: "David R.",
       rating: 5,
       comment:
@@ -107,7 +107,7 @@ async function seed() {
       stayDate: "2025-07-20",
     },
     {
-      propertyId: seaglassVilla.id,
+      propertyId: theBlueOasis.id,
       guestName: "Jennifer L.",
       rating: 4,
       comment:
@@ -116,7 +116,7 @@ async function seed() {
       stayDate: "2025-08-10",
     },
     {
-      propertyId: coralRetreat.id,
+      propertyId: surfersSerenity.id,
       guestName: "Mike T.",
       rating: 5,
       comment:
@@ -125,7 +125,7 @@ async function seed() {
       stayDate: "2025-05-22",
     },
     {
-      propertyId: coralRetreat.id,
+      propertyId: surfersSerenity.id,
       guestName: "Amanda K.",
       rating: 5,
       comment:
@@ -141,7 +141,7 @@ async function seed() {
   const [turnoverChecklist] = await db
     .insert(schema.checklists)
     .values({
-      propertyId: seaglassVilla.id,
+      propertyId: theBlueOasis.id,
       title: "Guest Turnover Checklist",
       type: "turnover",
       createdBy: adminUser.id,

@@ -23,13 +23,13 @@ import { Route as ApiDebugRouteImport } from './routes/api/debug'
 import { Route as AdminThermostatRouteImport } from './routes/admin/thermostat'
 import { Route as AdminTestUploadRouteImport } from './routes/admin/test-upload'
 import { Route as AdminReviewsRouteImport } from './routes/admin/reviews'
-import { Route as AdminInspectionsRouteImport } from './routes/admin/inspections'
 import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
 import { Route as AdminCalendarSyncRouteImport } from './routes/admin/calendar-sync'
 import { Route as AdminCalendarRouteImport } from './routes/admin/calendar'
 import { Route as AdminBookingsRouteImport } from './routes/admin/bookings'
 import { Route as InspectTokenIndexRouteImport } from './routes/inspect/$token/index'
 import { Route as AdminListingsIndexRouteImport } from './routes/admin/listings/index'
+import { Route as AdminInspectionsIndexRouteImport } from './routes/admin/inspections/index'
 import { Route as AdminChecklistsIndexRouteImport } from './routes/admin/checklists/index'
 import { Route as InspectCompleteTokenRouteImport } from './routes/inspect/complete.$token'
 import { Route as InspectTokenRoomRouteImport } from './routes/inspect/$token/$room'
@@ -109,11 +109,6 @@ const AdminReviewsRoute = AdminReviewsRouteImport.update({
   path: '/reviews',
   getParentRoute: () => AdminRouteRoute,
 } as any)
-const AdminInspectionsRoute = AdminInspectionsRouteImport.update({
-  id: '/inspections',
-  path: '/inspections',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -142,6 +137,11 @@ const InspectTokenIndexRoute = InspectTokenIndexRouteImport.update({
 const AdminListingsIndexRoute = AdminListingsIndexRouteImport.update({
   id: '/listings/',
   path: '/listings/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminInspectionsIndexRoute = AdminInspectionsIndexRouteImport.update({
+  id: '/inspections/',
+  path: '/inspections/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminChecklistsIndexRoute = AdminChecklistsIndexRouteImport.update({
@@ -177,9 +177,9 @@ const AdminListingsSlugRoute = AdminListingsSlugRouteImport.update({
 } as any)
 const AdminInspectionsInspectionIdRoute =
   AdminInspectionsInspectionIdRouteImport.update({
-    id: '/$inspectionId',
-    path: '/$inspectionId',
-    getParentRoute: () => AdminInspectionsRoute,
+    id: '/inspections/$inspectionId',
+    path: '/inspections/$inspectionId',
+    getParentRoute: () => AdminRouteRoute,
   } as any)
 const AdminChecklistsChecklistIdRoute =
   AdminChecklistsChecklistIdRouteImport.update({
@@ -197,7 +197,6 @@ export interface FileRoutesByFullPath {
   '/admin/calendar': typeof AdminCalendarRoute
   '/admin/calendar-sync': typeof AdminCalendarSyncRoute
   '/admin/dashboard': typeof AdminDashboardRoute
-  '/admin/inspections': typeof AdminInspectionsRouteWithChildren
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/test-upload': typeof AdminTestUploadRoute
   '/admin/thermostat': typeof AdminThermostatRoute
@@ -216,6 +215,7 @@ export interface FileRoutesByFullPath {
   '/inspect/$token/$room': typeof InspectTokenRoomRoute
   '/inspect/complete/$token': typeof InspectCompleteTokenRoute
   '/admin/checklists/': typeof AdminChecklistsIndexRoute
+  '/admin/inspections/': typeof AdminInspectionsIndexRoute
   '/admin/listings/': typeof AdminListingsIndexRoute
   '/inspect/$token/': typeof InspectTokenIndexRoute
 }
@@ -227,7 +227,6 @@ export interface FileRoutesByTo {
   '/admin/calendar': typeof AdminCalendarRoute
   '/admin/calendar-sync': typeof AdminCalendarSyncRoute
   '/admin/dashboard': typeof AdminDashboardRoute
-  '/admin/inspections': typeof AdminInspectionsRouteWithChildren
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/test-upload': typeof AdminTestUploadRoute
   '/admin/thermostat': typeof AdminThermostatRoute
@@ -246,6 +245,7 @@ export interface FileRoutesByTo {
   '/inspect/$token/$room': typeof InspectTokenRoomRoute
   '/inspect/complete/$token': typeof InspectCompleteTokenRoute
   '/admin/checklists': typeof AdminChecklistsIndexRoute
+  '/admin/inspections': typeof AdminInspectionsIndexRoute
   '/admin/listings': typeof AdminListingsIndexRoute
   '/inspect/$token': typeof InspectTokenIndexRoute
 }
@@ -259,7 +259,6 @@ export interface FileRoutesById {
   '/admin/calendar': typeof AdminCalendarRoute
   '/admin/calendar-sync': typeof AdminCalendarSyncRoute
   '/admin/dashboard': typeof AdminDashboardRoute
-  '/admin/inspections': typeof AdminInspectionsRouteWithChildren
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/test-upload': typeof AdminTestUploadRoute
   '/admin/thermostat': typeof AdminThermostatRoute
@@ -278,6 +277,7 @@ export interface FileRoutesById {
   '/inspect/$token/$room': typeof InspectTokenRoomRoute
   '/inspect/complete/$token': typeof InspectCompleteTokenRoute
   '/admin/checklists/': typeof AdminChecklistsIndexRoute
+  '/admin/inspections/': typeof AdminInspectionsIndexRoute
   '/admin/listings/': typeof AdminListingsIndexRoute
   '/inspect/$token/': typeof InspectTokenIndexRoute
 }
@@ -292,7 +292,6 @@ export interface FileRouteTypes {
     | '/admin/calendar'
     | '/admin/calendar-sync'
     | '/admin/dashboard'
-    | '/admin/inspections'
     | '/admin/reviews'
     | '/admin/test-upload'
     | '/admin/thermostat'
@@ -311,6 +310,7 @@ export interface FileRouteTypes {
     | '/inspect/$token/$room'
     | '/inspect/complete/$token'
     | '/admin/checklists/'
+    | '/admin/inspections/'
     | '/admin/listings/'
     | '/inspect/$token/'
   fileRoutesByTo: FileRoutesByTo
@@ -322,7 +322,6 @@ export interface FileRouteTypes {
     | '/admin/calendar'
     | '/admin/calendar-sync'
     | '/admin/dashboard'
-    | '/admin/inspections'
     | '/admin/reviews'
     | '/admin/test-upload'
     | '/admin/thermostat'
@@ -341,6 +340,7 @@ export interface FileRouteTypes {
     | '/inspect/$token/$room'
     | '/inspect/complete/$token'
     | '/admin/checklists'
+    | '/admin/inspections'
     | '/admin/listings'
     | '/inspect/$token'
   id:
@@ -353,7 +353,6 @@ export interface FileRouteTypes {
     | '/admin/calendar'
     | '/admin/calendar-sync'
     | '/admin/dashboard'
-    | '/admin/inspections'
     | '/admin/reviews'
     | '/admin/test-upload'
     | '/admin/thermostat'
@@ -372,6 +371,7 @@ export interface FileRouteTypes {
     | '/inspect/$token/$room'
     | '/inspect/complete/$token'
     | '/admin/checklists/'
+    | '/admin/inspections/'
     | '/admin/listings/'
     | '/inspect/$token/'
   fileRoutesById: FileRoutesById
@@ -493,13 +493,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReviewsRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/admin/inspections': {
-      id: '/admin/inspections'
-      path: '/inspections'
-      fullPath: '/admin/inspections'
-      preLoaderRoute: typeof AdminInspectionsRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
     '/admin/dashboard': {
       id: '/admin/dashboard'
       path: '/dashboard'
@@ -540,6 +533,13 @@ declare module '@tanstack/react-router' {
       path: '/listings'
       fullPath: '/admin/listings/'
       preLoaderRoute: typeof AdminListingsIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/inspections/': {
+      id: '/admin/inspections/'
+      path: '/inspections'
+      fullPath: '/admin/inspections/'
+      preLoaderRoute: typeof AdminInspectionsIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/checklists/': {
@@ -586,10 +586,10 @@ declare module '@tanstack/react-router' {
     }
     '/admin/inspections/$inspectionId': {
       id: '/admin/inspections/$inspectionId'
-      path: '/$inspectionId'
+      path: '/inspections/$inspectionId'
       fullPath: '/admin/inspections/$inspectionId'
       preLoaderRoute: typeof AdminInspectionsInspectionIdRouteImport
-      parentRoute: typeof AdminInspectionsRoute
+      parentRoute: typeof AdminRouteRoute
     }
     '/admin/checklists/$checklistId': {
       id: '/admin/checklists/$checklistId'
@@ -601,31 +601,21 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AdminInspectionsRouteChildren {
-  AdminInspectionsInspectionIdRoute: typeof AdminInspectionsInspectionIdRoute
-}
-
-const AdminInspectionsRouteChildren: AdminInspectionsRouteChildren = {
-  AdminInspectionsInspectionIdRoute: AdminInspectionsInspectionIdRoute,
-}
-
-const AdminInspectionsRouteWithChildren =
-  AdminInspectionsRoute._addFileChildren(AdminInspectionsRouteChildren)
-
 interface AdminRouteRouteChildren {
   AdminBookingsRoute: typeof AdminBookingsRoute
   AdminCalendarRoute: typeof AdminCalendarRoute
   AdminCalendarSyncRoute: typeof AdminCalendarSyncRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
-  AdminInspectionsRoute: typeof AdminInspectionsRouteWithChildren
   AdminReviewsRoute: typeof AdminReviewsRoute
   AdminTestUploadRoute: typeof AdminTestUploadRoute
   AdminThermostatRoute: typeof AdminThermostatRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminChecklistsChecklistIdRoute: typeof AdminChecklistsChecklistIdRoute
+  AdminInspectionsInspectionIdRoute: typeof AdminInspectionsInspectionIdRoute
   AdminListingsSlugRoute: typeof AdminListingsSlugRoute
   AdminListingsNewRoute: typeof AdminListingsNewRoute
   AdminChecklistsIndexRoute: typeof AdminChecklistsIndexRoute
+  AdminInspectionsIndexRoute: typeof AdminInspectionsIndexRoute
   AdminListingsIndexRoute: typeof AdminListingsIndexRoute
 }
 
@@ -634,15 +624,16 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminCalendarRoute: AdminCalendarRoute,
   AdminCalendarSyncRoute: AdminCalendarSyncRoute,
   AdminDashboardRoute: AdminDashboardRoute,
-  AdminInspectionsRoute: AdminInspectionsRouteWithChildren,
   AdminReviewsRoute: AdminReviewsRoute,
   AdminTestUploadRoute: AdminTestUploadRoute,
   AdminThermostatRoute: AdminThermostatRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminChecklistsChecklistIdRoute: AdminChecklistsChecklistIdRoute,
+  AdminInspectionsInspectionIdRoute: AdminInspectionsInspectionIdRoute,
   AdminListingsSlugRoute: AdminListingsSlugRoute,
   AdminListingsNewRoute: AdminListingsNewRoute,
   AdminChecklistsIndexRoute: AdminChecklistsIndexRoute,
+  AdminInspectionsIndexRoute: AdminInspectionsIndexRoute,
   AdminListingsIndexRoute: AdminListingsIndexRoute,
 }
 

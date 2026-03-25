@@ -154,42 +154,16 @@ function InspectionDetailPage() {
           </div>
         </div>
 
-        {/* Statistics Card */}
-        <div className="bg-white border border-stone-200 rounded-[1.5rem] p-6 shadow-sm">
-          <h3 className="text-lg font-medium text-stone-900 mb-5">Statistics</h3>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center p-3 bg-stone-50 rounded-xl">
-              <div className="text-3xl font-medium text-stone-900">{completedCount}</div>
-              <div className="text-xs text-stone-500 mt-1 font-medium">Completed</div>
-            </div>
-            <div className="text-center p-3 bg-emerald-50 rounded-xl">
-              <div className="text-3xl font-medium text-emerald-600">{completionRate}%</div>
-              <div className="text-xs text-emerald-600 mt-1 font-medium">Progress</div>
-            </div>
-            <div className="text-center p-3 bg-sky-50 rounded-xl">
+        {/* Media Statistics Card */}
+        {totalMedia > 0 && (
+          <div className="bg-white border border-stone-200 rounded-[1.5rem] p-6 shadow-sm">
+            <h3 className="text-lg font-medium text-stone-900 mb-5">Media Files</h3>
+            <div className="text-center p-4 bg-sky-50 rounded-xl">
               <div className="text-3xl font-medium text-sky-600">{totalMedia}</div>
-              <div className="text-xs text-sky-600 mt-1 font-medium">Media</div>
+              <div className="text-xs text-sky-600 mt-1 font-medium">Total Files Uploaded</div>
             </div>
           </div>
-          <div className="mt-5">
-            <div className="flex justify-between text-xs text-stone-500 mb-2 font-medium">
-              <span>Progress</span>
-              <span>{completedCount} of {items.length}</span>
-            </div>
-            <div className="w-full bg-stone-100 rounded-full h-2 overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all ${
-                  completionRate === 100
-                    ? 'bg-emerald-500'
-                    : completionRate > 0
-                    ? 'bg-sky-500'
-                    : 'bg-stone-300'
-                }`}
-                style={{ width: `${completionRate}%` }}
-              />
-            </div>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Notes */}
@@ -268,28 +242,23 @@ function InspectionDetailPage() {
                         <div className="mt-4 flex flex-wrap gap-2">
                           {itemMedia.map((m) => (
                             <div key={m.id} className="relative group">
-                              {m.mimeType.startsWith('image/') ? (
-                                <a href={m.filePath} target="_blank" rel="noopener noreferrer">
+                              {m.fileType === 'image' ? (
+                                <a href={m.url} target="_blank" rel="noopener noreferrer">
                                   <img
-                                    src={m.filePath}
-                                    alt={m.originalName}
+                                    src={m.url}
+                                    alt={m.fileName || 'Inspection image'}
                                     className="w-20 h-20 object-cover rounded-xl border border-stone-200 hover:border-stone-300 transition-colors"
                                   />
                                 </a>
                               ) : (
                                 <a
-                                  href={m.filePath}
+                                  href={m.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="w-20 h-20 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center hover:border-stone-300 transition-colors"
                                 >
                                   <iconify-icon icon="solar:videocamera-record-linear" class="text-xl text-stone-400" />
                                 </a>
-                              )}
-                              {m.uploaderType === 'handyman' && (
-                                <span className="absolute -top-1 -right-1 w-4 h-4 bg-sky-500 rounded-full flex items-center justify-center" title="Handyman upload">
-                                  <iconify-icon icon="solar:user-circle-bold" class="text-[10px] text-white" />
-                                </span>
                               )}
                             </div>
                           ))}

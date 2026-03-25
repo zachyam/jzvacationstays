@@ -48,23 +48,30 @@ export const getInspectionDetails = createServerFn({ method: "GET" })
 
     if (!inspection) throw new Error("Inspection not found");
 
-    // Get checklist items
+    // Get inspection items (not checklist template items)
     const items = await db
       .select()
-      .from(checklistItems)
-      .where(eq(checklistItems.checklistId, inspection.checklistId))
-      .orderBy(asc(checklistItems.sortOrder));
+      .from(inspectionItems)
+      .where(eq(inspectionItems.inspectionId, inspection.id))
+      .orderBy(asc(inspectionItems.sortOrder));
 
-    // Get media for all items
-    const mediaByItem: Record<string, any[]> = {};
-    for (const item of items) {
-      const media = await db
-        .select()
-        .from(checklistItemMedia)
-        .where(eq(checklistItemMedia.checklistItemId, item.id))
-        .orderBy(asc(checklistItemMedia.createdAt));
+    // Get media for all inspection items (batch fetch to avoid N+1)
+    const itemIds = items.map(item => item.id);
+    const allMedia = itemIds.length > 0
+      ? await db
+          .select()
+          .from(inspectionMedia)
+          .where(sql`${inspectionMedia.inspectionItemId} IN (${sql.join(itemIds.map(id => sql`${id}`), sql`, `)})`)
+          .orderBy(asc(inspectionMedia.createdAt))
+      : [];
 
-      mediaByItem[item.id] = media;
+    // Group media by item ID
+    const mediaByItem: Record<string, typeof allMedia> = {};
+    for (const media of allMedia) {
+      if (!mediaByItem[media.inspectionItemId]) {
+        mediaByItem[media.inspectionItemId] = [];
+      }
+      mediaByItem[media.inspectionItemId].push(media);
     }
 
     return { inspection, items, mediaByItem };
@@ -273,6 +280,75 @@ export const deleteInspection = createServerFn({ method: "POST" })
 
 // --- Public functions (token-based access) ---
 
+export const getInspectionRoomData = createServerFn({ method: "GET" })
+  .inputValidator((data: { token: string; room: string }) => {
+    if (!data.token) throw new Error("Token is required");
+    if (!data.room) throw new Error("Room is required");
+    return data;
+  })
+  .handler(async ({ data }) => {
+    const [row] = await db
+      .select({
+        inspection: inspections,
+        checklistTitle: checklists.title,
+        propertyName: properties.name,
+      })
+      .from(inspections)
+      .leftJoin(checklists, eq(inspections.checklistId, checklists.id))
+      .leftJoin(properties, eq(inspections.propertyId, properties.id))
+      .where(eq(inspections.token, data.token))
+      .limit(1);
+
+    if (!row) return { inspection: null, items: [], media: {}, allRooms: [] };
+
+    // Get ALL items to determine all rooms
+    const allItems = await db
+      .select({ room: inspectionItems.room })
+      .from(inspectionItems)
+      .where(eq(inspectionItems.inspectionId, row.inspection.id))
+      .groupBy(inspectionItems.room);
+
+    const allRooms = [...new Set(allItems.map(item => item.room || "General"))];
+
+    // Get only items for the specified room
+    const roomItems = await db
+      .select()
+      .from(inspectionItems)
+      .where(
+        sql`${inspectionItems.inspectionId} = ${row.inspection.id} AND
+            COALESCE(${inspectionItems.room}, 'General') = ${data.room}`
+      )
+      .orderBy(asc(inspectionItems.sortOrder));
+
+    // Fetch media only for items in this room
+    const itemIds = roomItems.map(item => item.id);
+    const allMedia = itemIds.length > 0
+      ? await db
+          .select()
+          .from(inspectionMedia)
+          .where(sql`${inspectionMedia.inspectionItemId} IN (${sql.join(itemIds.map(id => sql`${id}`), sql`, `)})`)
+          .orderBy(asc(inspectionMedia.createdAt))
+      : [];
+
+    // Group media by item ID
+    const mediaMap: Record<string, (typeof inspectionMedia.$inferSelect)[]> = {};
+    for (const media of allMedia) {
+      if (!mediaMap[media.inspectionItemId]) {
+        mediaMap[media.inspectionItemId] = [];
+      }
+      mediaMap[media.inspectionItemId].push(media);
+    }
+
+    return {
+      inspection: row.inspection,
+      checklistTitle: row.checklistTitle,
+      propertyName: row.propertyName,
+      items: roomItems,
+      media: mediaMap,
+      allRooms,
+    };
+  });
+
 export const getInspectionByToken = createServerFn({ method: "GET" })
   .inputValidator((data: { token: string }) => {
     if (!data.token) throw new Error("Token is required");
@@ -299,16 +375,23 @@ export const getInspectionByToken = createServerFn({ method: "GET" })
       .where(eq(inspectionItems.inspectionId, row.inspection.id))
       .orderBy(asc(inspectionItems.sortOrder));
 
+    // Fetch all media for all items in a single query
+    const itemIds = items.map(item => item.id);
+    const allMedia = itemIds.length > 0
+      ? await db
+          .select()
+          .from(inspectionMedia)
+          .where(sql`${inspectionMedia.inspectionItemId} IN (${sql.join(itemIds.map(id => sql`${id}`), sql`, `)})`)
+          .orderBy(asc(inspectionMedia.createdAt))
+      : [];
+
+    // Group media by item ID
     const mediaMap: Record<string, (typeof inspectionMedia.$inferSelect)[]> = {};
-    for (const item of items) {
-      const itemMedia = await db
-        .select()
-        .from(inspectionMedia)
-        .where(eq(inspectionMedia.inspectionItemId, item.id))
-        .orderBy(asc(inspectionMedia.createdAt));
-      if (itemMedia.length > 0) {
-        mediaMap[item.id] = itemMedia;
+    for (const media of allMedia) {
+      if (!mediaMap[media.inspectionItemId]) {
+        mediaMap[media.inspectionItemId] = [];
       }
+      mediaMap[media.inspectionItemId].push(media);
     }
 
     return {
