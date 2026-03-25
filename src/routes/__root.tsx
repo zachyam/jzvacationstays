@@ -31,7 +31,7 @@ export const Route = createRootRouteWithContext<{
         // If on admin subdomain but accessing non-admin routes (except root which redirects separately)
         if (isAdminDomain && !location.pathname.startsWith("/admin") && location.pathname !== "/") {
           // Only redirect if it's not an admin-related path
-          const nonAdminPaths = ["/properties", "/booking", "/auth/login"];
+          const nonAdminPaths = ["/properties", "/booking", "/auth/login", "/inspect"];
           if (nonAdminPaths.some(path => location.pathname.startsWith(path))) {
             window.location.href = getRedirectUrl(hostname, "www", location.pathname);
             return { user };
