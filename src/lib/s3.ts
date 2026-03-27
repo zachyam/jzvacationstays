@@ -5,12 +5,33 @@ let client: S3Client | null = null;
 
 function getS3Client() {
   if (!client) {
+    const accessKeyId = process.env.S3_ACCESS_KEY_ID;
+    const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY;
+    const endpoint = process.env.S3_ENDPOINT;
+
+    // Validate all required credentials
+    if (!accessKeyId || !secretAccessKey) {
+      console.error("S3 credentials validation failed:", {
+        hasAccessKey: !!accessKeyId,
+        accessKeyLength: accessKeyId?.length || 0,
+        hasSecretKey: !!secretAccessKey,
+        secretKeyLength: secretAccessKey?.length || 0,
+        endpoint: endpoint,
+      });
+      throw new Error("S3 credentials not configured properly");
+    }
+
+    if (!endpoint) {
+      throw new Error("S3 endpoint not configured");
+    }
+
+    // Ensure credentials are strings and not undefined
     client = new S3Client({
       region: process.env.S3_REGION || "auto",
-      endpoint: process.env.S3_ENDPOINT,
+      endpoint: endpoint,
       credentials: {
-        accessKeyId: process.env.S3_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
+        accessKeyId: accessKeyId.trim(),
+        secretAccessKey: secretAccessKey.trim(),
       },
       forcePathStyle: true,
     });
@@ -30,12 +51,23 @@ export async function getPresignedUploadUrl(
     const bucket = BUCKET();
     const publicUrlBase = PUBLIC_URL_BASE();
 
+    // Validate credentials before attempting to create presigned URL
+    if (!process.env.S3_ACCESS_KEY_ID || !process.env.S3_SECRET_ACCESS_KEY) {
+      console.error("S3 credentials missing:", {
+        hasAccessKey: !!process.env.S3_ACCESS_KEY_ID,
+        hasSecretKey: !!process.env.S3_SECRET_ACCESS_KEY,
+        endpoint: process.env.S3_ENDPOINT,
+      });
+      throw new Error("Storage service not configured. Please contact support.");
+    }
+
     console.log("S3 Configuration:", {
       endpoint: process.env.S3_ENDPOINT,
       bucket,
       region: process.env.S3_REGION,
       hasAccessKey: !!process.env.S3_ACCESS_KEY_ID,
       hasSecretKey: !!process.env.S3_SECRET_ACCESS_KEY,
+      keyPrefix: key.split('/').slice(0, 2).join('/'),
     });
 
     const command = new PutObjectCommand({
@@ -50,9 +82,21 @@ export async function getPresignedUploadUrl(
 
     const publicUrl = `${publicUrlBase}/${key}`;
 
+    console.log("Successfully generated presigned URL for:", key);
     return { uploadUrl, publicUrl };
   } catch (error) {
     console.error("Error generating presigned URL:", error);
+    if (error instanceof Error) {
+      console.error("Error details:", {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+      });
+      // Provide a more user-friendly error message
+      if (error.message.includes("resolved credentials")) {
+        throw new Error("Upload service configuration error. Please try again or contact support.");
+      }
+    }
     throw error;
   }
 }
