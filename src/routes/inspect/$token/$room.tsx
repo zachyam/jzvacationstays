@@ -489,11 +489,11 @@ function InspectionItemCard({
             ? "border-emerald-200 shadow-sm"
             : disabled
               ? "border-stone-200 shadow-sm opacity-75"
-              : "border-stone-200 shadow-sm hover:border-stone-300"
+              : "border-stone-200 shadow-sm hover:border-stone-300 hover:shadow-md"
       }`}
     >
       <div
-        className="flex gap-4 cursor-pointer"
+        className={`flex gap-4 ${!disabled && !item.isCompleted ? "cursor-pointer" : ""}`}
         onClick={() => {
           if (!disabled && !item.isCompleted) onExpand();
         }}
@@ -519,37 +519,88 @@ function InspectionItemCard({
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className={`font-medium text-lg mb-1 leading-snug ${
-            item.isCompleted ? "text-stone-400 line-through" : "text-stone-900"
-          }`}>
-            {item.title}
-          </h3>
-          {item.description && (
-            <p className="text-sm text-stone-500 leading-relaxed">
-              {item.description}
-            </p>
-          )}
-
-          {/* Status badge when collapsed */}
-          {!expanded && item.status && (
-            <div className="mt-2">
-              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium ${
-                item.status === "pass"
-                  ? "bg-emerald-100 text-emerald-700"
-                  : item.status === "fail"
-                    ? "bg-red-100 text-red-700"
-                    : "bg-stone-100 text-stone-600"
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1">
+              <h3 className={`font-medium text-lg mb-1 leading-snug ${
+                item.isCompleted ? "text-stone-400 line-through" : "text-stone-900"
               }`}>
-                {item.status ? item.status.charAt(0).toUpperCase() + item.status.slice(1) : "Not Set"}
+                {item.title}
+              </h3>
+              {item.description && (
+                <p className="text-sm text-stone-500 leading-relaxed">
+                  {item.description}
+                </p>
+              )}
+            </div>
+
+            {/* Expand/Collapse indicator */}
+            {!disabled && !item.isCompleted && (
+              <div className={`shrink-0 pt-1 transition-transform ${expanded ? "rotate-180" : ""}`}>
+                <iconify-icon
+                  icon="solar:alt-arrow-down-linear"
+                  class="text-xl text-stone-400"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Action buttons preview when collapsed */}
+          {!expanded && !item.isCompleted && !disabled && (
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-stone-50 text-stone-600 rounded-lg text-xs font-medium border border-stone-200">
+                <iconify-icon icon="solar:hand-stars-linear" class="text-sm" />
+                Tap to inspect
               </span>
+
+              {!item.status && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-50 text-amber-700 rounded-lg text-xs">
+                  <iconify-icon icon="solar:danger-circle-linear" class="text-sm" />
+                  Needs review
+                </span>
+              )}
+
+              {item.status && (
+                <span className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium ${
+                  item.status === "pass"
+                    ? "bg-emerald-50 text-emerald-700"
+                    : item.status === "fail"
+                      ? "bg-red-50 text-red-700"
+                      : "bg-stone-100 text-stone-600"
+                }`}>
+                  <iconify-icon
+                    icon={item.status === "pass" ? "solar:check-circle-linear" : "solar:close-circle-linear"}
+                    class="text-sm"
+                  />
+                  {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                </span>
+              )}
+
+              {media.length > 0 && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-sky-50 text-sky-700 rounded-lg text-xs">
+                  <iconify-icon icon="solar:camera-linear" class="text-sm" />
+                  {media.length}
+                </span>
+              )}
             </div>
           )}
 
-          {/* Media count when collapsed */}
-          {!expanded && media.length > 0 && (
-            <div className="flex items-center gap-1.5 mt-2 text-xs text-stone-500">
-              <iconify-icon icon="solar:camera-linear" class="text-sm" />
-              {media.length} photo{media.length !== 1 ? "s" : ""}
+          {/* Completed state */}
+          {item.isCompleted && (
+            <div className="mt-2 flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-medium">
+                <iconify-icon icon="solar:check-circle-bold" class="text-sm" />
+                Completed
+              </span>
+              {item.status && (
+                <span className={`text-xs text-stone-500`}>
+                  • {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                </span>
+              )}
+              {media.length > 0 && (
+                <span className="text-xs text-stone-500">
+                  • {media.length} photo{media.length !== 1 ? "s" : ""}
+                </span>
+              )}
             </div>
           )}
         </div>
@@ -561,28 +612,37 @@ function InspectionItemCard({
           <div className="h-px w-full bg-stone-100" />
 
           {/* Pass/Fail buttons */}
-          <div className="flex gap-2">
-            {(["pass", "fail"] as const).map((s) => (
-              <button
-                key={s}
-                onClick={() => onStatus(item.id, s)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                  item.status === s
-                    ? s === "pass"
-                      ? "bg-emerald-500 text-white shadow-sm"
-                      : "bg-red-500 text-white shadow-sm"
-                    : "bg-stone-100 text-stone-500 hover:bg-stone-200"
-                }`}
-              >
-                {s.charAt(0).toUpperCase() + s.slice(1)}
-              </button>
-            ))}
+          <div className="space-y-2">
+            <h4 className="text-xs font-semibold text-stone-500 uppercase tracking-widest">
+              Inspection Status
+            </h4>
+            <div className="flex gap-2">
+              {(["pass", "fail"] as const).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => onStatus(item.id, s)}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                    item.status === s
+                      ? s === "pass"
+                        ? "bg-emerald-500 text-white shadow-sm ring-2 ring-emerald-500/20"
+                        : "bg-red-500 text-white shadow-sm ring-2 ring-red-500/20"
+                      : "bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 hover:border-stone-300"
+                  }`}
+                >
+                  <iconify-icon
+                    icon={s === "pass" ? "solar:check-circle-linear" : "solar:close-circle-linear"}
+                    class="text-base"
+                  />
+                  {s === "pass" ? "Pass" : "Fail"}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Photo Upload Area */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <h4 className="text-xs font-semibold text-stone-500 uppercase tracking-widest">
-              Photos & Notes
+              Photos & Videos
             </h4>
 
             {/* Existing media */}
@@ -641,20 +701,20 @@ function InspectionItemCard({
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading || disabled}
-              className="w-full border-2 border-dashed border-sky-200 bg-sky-50/50 rounded-[1rem] p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:border-sky-300 transition-colors group disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full border-2 border-dashed border-sky-300 bg-gradient-to-b from-sky-50 to-sky-100/50 rounded-[1rem] p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:border-sky-400 hover:from-sky-100 hover:to-sky-100 transition-all group disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
             >
-              <div className="w-12 h-12 bg-white border border-sky-100 rounded-full flex items-center justify-center mb-3 text-sky-500 group-hover:scale-110 group-hover:shadow-sm transition-all">
+              <div className="w-14 h-14 bg-white shadow-md rounded-full flex items-center justify-center mb-3 text-sky-600 group-hover:scale-110 group-hover:shadow-lg transition-all">
                 {uploading ? (
                   <iconify-icon icon="solar:refresh-linear" class="text-2xl animate-spin" />
                 ) : (
-                  <iconify-icon icon="solar:camera-linear" class="text-2xl" />
+                  <iconify-icon icon="solar:camera-add-bold" class="text-2xl" />
                 )}
               </div>
-              <span className="text-sm font-medium text-sky-900 block mb-1">
-                {uploading ? "Uploading..." : "Tap to take a photo"}
+              <span className="text-base font-semibold text-sky-900 block mb-1">
+                {uploading ? "Uploading..." : "📸 Add Photos/Videos"}
               </span>
-              <span className="text-xs text-sky-600">
-                Add photos or videos
+              <span className="text-xs text-sky-700 font-medium">
+                Tap here to document issues or condition
               </span>
             </button>
 
