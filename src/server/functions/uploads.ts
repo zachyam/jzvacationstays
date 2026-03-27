@@ -1,9 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 
-import { getPresignedUploadUrl } from "../../lib/s3";
+import { getPresignedUploadUrl, getS3Client } from "../../lib/s3";
 import { db } from "../../db";
 import { inspections, inspectionItems, properties } from "../../db/schema";
 
@@ -22,18 +22,6 @@ const ALLOWED_VIDEO_TYPES = [
 ];
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
-
-function getS3Client() {
-  return new S3Client({
-    region: process.env.S3_REGION || "auto",
-    endpoint: process.env.S3_ENDPOINT,
-    credentials: {
-      accessKeyId: process.env.S3_ACCESS_KEY_ID!,
-      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
-    },
-    forcePathStyle: true,
-  });
-}
 
 export const getUploadUrl = createServerFn({ method: "POST" })
   .inputValidator(
@@ -132,6 +120,17 @@ export const uploadInspectionFile = createServerFn({ method: "POST" })
     },
   )
   .handler(async ({ data }) => {
+    // Check environment variables first
+    if (!process.env.S3_ACCESS_KEY_ID || !process.env.S3_SECRET_ACCESS_KEY || !process.env.S3_ENDPOINT) {
+      console.error("Missing S3 environment variables in uploadInspectionFile:", {
+        hasAccessKey: !!process.env.S3_ACCESS_KEY_ID,
+        hasSecretKey: !!process.env.S3_SECRET_ACCESS_KEY,
+        hasEndpoint: !!process.env.S3_ENDPOINT,
+        hasBucket: !!process.env.S3_BUCKET,
+      });
+      throw new Error("Upload service not configured. Please contact support.");
+    }
+
     const isImage = ALLOWED_IMAGE_TYPES.includes(data.contentType);
     const isVideo = ALLOWED_VIDEO_TYPES.includes(data.contentType);
 
@@ -186,22 +185,38 @@ export const uploadInspectionFile = createServerFn({ method: "POST" })
     // Convert base64 to buffer
     const buffer = Buffer.from(data.file.split(',')[1] || data.file, 'base64');
 
-    // Upload directly to S3 from server
-    const command = new PutObjectCommand({
-      Bucket: process.env.S3_BUCKET || "jzvacationstays",
-      Key: key,
-      Body: buffer,
-      ContentType: data.contentType,
-    });
+    try {
+      // Upload directly to S3 from server
+      const command = new PutObjectCommand({
+        Bucket: process.env.S3_BUCKET || "jzvacationstays",
+        Key: key,
+        Body: buffer,
+        ContentType: data.contentType,
+      });
 
-    await getS3Client().send(command);
+      await getS3Client().send(command);
 
-    const publicUrl = `${process.env.S3_PUBLIC_URL || `${process.env.S3_ENDPOINT}/${process.env.S3_BUCKET}`}/${key}`;
+      const publicUrl = `${process.env.S3_PUBLIC_URL || `${process.env.S3_ENDPOINT}/${process.env.S3_BUCKET}`}/${key}`;
 
-    return {
-      publicUrl,
-      fileType: isImage ? "image" : "video",
-    };
+      console.log("Successfully uploaded file:", key);
+      return {
+        publicUrl,
+        fileType: isImage ? "image" : "video",
+      };
+    } catch (error) {
+      console.error("Failed to upload file to S3:", error);
+      if (error instanceof Error) {
+        console.error("Error details:", {
+          message: error.message,
+          name: error.name,
+        });
+        // Provide a user-friendly error message
+        if (error.message.includes("credentials") || error.message.includes("Credential")) {
+          throw new Error("Upload failed due to server configuration. Please try again later or contact support.");
+        }
+      }
+      throw new Error("Upload failed. Please try again.");
+    }
   });
 
 export const getChecklistUploadUrl = createServerFn({ method: "POST" })
