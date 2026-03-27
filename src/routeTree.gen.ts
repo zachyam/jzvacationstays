@@ -23,6 +23,7 @@ import { Route as ApiDebugRouteImport } from './routes/api/debug'
 import { Route as AdminThermostatRouteImport } from './routes/admin/thermostat'
 import { Route as AdminTestUploadRouteImport } from './routes/admin/test-upload'
 import { Route as AdminReviewsRouteImport } from './routes/admin/reviews'
+import { Route as AdminEnvCheckRouteImport } from './routes/admin/env-check'
 import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
 import { Route as AdminCalendarSyncRouteImport } from './routes/admin/calendar-sync'
 import { Route as AdminCalendarRouteImport } from './routes/admin/calendar'
@@ -107,6 +108,11 @@ const AdminTestUploadRoute = AdminTestUploadRouteImport.update({
 const AdminReviewsRoute = AdminReviewsRouteImport.update({
   id: '/reviews',
   path: '/reviews',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminEnvCheckRoute = AdminEnvCheckRouteImport.update({
+  id: '/env-check',
+  path: '/env-check',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
@@ -197,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/admin/calendar': typeof AdminCalendarRoute
   '/admin/calendar-sync': typeof AdminCalendarSyncRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/env-check': typeof AdminEnvCheckRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/test-upload': typeof AdminTestUploadRoute
   '/admin/thermostat': typeof AdminThermostatRoute
@@ -227,6 +234,7 @@ export interface FileRoutesByTo {
   '/admin/calendar': typeof AdminCalendarRoute
   '/admin/calendar-sync': typeof AdminCalendarSyncRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/env-check': typeof AdminEnvCheckRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/test-upload': typeof AdminTestUploadRoute
   '/admin/thermostat': typeof AdminThermostatRoute
@@ -259,6 +267,7 @@ export interface FileRoutesById {
   '/admin/calendar': typeof AdminCalendarRoute
   '/admin/calendar-sync': typeof AdminCalendarSyncRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/env-check': typeof AdminEnvCheckRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/test-upload': typeof AdminTestUploadRoute
   '/admin/thermostat': typeof AdminThermostatRoute
@@ -292,6 +301,7 @@ export interface FileRouteTypes {
     | '/admin/calendar'
     | '/admin/calendar-sync'
     | '/admin/dashboard'
+    | '/admin/env-check'
     | '/admin/reviews'
     | '/admin/test-upload'
     | '/admin/thermostat'
@@ -322,6 +332,7 @@ export interface FileRouteTypes {
     | '/admin/calendar'
     | '/admin/calendar-sync'
     | '/admin/dashboard'
+    | '/admin/env-check'
     | '/admin/reviews'
     | '/admin/test-upload'
     | '/admin/thermostat'
@@ -353,6 +364,7 @@ export interface FileRouteTypes {
     | '/admin/calendar'
     | '/admin/calendar-sync'
     | '/admin/dashboard'
+    | '/admin/env-check'
     | '/admin/reviews'
     | '/admin/test-upload'
     | '/admin/thermostat'
@@ -493,6 +505,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReviewsRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/env-check': {
+      id: '/admin/env-check'
+      path: '/env-check'
+      fullPath: '/admin/env-check'
+      preLoaderRoute: typeof AdminEnvCheckRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/dashboard': {
       id: '/admin/dashboard'
       path: '/dashboard'
@@ -606,6 +625,7 @@ interface AdminRouteRouteChildren {
   AdminCalendarRoute: typeof AdminCalendarRoute
   AdminCalendarSyncRoute: typeof AdminCalendarSyncRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminEnvCheckRoute: typeof AdminEnvCheckRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
   AdminTestUploadRoute: typeof AdminTestUploadRoute
   AdminThermostatRoute: typeof AdminThermostatRoute
@@ -624,6 +644,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminCalendarRoute: AdminCalendarRoute,
   AdminCalendarSyncRoute: AdminCalendarSyncRoute,
   AdminDashboardRoute: AdminDashboardRoute,
+  AdminEnvCheckRoute: AdminEnvCheckRoute,
   AdminReviewsRoute: AdminReviewsRoute,
   AdminTestUploadRoute: AdminTestUploadRoute,
   AdminThermostatRoute: AdminThermostatRoute,
