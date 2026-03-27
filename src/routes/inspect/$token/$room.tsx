@@ -145,12 +145,32 @@ function RoomInspectionPage() {
   async function handleStatus(itemId: string, itemStatus: string) {
     if (!canEdit) return;
 
-    const newStatus = items.find((i: InspectionItem) => i.id === itemId)?.status === itemStatus ? null : itemStatus;
+    const currentItem = items.find((i: InspectionItem) => i.id === itemId);
+    const newStatus = currentItem?.status === itemStatus ? null : itemStatus;
+
+    // Update both status and completion state
     setItems((prev: InspectionItem[]) =>
-      prev.map((i: InspectionItem) => (i.id === itemId ? { ...i, status: newStatus } : i)),
+      prev.map((i: InspectionItem) =>
+        i.id === itemId
+          ? {
+              ...i,
+              status: newStatus,
+              // Auto-check the item when Pass or Fail is selected
+              isCompleted: newStatus !== null ? true : i.isCompleted,
+              completedAt: newStatus !== null ? new Date().toISOString() : i.completedAt
+            }
+          : i
+      ),
     );
+
+    // Update both status and completion in the database
     await updateInspectionItem({
-      data: { token, itemId, status: newStatus || "" },
+      data: {
+        token,
+        itemId,
+        status: newStatus || "",
+        isCompleted: newStatus !== null ? true : currentItem?.isCompleted || false
+      },
     });
   }
 
