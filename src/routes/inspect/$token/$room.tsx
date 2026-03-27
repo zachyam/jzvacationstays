@@ -267,21 +267,20 @@ function RoomInspectionPage() {
       <header className="bg-white border-b border-stone-200 sticky top-0 z-50 shadow-sm shadow-stone-200/50">
         <div className="max-w-3xl mx-auto w-full px-4 sm:px-8 pt-5 pb-4">
           {/* Top Nav with Back Button */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="relative flex items-center justify-center mb-4">
             <Link
               to="/inspect/$token/"
               params={{ token }}
-              className="w-10 h-10 rounded-xl bg-stone-100 hover:bg-stone-200 flex items-center justify-center transition-colors"
+              className="absolute left-0 w-10 h-10 rounded-xl bg-stone-100 hover:bg-stone-200 flex items-center justify-center transition-colors"
             >
               <iconify-icon icon="solar:arrow-left-linear" class="text-lg text-stone-600" />
             </Link>
-            <div className="text-center flex-1">
+            <div className="text-center">
               <h1 className="text-xl font-medium tracking-tight text-stone-900">
                 {room}
               </h1>
               <p className="text-sm text-stone-500">{data.propertyName}</p>
             </div>
-            <div className="w-10 h-10" /> {/* Spacer for balance */}
           </div>
 
           {/* Progress Bar */}
@@ -339,36 +338,36 @@ function RoomInspectionPage() {
 
         {/* Room Navigation */}
         {canEdit && (
-          <div className="flex items-center justify-between gap-4">
-            {previousRoom ? (
-              <Link
-                to="/inspect/$token/$room"
-                params={{ token, room: previousRoom }}
-                className="flex items-center gap-2 text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors"
-              >
-                <iconify-icon icon="solar:arrow-left-linear" class="text-base" />
-                {previousRoom}
-              </Link>
-            ) : (
-              <div />
-            )}
+          <div className="relative flex items-center justify-center py-1">
+            <div className="absolute left-0">
+              {previousRoom ? (
+                <Link
+                  to="/inspect/$token/$room"
+                  params={{ token, room: previousRoom }}
+                  className="flex items-center gap-1.5 text-sm font-medium text-stone-500 hover:text-stone-900 transition-colors"
+                >
+                  <iconify-icon icon="solar:arrow-left-linear" class="text-base" />
+                  <span className="max-w-[8rem] truncate">{previousRoom}</span>
+                </Link>
+              ) : null}
+            </div>
 
             <div className="text-xs font-semibold text-stone-400 uppercase tracking-widest">
               Room {currentRoomIndex + 1} of {data.allRooms.length}
             </div>
 
-            {nextRoom ? (
-              <Link
-                to="/inspect/$token/$room"
-                params={{ token, room: nextRoom }}
-                className="flex items-center gap-2 text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors"
-              >
-                {nextRoom}
-                <iconify-icon icon="solar:arrow-right-linear" class="text-base" />
-              </Link>
-            ) : (
-              <div />
-            )}
+            <div className="absolute right-0">
+              {nextRoom ? (
+                <Link
+                  to="/inspect/$token/$room"
+                  params={{ token, room: nextRoom }}
+                  className="flex items-center gap-1.5 text-sm font-medium text-stone-500 hover:text-stone-900 transition-colors"
+                >
+                  <span className="max-w-[8rem] truncate">{nextRoom}</span>
+                  <iconify-icon icon="solar:arrow-right-linear" class="text-base" />
+                </Link>
+              ) : null}
+            </div>
           </div>
         )}
 
