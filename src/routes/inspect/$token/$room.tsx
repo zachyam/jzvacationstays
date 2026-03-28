@@ -352,10 +352,6 @@ function RoomInspectionPage() {
               ) : null}
             </div>
 
-            <div className="text-xs font-semibold text-stone-400 uppercase tracking-widest">
-              Room {currentRoomIndex + 1} of {data.allRooms.length}
-            </div>
-
             <div className="absolute right-0">
               {nextRoom ? (
                 <Link
