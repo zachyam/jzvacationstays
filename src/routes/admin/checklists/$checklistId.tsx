@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 import {
   getChecklistById,
@@ -91,24 +91,24 @@ function ChecklistDetailPage() {
   // Room ordering: use stored roomOrder, fall back to Map insertion order
   const storedRoomOrder: string[] = (checklist?.roomOrder as string[] | null) || [];
   const roomKeys = Array.from(rooms.keys());
-  const initialOrderedRooms = storedRoomOrder.length > 0
-    ? [
-        ...storedRoomOrder.filter(r => rooms.has(r)),
-        ...roomKeys.filter(r => !storedRoomOrder.includes(r)),
-      ]
-    : roomKeys;
-  const [orderedRooms, setOrderedRooms] = useState<string[]>(initialOrderedRooms);
+  const computeOrderedRooms = (currentOrder: string[]) => {
+    const validOrder = currentOrder.length > 0 ? currentOrder : roomKeys;
+    return [
+      ...validOrder.filter(r => rooms.has(r)),
+      ...roomKeys.filter(r => !validOrder.includes(r)),
+    ];
+  };
+  const [orderedRooms, setOrderedRooms] = useState<string[]>(() => computeOrderedRooms(storedRoomOrder));
 
   // Keep orderedRooms in sync if rooms change (e.g. after reload)
-  const currentRoomKeysStr = roomKeys.sort().join(",");
-  const orderedRoomsKeysStr = [...orderedRooms].sort().join(",");
-  if (currentRoomKeysStr !== orderedRoomsKeysStr) {
-    const synced = [
-      ...orderedRooms.filter(r => rooms.has(r)),
-      ...roomKeys.filter(r => !orderedRooms.includes(r)),
-    ];
-    setOrderedRooms(synced);
-  }
+  useEffect(() => {
+    setOrderedRooms(prev => {
+      const synced = computeOrderedRooms(prev);
+      const prevStr = prev.join(",");
+      const syncedStr = synced.join(",");
+      return prevStr === syncedStr ? prev : synced;
+    });
+  }, [items]);
 
   async function moveRoom(room: string, direction: -1 | 1) {
     const current = [...orderedRooms];
@@ -554,22 +554,22 @@ function ChecklistDetailPage() {
                     {roomItems.length} Task{roomItems.length !== 1 ? "s" : ""}
                   </span>
                 </h2>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => moveRoom(room, -1)}
                     disabled={roomIdx === 0}
-                    className="w-7 h-7 rounded-lg flex items-center justify-center text-stone-400 hover:text-stone-600 hover:bg-stone-100 disabled:opacity-30 transition-colors"
+                    className="w-8 h-8 rounded-lg border border-stone-200 flex items-center justify-center text-stone-500 hover:text-stone-700 hover:bg-stone-100 hover:border-stone-300 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:border-stone-200 transition-colors"
                     title="Move room up"
                   >
-                    <iconify-icon icon="solar:arrow-up-linear" />
+                    <iconify-icon icon="solar:arrow-up-linear" class="text-base" />
                   </button>
                   <button
                     onClick={() => moveRoom(room, 1)}
                     disabled={roomIdx === orderedRooms.length - 1}
-                    className="w-7 h-7 rounded-lg flex items-center justify-center text-stone-400 hover:text-stone-600 hover:bg-stone-100 disabled:opacity-30 transition-colors"
+                    className="w-8 h-8 rounded-lg border border-stone-200 flex items-center justify-center text-stone-500 hover:text-stone-700 hover:bg-stone-100 hover:border-stone-300 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:border-stone-200 transition-colors"
                     title="Move room down"
                   >
-                    <iconify-icon icon="solar:arrow-down-linear" />
+                    <iconify-icon icon="solar:arrow-down-linear" class="text-base" />
                   </button>
                 </div>
               </div>
