@@ -12,22 +12,31 @@ import { formatCurrency } from "../../lib/utils";
 
 export const Route = createFileRoute("/properties/$propertyId")({
   loader: async ({ params }) => {
+    let property;
+    let photos;
     try {
-      const { property, photos } = await getPropertyBySlug({
+      const result = await getPropertyBySlug({
         data: { slug: params.propertyId },
       });
-
-      if (!property) return { property: null, photos: [], reviews: [], blockedDates: [] };
-
-      const [reviews, availability] = await Promise.all([
-        getReviewsByProperty({ data: { propertyId: property.id } }),
-        getAvailability({ data: { propertySlug: property.slug } }),
-      ]);
-
-      return { property, photos, reviews, blockedDates: availability.blockedDates };
+      property = result.property;
+      photos = result.photos;
     } catch {
       return { property: null, photos: [], reviews: [], blockedDates: [] };
     }
+
+    if (!property) return { property: null, photos: [], reviews: [], blockedDates: [] };
+
+    const [reviews, availability] = await Promise.allSettled([
+      getReviewsByProperty({ data: { propertyId: property.id } }),
+      getAvailability({ data: { propertySlug: property.slug } }),
+    ]);
+
+    return {
+      property,
+      photos,
+      reviews: reviews.status === "fulfilled" ? reviews.value : [],
+      blockedDates: availability.status === "fulfilled" ? availability.value.blockedDates : [],
+    };
   },
   component: PropertyDetailPage,
 });
