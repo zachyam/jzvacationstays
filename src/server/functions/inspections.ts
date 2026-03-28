@@ -301,14 +301,19 @@ export const getInspectionRoomData = createServerFn({ method: "GET" })
 
     if (!row) return { inspection: null, items: [], media: {}, allRooms: [] };
 
-    // Get ALL items to determine all rooms
+    // Get ALL rooms ordered by the minimum sortOrder of their items
+    // This ensures the handyman navigates rooms in the same sequence as the admin checklist page
     const allItems = await db
-      .select({ room: inspectionItems.room })
+      .select({
+        room: sql<string>`COALESCE(${inspectionItems.room}, 'General')`.as("room"),
+        minSort: sql<number>`MIN(${inspectionItems.sortOrder})`.as("min_sort"),
+      })
       .from(inspectionItems)
       .where(eq(inspectionItems.inspectionId, row.inspection.id))
-      .groupBy(inspectionItems.room);
+      .groupBy(sql`COALESCE(${inspectionItems.room}, 'General')`)
+      .orderBy(sql`MIN(${inspectionItems.sortOrder})`);
 
-    const allRooms = [...new Set(allItems.map(item => item.room || "General"))];
+    const allRooms = allItems.map(item => item.room);
 
     // Get only items for the specified room
     const roomItems = await db
