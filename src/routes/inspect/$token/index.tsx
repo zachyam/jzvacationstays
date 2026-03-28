@@ -41,6 +41,7 @@ type LoaderData = {
     token: string;
     status: string;
     notes: string | null;
+    roomOrder: string[] | null;
     startedAt: Date | null;
     completedAt: Date | null;
     createdAt: Date;
@@ -109,14 +110,24 @@ function InspectionOverviewPage() {
     rooms.get(room)!.push(item);
   }
 
+  // Order rooms by the admin-defined roomOrder stored on the inspection
+  const storedOrder: string[] = (data.inspection?.roomOrder as string[] | null) || [];
+  const roomKeys = Array.from(rooms.keys());
+  const orderedRoomKeys = storedOrder.length > 0
+    ? [
+        ...storedOrder.filter(r => rooms.has(r)),
+        ...roomKeys.filter(r => !storedOrder.includes(r)),
+      ]
+    : roomKeys;
+
   const completedCount = data.items.filter((i) => i.isCompleted).length;
   const progressPercent = data.items.length > 0 ? Math.round((completedCount / data.items.length) * 100) : 0;
 
   async function handleStart() {
     await startInspection({ data: { token } });
     setStatus("in_progress");
-    // Navigate to first room
-    const firstRoom = Array.from(rooms.keys())[0];
+    // Navigate to first room (using admin-defined order)
+    const firstRoom = orderedRoomKeys[0];
     if (firstRoom) {
       await navigate({ to: `/inspect/${token}/${encodeURIComponent(firstRoom)}` });
     }
@@ -198,7 +209,8 @@ function InspectionOverviewPage() {
             Rooms to Inspect
           </h2>
           <div className="grid gap-4">
-            {Array.from(rooms.entries()).map(([room, roomItems]) => {
+            {orderedRoomKeys.map((room) => {
+              const roomItems = rooms.get(room)!;
               const roomCompleted = roomItems.filter(i => i.isCompleted).length;
               const roomProgress = Math.round((roomCompleted / roomItems.length) * 100);
               const isRoomComplete = roomCompleted === roomItems.length;

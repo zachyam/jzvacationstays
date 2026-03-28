@@ -6,6 +6,7 @@ import {
   integer,
   boolean,
   timestamp,
+  jsonb,
 } from "drizzle-orm/pg-core";
 
 import { properties } from "./properties";
@@ -20,6 +21,7 @@ export const inspections = pgTable("inspections", {
   token: varchar("token", { length: 64 }).notNull().unique(),
   status: varchar("status", { length: 20 }).notNull().default("pending"),
   notes: text("notes"),
+  roomOrder: jsonb("room_order").$type<string[]>().default([]),
   startedAt: timestamp("started_at"),
   completedAt: timestamp("completed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

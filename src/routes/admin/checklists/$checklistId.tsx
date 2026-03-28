@@ -9,6 +9,7 @@ import {
   updateChecklistItem,
   saveChecklistMedia,
   deleteChecklistMedia,
+  updateRoomOrder,
 } from "../../../server/functions/admin-checklists";
 import { getChecklistUploadUrl } from "../../../server/functions/uploads";
 import { createInspection } from "../../../server/functions/inspections";
@@ -85,6 +86,39 @@ function ChecklistDetailPage() {
     const room = item.room || "General";
     if (!rooms.has(room)) rooms.set(room, []);
     rooms.get(room)!.push(item);
+  }
+
+  // Room ordering: use stored roomOrder, fall back to Map insertion order
+  const storedRoomOrder: string[] = (checklist?.roomOrder as string[] | null) || [];
+  const roomKeys = Array.from(rooms.keys());
+  const initialOrderedRooms = storedRoomOrder.length > 0
+    ? [
+        ...storedRoomOrder.filter(r => rooms.has(r)),
+        ...roomKeys.filter(r => !storedRoomOrder.includes(r)),
+      ]
+    : roomKeys;
+  const [orderedRooms, setOrderedRooms] = useState<string[]>(initialOrderedRooms);
+
+  // Keep orderedRooms in sync if rooms change (e.g. after reload)
+  const currentRoomKeysStr = roomKeys.sort().join(",");
+  const orderedRoomsKeysStr = [...orderedRooms].sort().join(",");
+  if (currentRoomKeysStr !== orderedRoomsKeysStr) {
+    const synced = [
+      ...orderedRooms.filter(r => rooms.has(r)),
+      ...roomKeys.filter(r => !orderedRooms.includes(r)),
+    ];
+    setOrderedRooms(synced);
+  }
+
+  async function moveRoom(room: string, direction: -1 | 1) {
+    const current = [...orderedRooms];
+    const idx = current.indexOf(room);
+    if (idx < 0) return;
+    const newIdx = idx + direction;
+    if (newIdx < 0 || newIdx >= current.length) return;
+    [current[idx], current[newIdx]] = [current[newIdx], current[idx]];
+    setOrderedRooms(current);
+    await updateRoomOrder({ data: { checklistId: checklist!.id, roomOrder: current } });
   }
 
   // Comprehensive room list
@@ -509,7 +543,9 @@ function ChecklistDetailPage() {
           )}
 
           {/* Room Sections */}
-          {Array.from(rooms.entries()).map(([room, roomItems]) => (
+          {orderedRooms.map((room, roomIdx) => {
+            const roomItems = rooms.get(room)!;
+            return (
             <section key={room} className="space-y-4">
               <div className="flex items-center justify-between px-2">
                 <h2 className="text-2xl font-medium tracking-tight text-stone-900 flex items-center gap-3">
@@ -518,6 +554,24 @@ function ChecklistDetailPage() {
                     {roomItems.length} Task{roomItems.length !== 1 ? "s" : ""}
                   </span>
                 </h2>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => moveRoom(room, -1)}
+                    disabled={roomIdx === 0}
+                    className="w-7 h-7 rounded-lg flex items-center justify-center text-stone-400 hover:text-stone-600 hover:bg-stone-100 disabled:opacity-30 transition-colors"
+                    title="Move room up"
+                  >
+                    <iconify-icon icon="solar:arrow-up-linear" />
+                  </button>
+                  <button
+                    onClick={() => moveRoom(room, 1)}
+                    disabled={roomIdx === orderedRooms.length - 1}
+                    className="w-7 h-7 rounded-lg flex items-center justify-center text-stone-400 hover:text-stone-600 hover:bg-stone-100 disabled:opacity-30 transition-colors"
+                    title="Move room down"
+                  >
+                    <iconify-icon icon="solar:arrow-down-linear" />
+                  </button>
+                </div>
               </div>
 
               <div className="bg-white border border-stone-200 rounded-[1.5rem] shadow-sm overflow-hidden flex flex-col">
@@ -663,7 +717,8 @@ function ChecklistDetailPage() {
                 )}
               </div>
             </section>
-          ))}
+            );
+          })}
         </div>
 
         {/* Right Column: Task Editor Card */}

@@ -147,6 +147,13 @@ export const createInspection = createServerFn({ method: "POST" })
 
     const token = randomBytes(32).toString("hex");
 
+    // Fetch checklist's roomOrder to snapshot into the inspection
+    const [checklistData] = await db
+      .select({ roomOrder: checklists.roomOrder })
+      .from(checklists)
+      .where(eq(checklists.id, data.checklistId))
+      .limit(1);
+
     const [inspection] = await db
       .insert(inspections)
       .values({
@@ -154,6 +161,7 @@ export const createInspection = createServerFn({ method: "POST" })
         propertyId: data.propertyId || null,
         token,
         status: "pending",
+        roomOrder: checklistData?.roomOrder || [],
       })
       .returning();
 
@@ -301,19 +309,22 @@ export const getInspectionRoomData = createServerFn({ method: "GET" })
 
     if (!row) return { inspection: null, items: [], media: {}, allRooms: [] };
 
-    // Get ALL rooms ordered by the minimum sortOrder of their items
-    // This ensures the handyman navigates rooms in the same sequence as the admin checklist page
-    const allItems = await db
+    // Get distinct rooms that actually have items
+    const roomRows = await db
       .select({
-        room: sql<string>`COALESCE(${inspectionItems.room}, 'General')`.as("room"),
-        minSort: sql<number>`MIN(${inspectionItems.sortOrder})`.as("min_sort"),
+        room: sql<string>`DISTINCT COALESCE(${inspectionItems.room}, 'General')`.as("room"),
       })
       .from(inspectionItems)
-      .where(eq(inspectionItems.inspectionId, row.inspection.id))
-      .groupBy(sql`COALESCE(${inspectionItems.room}, 'General')`)
-      .orderBy(sql`MIN(${inspectionItems.sortOrder})`);
+      .where(eq(inspectionItems.inspectionId, row.inspection.id));
 
-    const allRooms = allItems.map(item => item.room);
+    const roomSet = new Set(roomRows.map(r => r.room));
+    const storedOrder: string[] = (row.inspection.roomOrder as string[]) || [];
+
+    // Order rooms by the admin-defined roomOrder, then append any unlisted rooms
+    const allRooms = [
+      ...storedOrder.filter(r => roomSet.has(r)),
+      ...[...roomSet].filter(r => !storedOrder.includes(r)),
+    ];
 
     // Get only items for the specified room
     const roomItems = await db
