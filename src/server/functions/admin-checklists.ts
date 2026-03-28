@@ -113,6 +113,23 @@ export const addChecklistItem = createServerFn({ method: "POST" })
       })
       .returning();
 
+    // Auto-append new room to roomOrder if not already present
+    if (data.room) {
+      const [cl] = await db
+        .select({ roomOrder: checklists.roomOrder })
+        .from(checklists)
+        .where(eq(checklists.id, data.checklistId))
+        .limit(1);
+      const order: string[] = (cl?.roomOrder as string[]) || [];
+      if (!order.includes(data.room)) {
+        order.push(data.room);
+        await db
+          .update(checklists)
+          .set({ roomOrder: order })
+          .where(eq(checklists.id, data.checklistId));
+      }
+    }
+
     return { success: true, item };
   });
 
@@ -344,6 +361,22 @@ export const updateChecklistItemMedia = createServerFn({ method: "POST" })
       .update(checklistItemMedia)
       .set({ description: data.description || null })
       .where(eq(checklistItemMedia.id, data.mediaId));
+
+    return { success: true };
+  });
+
+export const updateRoomOrder = createServerFn({ method: "POST" })
+  .inputValidator((data: { checklistId: string; roomOrder: string[] }) => {
+    if (!data.checklistId) throw new Error("Checklist ID is required");
+    return data;
+  })
+  .handler(async ({ data }) => {
+    await requireAdmin();
+
+    await db
+      .update(checklists)
+      .set({ roomOrder: data.roomOrder })
+      .where(eq(checklists.id, data.checklistId));
 
     return { success: true };
   });

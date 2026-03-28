@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 import {
   getChecklistById,
@@ -9,6 +9,7 @@ import {
   updateChecklistItem,
   saveChecklistMedia,
   deleteChecklistMedia,
+  updateRoomOrder,
 } from "../../../server/functions/admin-checklists";
 import { getChecklistUploadUrl } from "../../../server/functions/uploads";
 import { createInspection } from "../../../server/functions/inspections";
@@ -85,6 +86,39 @@ function ChecklistDetailPage() {
     const room = item.room || "General";
     if (!rooms.has(room)) rooms.set(room, []);
     rooms.get(room)!.push(item);
+  }
+
+  // Room ordering: use stored roomOrder, fall back to Map insertion order
+  const storedRoomOrder: string[] = (checklist?.roomOrder as string[] | null) || [];
+  const roomKeys = Array.from(rooms.keys());
+  const computeOrderedRooms = (currentOrder: string[]) => {
+    const validOrder = currentOrder.length > 0 ? currentOrder : roomKeys;
+    return [
+      ...validOrder.filter(r => rooms.has(r)),
+      ...roomKeys.filter(r => !validOrder.includes(r)),
+    ];
+  };
+  const [orderedRooms, setOrderedRooms] = useState<string[]>(() => computeOrderedRooms(storedRoomOrder));
+
+  // Keep orderedRooms in sync if rooms change (e.g. after reload)
+  useEffect(() => {
+    setOrderedRooms(prev => {
+      const synced = computeOrderedRooms(prev);
+      const prevStr = prev.join(",");
+      const syncedStr = synced.join(",");
+      return prevStr === syncedStr ? prev : synced;
+    });
+  }, [items]);
+
+  async function moveRoom(room: string, direction: -1 | 1) {
+    const current = [...orderedRooms];
+    const idx = current.indexOf(room);
+    if (idx < 0) return;
+    const newIdx = idx + direction;
+    if (newIdx < 0 || newIdx >= current.length) return;
+    [current[idx], current[newIdx]] = [current[newIdx], current[idx]];
+    setOrderedRooms(current);
+    await updateRoomOrder({ data: { checklistId: checklist!.id, roomOrder: current } });
   }
 
   // Comprehensive room list
@@ -509,7 +543,9 @@ function ChecklistDetailPage() {
           )}
 
           {/* Room Sections */}
-          {Array.from(rooms.entries()).map(([room, roomItems]) => (
+          {orderedRooms.map((room, roomIdx) => {
+            const roomItems = rooms.get(room)!;
+            return (
             <section key={room} className="space-y-4">
               <div className="flex items-center justify-between px-2">
                 <h2 className="text-2xl font-medium tracking-tight text-stone-900 flex items-center gap-3">
@@ -518,6 +554,24 @@ function ChecklistDetailPage() {
                     {roomItems.length} Task{roomItems.length !== 1 ? "s" : ""}
                   </span>
                 </h2>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => moveRoom(room, -1)}
+                    disabled={roomIdx === 0}
+                    className="w-8 h-8 rounded-lg border border-stone-200 flex items-center justify-center text-stone-500 hover:text-stone-700 hover:bg-stone-100 hover:border-stone-300 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:border-stone-200 transition-colors"
+                    title="Move room up"
+                  >
+                    <iconify-icon icon="solar:arrow-up-linear" class="text-base" />
+                  </button>
+                  <button
+                    onClick={() => moveRoom(room, 1)}
+                    disabled={roomIdx === orderedRooms.length - 1}
+                    className="w-8 h-8 rounded-lg border border-stone-200 flex items-center justify-center text-stone-500 hover:text-stone-700 hover:bg-stone-100 hover:border-stone-300 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:border-stone-200 transition-colors"
+                    title="Move room down"
+                  >
+                    <iconify-icon icon="solar:arrow-down-linear" class="text-base" />
+                  </button>
+                </div>
               </div>
 
               <div className="bg-white border border-stone-200 rounded-[1.5rem] shadow-sm overflow-hidden flex flex-col">
@@ -663,7 +717,8 @@ function ChecklistDetailPage() {
                 )}
               </div>
             </section>
-          ))}
+            );
+          })}
         </div>
 
         {/* Right Column: Task Editor Card */}
