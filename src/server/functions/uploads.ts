@@ -76,11 +76,8 @@ export const getUploadUrl = createServerFn({ method: "POST" })
       .where(eq(inspectionItems.id, data.itemId))
       .limit(1);
 
-    // Create descriptive path with datetime, property, and room
-    const now = new Date();
-    const date = now.toISOString().split('T')[0]; // YYYY-MM-DD
-    const time = now.toTimeString().split(' ')[0].replace(/:/g, '-'); // HH-MM-SS
-    const datetime = `${date}_${time}`;
+    // Create descriptive path with date, property, and room
+    const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     const sanitize = (str: string) => str?.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'unknown';
 
     const propertyName = sanitize(inspectionInfo.propertyName || 'property');
@@ -88,7 +85,7 @@ export const getUploadUrl = createServerFn({ method: "POST" })
     const ext = data.fileName.split(".").pop() || "bin";
     const fileName = `${randomUUID()}.${ext}`;
 
-    const key = `inspections/${propertyName}/${datetime}/${data.inspectionId}/${roomName}/${fileName}`;
+    const key = `inspections/${propertyName}/${date}/${data.inspectionId}/${roomName}/${fileName}`;
 
     const { uploadUrl, publicUrl } = await getPresignedUploadUrl(
       key,
@@ -168,11 +165,8 @@ export const uploadInspectionFile = createServerFn({ method: "POST" })
       .where(eq(inspectionItems.id, data.itemId))
       .limit(1);
 
-    // Create descriptive path with datetime, property, and room
-    const now = new Date();
-    const date = now.toISOString().split('T')[0]; // YYYY-MM-DD
-    const time = now.toTimeString().split(' ')[0].replace(/:/g, '-'); // HH-MM-SS
-    const datetime = `${date}_${time}`;
+    // Create descriptive path with date, property, and room
+    const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     const sanitize = (str: string) => str?.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'unknown';
 
     const propertyName = sanitize(inspectionInfo.propertyName || 'property');
@@ -180,7 +174,7 @@ export const uploadInspectionFile = createServerFn({ method: "POST" })
     const ext = data.fileName.split(".").pop() || "bin";
     const fileName = `${randomUUID()}.${ext}`;
 
-    const key = `inspections/${propertyName}/${datetime}/${data.inspectionId}/${roomName}/${fileName}`;
+    const key = `inspections/${propertyName}/${date}/${data.inspectionId}/${roomName}/${fileName}`;
 
     // Convert base64 to buffer
     const buffer = Buffer.from(data.file.split(',')[1] || data.file, 'base64');
@@ -264,11 +258,8 @@ export const getChecklistUploadUrl = createServerFn({ method: "POST" })
     try {
       const ext = data.fileName.split(".").pop() || "bin";
 
-      // Create organized directory structure with datetime, property, and room
-      const now = new Date();
-      const date = now.toISOString().split('T')[0]; // YYYY-MM-DD
-      const time = now.toTimeString().split(' ')[0].replace(/:/g, '-'); // HH-MM-SS
-      const datetime = `${date}_${time}`;
+      // Create organized directory structure with date, property, and room
+      const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
       const sanitize = (str: string) => str?.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'unknown';
 
       const propertyName = sanitize(data.propertyName || 'property');
@@ -280,7 +271,7 @@ export const getChecklistUploadUrl = createServerFn({ method: "POST" })
 
       // Use temporary prefix for admin uploads (they save explicitly)
       const prefix = data.temporary ? 'temp' : 'checklists';
-      const key = `${prefix}/${propertyName}/${datetime}/${data.checklistId}/${roomName}/${descriptiveName}`;
+      const key = `${prefix}/${propertyName}/${date}/${data.checklistId}/${roomName}/${descriptiveName}`;
 
       console.log("Generating presigned URL for key:", key);
       const { uploadUrl, publicUrl } = await getPresignedUploadUrl(
