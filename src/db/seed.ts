@@ -38,7 +38,7 @@ async function seed() {
         "A stunning oceanfront villa perfect for family vacations. Wake up to the sound of waves and enjoy breathtaking views from every room. Features a spacious open floor plan, gourmet kitchen, and direct beach access.",
       maxGuests: 8,
       bedrooms: 4,
-      bathrooms: "3.5",
+      bathrooms: 3.5,
       cleaningFee: 25000, // $250.00
       amenities: [
         "Ocean view",
@@ -66,7 +66,7 @@ async function seed() {
         "A charming retreat with a private heated pool, perfect for families with young children. Located just minutes from the beach with a fully fenced yard and kid-friendly amenities throughout.",
       maxGuests: 4,
       bedrooms: 2,
-      bathrooms: "2.0",
+      bathrooms: 2.0,
       cleaningFee: 15000, // $150.00
       amenities: [
         "Private pool",

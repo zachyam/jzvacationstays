@@ -5,19 +5,24 @@ import {
   getAdminPropertyBySlug,
   updateProperty,
   deleteProperty,
-  addPropertyPhoto,
-  deletePropertyPhoto,
-  reorderPropertyPhotos,
 } from "../../../server/functions/admin-properties";
-import { PhotoManager } from "../../../components/admin/photo-manager";
+import { PropertyMediaManager } from "../../../components/admin/property-media-manager";
+import { getPropertyMedia, getRoomTypes } from "../../../server/functions/property-media";
 import { cn } from "../../../lib/utils";
 
 export const Route = createFileRoute("/admin/listings/$slug")({
   loader: async ({ params }) => {
     try {
-      return await getAdminPropertyBySlug({ data: { slug: params.slug } });
+      const data = await getAdminPropertyBySlug({ data: { slug: params.slug } });
+      if (data.property) {
+        // Also load new media data
+        const { media } = await getPropertyMedia({ data: { propertyId: data.property.id } });
+        const { rooms } = await getRoomTypes({ data: { propertyId: data.property.id } });
+        return { ...data, propertyMedia: media, roomTypes: rooms };
+      }
+      return { ...data, propertyMedia: [], roomTypes: [] };
     } catch {
-      return { property: null, photos: [] };
+      return { property: null, photos: [], propertyMedia: [], roomTypes: [] };
     }
   },
   component: EditListingPage,
@@ -42,7 +47,7 @@ const AMENITY_OPTIONS = [
 ];
 
 function EditListingPage() {
-  const { property, photos } = Route.useLoaderData();
+  const { property, photos, propertyMedia, roomTypes } = Route.useLoaderData();
   const navigate = useNavigate();
   const router = useRouter();
   const [saving, setSaving] = useState(false);
@@ -56,9 +61,10 @@ function EditListingPage() {
     name: property?.name || "",
     tagline: property?.tagline || "",
     description: property?.description || "",
+    moreDetails: property?.moreDetails || "",
     maxGuests: property?.maxGuests || 1,
     bedrooms: property?.bedrooms || 1,
-    bathrooms: property?.bathrooms || "1",
+    bathrooms: property?.bathrooms || 1,
     beds: (property?.beds as string[]) || [],
     cleaningFee: property?.cleaningFee ? property.cleaningFee / 100 : 0,
     nightlyRate: property?.nightlyRate ? property.nightlyRate / 100 : 0,
@@ -98,6 +104,7 @@ function EditListingPage() {
     try {
       const updates = {
         ...formData,
+        bathrooms: typeof formData.bathrooms === 'string' ? parseFloat(formData.bathrooms) : formData.bathrooms,
         cleaningFee: Math.round(formData.cleaningFee * 100),
         nightlyRate: Math.round(formData.nightlyRate * 100),
         petFee: Math.round(formData.petFee * 100),
@@ -132,43 +139,9 @@ function EditListingPage() {
     }
   }
 
-  async function handleAddPhoto(url: string, alt: string) {
-    try {
-      await addPropertyPhoto({
-        data: {
-          propertyId: property.id,
-          url,
-          alt,
-          sortOrder: photos.length,
-        },
-      });
-      router.invalidate();
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to add photo");
-    }
-  }
-
-  async function handleDeletePhoto(photoId: string) {
-    try {
-      await deletePropertyPhoto({ data: { photoId } });
-      router.invalidate();
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to delete photo");
-    }
-  }
-
-  async function handleReorderPhotos(
-    reordered: { id: string; sortOrder: number; isCover: boolean }[],
-  ) {
-    try {
-      await reorderPropertyPhotos({ data: { photos: reordered } });
-      router.invalidate();
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to reorder photos");
-    }
-  }
-
-  const coverPhoto = photos.find(p => p.isCover) || photos[0];
+  // Use property media for cover photo if available
+  const heroMedia = propertyMedia.find(m => m.category === 'hero');
+  const coverPhoto = heroMedia || (photos.find(p => p.isCover) || photos[0]);
 
   return (
     <>
@@ -201,7 +174,14 @@ function EditListingPage() {
                 disabled={saving}
                 className="px-4 py-2 bg-sky-600 text-white rounded-lg text-sm font-medium hover:bg-sky-700 transition-colors disabled:opacity-50"
               >
-                {saving ? "Saving..." : "Save Changes"}
+  {saving ? (
+                <>
+                  <iconify-icon icon="solar:refresh-linear" class="text-sm animate-spin mr-2" />
+                  Saving...
+                </>
+              ) : (
+                "Save Changes"
+              )}
               </button>
             </div>
           </div>
@@ -231,19 +211,19 @@ function EditListingPage() {
       )}
 
       {/* Main Content Layout */}
-      <div className="flex gap-12">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-12">
         {/* Left Sidebar: Section Navigation */}
-        <aside className="w-48 shrink-0">
+        <aside className="lg:w-48 shrink-0">
           <h3 className="text-xs font-medium text-stone-400 mb-4 uppercase tracking-wide">
             Listing Details
           </h3>
-          <ul className="space-y-1">
+          <ul className="flex lg:flex-col space-x-2 lg:space-x-0 lg:space-y-1 overflow-x-auto lg:overflow-x-visible">
             {SECTIONS.map((section) => (
               <li key={section.id}>
                 <button
                   onClick={() => setActiveSection(section.id)}
                   className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all",
+                    "w-full lg:w-auto flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap",
                     activeSection === section.id
                       ? "bg-sky-50 text-sky-700"
                       : "text-stone-600 hover:text-stone-900 hover:bg-stone-50"
@@ -320,6 +300,7 @@ function EditListingPage() {
                 <label className="block text-sm font-medium text-stone-600">
                   Description
                 </label>
+                <p className="text-xs text-stone-500">Brief overview shown in "About this home"</p>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -328,7 +309,21 @@ function EditListingPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-stone-600">
+                  More Details
+                </label>
+                <p className="text-xs text-stone-500">Additional details shown in "More details about home"</p>
+                <textarea
+                  value={formData.moreDetails}
+                  onChange={(e) => setFormData({ ...formData, moreDetails: e.target.value })}
+                  rows={6}
+                  placeholder="Additional information about the property, local area, special features, etc."
+                  className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-lg text-sm text-stone-900 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-stone-600">
                     Bedrooms
@@ -352,9 +347,14 @@ function EditListingPage() {
                   </label>
                   <div className="relative">
                     <input
-                      type="text"
+                      type="number"
+                      step="0.5"
+                      min="0.5"
                       value={formData.bathrooms}
-                      onChange={(e) => setFormData({ ...formData, bathrooms: e.target.value })}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value);
+                        setFormData({ ...formData, bathrooms: isNaN(value) ? 1 : value });
+                      }}
                       className="w-full pl-4 pr-20 py-2.5 bg-white border border-stone-200 rounded-lg text-sm text-stone-900 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-stone-400">
@@ -416,7 +416,7 @@ function EditListingPage() {
                 <p className="text-sm text-stone-500">Set your rates and fees</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-stone-600">
                     Nightly Rate
@@ -500,7 +500,7 @@ function EditListingPage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-stone-600">
                     Check-in Time
@@ -589,7 +589,7 @@ function EditListingPage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {AMENITY_OPTIONS.map((amenity) => (
                   <label
                     key={amenity}
@@ -619,15 +619,15 @@ function EditListingPage() {
               <div className="mb-8">
                 <h1 className="text-2xl font-medium text-stone-900 mb-1">Media</h1>
                 <p className="text-sm text-stone-500">
-                  Manage your property photos
+                  Manage your property photos and room types
                 </p>
               </div>
 
-              <PhotoManager
-                photos={photos}
-                onAdd={handleAddPhoto}
-                onDelete={handleDeletePhoto}
-                onReorder={handleReorderPhotos}
+              <PropertyMediaManager
+                propertyId={property.id}
+                media={propertyMedia}
+                rooms={roomTypes}
+                onUpdate={() => router.invalidate()}
               />
             </div>
           )}
@@ -681,7 +681,7 @@ function EditListingPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-stone-600">
                     Latitude

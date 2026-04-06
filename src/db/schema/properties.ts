@@ -16,6 +16,7 @@ export const properties = pgTable("properties", {
   name: varchar("name", { length: 255 }).notNull(),
   tagline: varchar("tagline", { length: 255 }),
   description: text("description"),
+  moreDetails: text("more_details"),
   maxGuests: integer("max_guests").notNull(),
   bedrooms: integer("bedrooms").notNull(),
   bathrooms: numeric("bathrooms", { precision: 3, scale: 1 }).notNull(),

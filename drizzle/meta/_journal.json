@@ -36,6 +36,20 @@
       "when": 1774681146968,
       "tag": "0004_misty_tempest",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1775467330257,
+      "tag": "0004_powerful_xorn",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1775469484876,
+      "tag": "0005_glorious_bromley",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "properties" ADD COLUMN "more_details" text;

@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
+import sharp from "sharp";
 
 import { getPresignedUploadUrl, getS3Client } from "../../lib/s3";
 import { db } from "../../db";
@@ -171,13 +172,31 @@ export const uploadInspectionFile = createServerFn({ method: "POST" })
 
     const propertyName = sanitize(inspectionInfo.propertyName || 'property');
     const roomName = sanitize(itemInfo?.room || 'general');
-    const ext = data.fileName.split(".").pop() || "bin";
-    const fileName = `${randomUUID()}.${ext}`;
-
-    const key = `inspections/${propertyName}/${date}/${data.inspectionId}/${roomName}/${fileName}`;
 
     // Convert base64 to buffer
-    const buffer = Buffer.from(data.file.split(',')[1] || data.file, 'base64');
+    let buffer = Buffer.from(data.file.split(',')[1] || data.file, 'base64');
+    let contentType = data.contentType;
+    let ext = data.fileName.split(".").pop()?.toLowerCase() || "bin";
+
+    // Convert HEIC/HEIF images to JPEG
+    const isHeicFile = contentType === 'image/heic' || contentType === 'image/heif' || ext === 'heic' || ext === 'heif';
+    if (isHeicFile) {
+      try {
+        console.log('Converting HEIC/HEIF image to JPEG...');
+        buffer = await sharp(buffer)
+          .jpeg({ quality: 90 })
+          .toBuffer();
+        contentType = 'image/jpeg';
+        ext = 'jpg'; // Change extension to jpg
+        console.log('Successfully converted HEIC/HEIF to JPEG');
+      } catch (error) {
+        console.error('Failed to convert HEIC/HEIF:', error);
+        // If conversion fails, still try to upload the original
+      }
+    }
+
+    const fileName = `${randomUUID()}.${ext}`;
+    const key = `inspections/${propertyName}/${date}/${data.inspectionId}/${roomName}/${fileName}`;
 
     try {
       // Upload directly to S3 from server
@@ -185,7 +204,7 @@ export const uploadInspectionFile = createServerFn({ method: "POST" })
         Bucket: process.env.S3_BUCKET || "jzvacationstays",
         Key: key,
         Body: buffer,
-        ContentType: data.contentType,
+        ContentType: contentType,
       });
 
       await getS3Client().send(command);

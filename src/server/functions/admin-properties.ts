@@ -68,6 +68,7 @@ export const createProperty = createServerFn({ method: "POST" })
         name: data.name,
         tagline: data.tagline || null,
         description: data.description || null,
+        moreDetails: data.moreDetails || null,
         maxGuests: data.maxGuests,
         bedrooms: data.bedrooms,
         bathrooms: data.bathrooms,
@@ -81,8 +82,8 @@ export const createProperty = createServerFn({ method: "POST" })
         checkOutTime: data.checkOutTime || "11:00",
         houseRules: data.houseRules || null,
         address: data.address || null,
-        latitude: data.latitude || null,
-        longitude: data.longitude || null,
+        latitude: data.latitude ? parseFloat(data.latitude) : null,
+        longitude: data.longitude ? parseFloat(data.longitude) : null,
         amenities: data.amenities,
         highlight: data.highlight || null,
         isActive: data.isActive,
@@ -127,6 +128,8 @@ export const updateProperty = createServerFn({ method: "POST" })
       updateValues.tagline = data.updates.tagline || null;
     if (data.updates.description !== undefined)
       updateValues.description = data.updates.description || null;
+    if (data.updates.moreDetails !== undefined)
+      updateValues.moreDetails = data.updates.moreDetails || null;
     if (data.updates.maxGuests !== undefined)
       updateValues.maxGuests = data.updates.maxGuests;
     if (data.updates.bedrooms !== undefined)
@@ -153,9 +156,9 @@ export const updateProperty = createServerFn({ method: "POST" })
     if (data.updates.address !== undefined)
       updateValues.address = data.updates.address || null;
     if (data.updates.latitude !== undefined)
-      updateValues.latitude = data.updates.latitude || null;
+      updateValues.latitude = data.updates.latitude ? parseFloat(data.updates.latitude) : null;
     if (data.updates.longitude !== undefined)
-      updateValues.longitude = data.updates.longitude || null;
+      updateValues.longitude = data.updates.longitude ? parseFloat(data.updates.longitude) : null;
     if (data.updates.amenities !== undefined)
       updateValues.amenities = data.updates.amenities;
     if (data.updates.highlight !== undefined)

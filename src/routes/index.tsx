@@ -64,21 +64,6 @@ function HomePage() {
             JZ Vacation Stays
           </Link>
 
-          <nav className="hidden md:flex items-center space-x-10">
-            <Link
-              to="/properties"
-              className="text-lg text-stone-700 hover:text-stone-900 transition-colors duration-200"
-            >
-              Browse
-            </Link>
-            <Link
-              to="/properties"
-              className="text-lg text-stone-700 hover:text-stone-900 transition-colors duration-200"
-            >
-              Find stay
-            </Link>
-          </nav>
-
           <div className="flex items-center space-x-4 md:space-x-6">
             {user ? (
               <>

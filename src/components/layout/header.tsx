@@ -37,28 +37,7 @@ export function Header({ variant = "default" }: HeaderProps) {
       </Link>
 
       <nav className="hidden md:flex items-center space-x-10">
-        <Link
-          to="/properties"
-          className={cn(
-            "text-lg transition-colors duration-200",
-            isTransparent
-              ? "text-stone-100 hover:text-white drop-shadow-sm font-light"
-              : "text-stone-700 hover:text-stone-900",
-          )}
-        >
-          Browse
-        </Link>
-        <Link
-          to="/properties"
-          className={cn(
-            "text-lg transition-colors duration-200",
-            isTransparent
-              ? "text-stone-100 hover:text-white drop-shadow-sm font-light"
-              : "text-stone-700 hover:text-stone-900",
-          )}
-        >
-          Find stay
-        </Link>
+        
       </nav>
 
       <div className="flex items-center space-x-4 md:space-x-6">

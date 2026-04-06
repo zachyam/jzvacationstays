@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { getInspectionDetails } from "../../../server/functions/inspections";
 import { getInspectionUrl } from "../../../lib/inspection-url";
+import { InspectionImage } from "../../../components/inspection-image";
 
 export const Route = createFileRoute("/admin/inspections/$inspectionId")({
   loader: async ({ params }) => {
@@ -268,8 +269,12 @@ function InspectionDetailPage() {
                           {itemMedia.map((m) => (
                             <div key={m.id} className="relative group">
                               {m.fileType === 'image' ? (
-                                <a href={m.url} target="_blank" rel="noopener noreferrer">
-                                  <img
+                                <a
+                                  href={m.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <InspectionImage
                                     src={m.url}
                                     alt={m.fileName || 'Inspection image'}
                                     className="w-20 h-20 object-cover rounded-xl border border-stone-200 hover:border-stone-300 transition-colors"

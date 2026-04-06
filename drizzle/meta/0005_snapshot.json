@@ -1,6 +1,6 @@
 {
-  "id": "cb858102-2efc-46cf-979d-48e31e5d074f",
-  "prevId": "19545f86-077f-4154-b468-a6ec64da1b86",
+  "id": "996d7379-af7e-451b-b35d-e1ffff9dc178",
+  "prevId": "cb858102-2efc-46cf-979d-48e31e5d074f",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -215,6 +215,12 @@
         },
         "description": {
           "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "more_details": {
+          "name": "more_details",
           "type": "text",
           "primaryKey": false,
           "notNull": false

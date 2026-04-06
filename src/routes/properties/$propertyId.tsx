@@ -1,14 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { getPropertyBySlug } from "../../server/functions/properties";
 import { getReviewsByProperty } from "../../server/functions/reviews";
 import { getAvailability } from "../../server/functions/calendar-sync";
+import { getPropertyMedia, getRoomTypes } from "../../server/functions/property-media";
 import { Header } from "../../components/layout/header";
 import { PropertyAmenities } from "../../components/property/property-amenities";
 import { PropertyReviews } from "../../components/property/property-reviews";
 import { DateRangePicker } from "../../components/ui/date-range-picker";
 import { formatCurrency } from "../../lib/utils";
+import { InspectionImage } from "../../components/inspection-image";
 
 export const Route = createFileRoute("/properties/$propertyId")({
   loader: async ({ params }) => {
@@ -21,33 +23,109 @@ export const Route = createFileRoute("/properties/$propertyId")({
       property = result.property;
       photos = result.photos;
     } catch {
-      return { property: null, photos: [], reviews: [], blockedDates: [] };
+      return { property: null, photos: [], reviews: [], blockedDates: [], propertyMedia: [], roomTypes: [] };
     }
 
-    if (!property) return { property: null, photos: [], reviews: [], blockedDates: [] };
+    if (!property) return { property: null, photos: [], reviews: [], blockedDates: [], propertyMedia: [], roomTypes: [] };
 
-    const [reviews, availability] = await Promise.allSettled([
+    const [reviews, availability, mediaData, roomData] = await Promise.all([
       getReviewsByProperty({ data: { propertyId: property.id } }),
       getAvailability({ data: { propertySlug: property.slug } }),
+      getPropertyMedia({ data: { propertyId: property.id } }),
+      getRoomTypes({ data: { propertyId: property.id } }),
     ]);
 
     return {
       property,
       photos,
-      reviews: reviews.status === "fulfilled" ? reviews.value : [],
-      blockedDates: availability.status === "fulfilled" ? availability.value.blockedDates : [],
+      reviews,
+      blockedDates: availability.blockedDates,
+      propertyMedia: mediaData.media,
+      roomTypes: roomData.rooms
     };
   },
   component: PropertyDetailPage,
 });
 
 function PropertyDetailPage() {
-  const { property, photos, reviews, blockedDates } = Route.useLoaderData();
+  const { property, photos, reviews, blockedDates, propertyMedia, roomTypes } = Route.useLoaderData();
   const navigate = useNavigate();
 
   const [checkIn, setCheckIn] = useState<string | null>(null);
   const [checkOut, setCheckOut] = useState<string | null>(null);
   const [guestsCount, setGuestsCount] = useState(2);
+  const [lightboxImage, setLightboxImage] = useState<{
+    url: string;
+    caption?: string;
+    roomName: string;
+    currentIndex: number;
+    images: Array<{ url: string; caption?: string; roomName: string }>;
+  } | null>(null);
+
+  // Create a flat array of all room images for navigation
+  const allRoomImages = roomTypes.flatMap(room =>
+    (room.media || []).map(media => ({
+      url: media.url,
+      caption: media.caption || undefined,
+      roomName: room.name
+    }))
+  );
+
+  const openLightbox = (imageUrl: string, roomName: string, caption?: string) => {
+    const imageIndex = allRoomImages.findIndex(img => img.url === imageUrl);
+    setLightboxImage({
+      url: imageUrl,
+      caption,
+      roomName,
+      currentIndex: imageIndex,
+      images: allRoomImages
+    });
+  };
+
+  const navigateLightbox = (direction: 'prev' | 'next') => {
+    if (!lightboxImage) return;
+
+    const { currentIndex, images } = lightboxImage;
+    let newIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1;
+
+    if (newIndex < 0) newIndex = images.length - 1;
+    if (newIndex >= images.length) newIndex = 0;
+
+    const newImage = images[newIndex];
+    setLightboxImage({
+      ...lightboxImage,
+      url: newImage.url,
+      caption: newImage.caption,
+      roomName: newImage.roomName,
+      currentIndex: newIndex
+    });
+  };
+
+  const closeLightbox = () => {
+    setLightboxImage(null);
+  };
+
+  // Keyboard navigation for lightbox
+  useEffect(() => {
+    if (!lightboxImage) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      switch (event.key) {
+        case 'Escape':
+          closeLightbox();
+          break;
+        case 'ArrowLeft':
+          navigateLightbox('prev');
+          break;
+        case 'ArrowRight':
+          navigateLightbox('next');
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [lightboxImage]);
 
   if (!property) {
     return (
@@ -67,8 +145,11 @@ function PropertyDetailPage() {
     );
   }
 
+  // Use new hero media if available, otherwise fall back to old photos
+  const heroMedia = propertyMedia.find((m) => m.category === 'hero');
   const coverPhoto = photos.find((p) => p.isCover) ?? photos[0];
   const heroUrl =
+    heroMedia?.url ||
     coverPhoto?.url ||
     "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=2800&q=80";
 
@@ -182,26 +263,198 @@ function PropertyDetailPage() {
             </>
           )}
 
+          {/* More Details */}
+          {property.moreDetails && (
+            <>
+              <div className="mb-12">
+                <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-stone-900 mb-6">
+                  More details about home
+                </h2>
+                <div className="space-y-6 text-lg font-light text-stone-700 leading-relaxed">
+                  {property.moreDetails.split("\n\n").map((para, i) => (
+                    <p key={i}>{para}</p>
+                  ))}
+                </div>
+              </div>
+              <hr className="border-stone-200 mb-10" />
+            </>
+          )}
+
           {/* Amenities */}
           <PropertyAmenities amenities={(property.amenities as string[]) || []} />
 
-          {/* Photo Gallery */}
-          {photos.length > 1 && (
+          {/* Enhanced Photo Gallery */}
+          {(propertyMedia.length > 0 || photos.length > 1) && (
             <div className="mt-12">
               <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-stone-900 mb-6">
                 Gallery
               </h2>
+
+              {/* Hero Images */}
+              {propertyMedia.filter(m => m.category === 'hero').length > 0 && (
+                <div className="mb-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {propertyMedia
+                      .filter(m => m.category === 'hero')
+                      .map((media) => (
+                        <div
+                          key={media.id}
+                          className="aspect-[16/9] rounded-2xl overflow-hidden"
+                        >
+                          <InspectionImage
+                            src={media.url}
+                            alt={media.caption || property.name}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                          />
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Gallery Images */}
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {photos.map((photo) => (
-                  <div
-                    key={photo.id}
-                    className="aspect-[4/3] rounded-2xl overflow-hidden"
-                  >
-                    <img
-                      src={photo.url}
-                      alt={photo.alt || property.name}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                    />
+                {/* Use new media if available, otherwise fall back to old photos */}
+                {propertyMedia.filter(m => m.category === 'gallery').length > 0 ? (
+                  propertyMedia
+                    .filter(m => m.category === 'gallery')
+                    .map((media) => (
+                      <div
+                        key={media.id}
+                        className="aspect-[4/3] rounded-2xl overflow-hidden"
+                      >
+                        <InspectionImage
+                          src={media.url}
+                          alt={media.caption || property.name}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                    ))
+                ) : (
+                  photos.map((photo) => (
+                    <div
+                      key={photo.id}
+                      className="aspect-[4/3] rounded-2xl overflow-hidden"
+                    >
+                      <img
+                        src={photo.url}
+                        alt={photo.alt || property.name}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Exterior Images */}
+              {propertyMedia.filter(m => m.category === 'exterior').length > 0 && (
+                <div className="mt-8">
+                  <h3 className="text-xl font-medium text-stone-800 mb-4">Exterior</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {propertyMedia
+                      .filter(m => m.category === 'exterior')
+                      .map((media) => (
+                        <div
+                          key={media.id}
+                          className="aspect-[4/3] rounded-2xl overflow-hidden"
+                        >
+                          <InspectionImage
+                            src={media.url}
+                            alt={media.caption || "Exterior view"}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                          />
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Amenity Images */}
+              {propertyMedia.filter(m => m.category === 'amenity').length > 0 && (
+                <div className="mt-8">
+                  <h3 className="text-xl font-medium text-stone-800 mb-4">Amenities</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {propertyMedia
+                      .filter(m => m.category === 'amenity')
+                      .map((media) => (
+                        <div
+                          key={media.id}
+                          className="aspect-[4/3] rounded-2xl overflow-hidden"
+                        >
+                          <InspectionImage
+                            src={media.url}
+                            alt={media.caption || "Amenity"}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                          />
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Room Types */}
+          {roomTypes.length > 0 && (
+            <div className="mt-12">
+              <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-stone-900 mb-6">
+                Rooms & Sleeping Arrangements
+              </h2>
+              <div className="grid gap-8">
+                {roomTypes.map((room) => (
+                  <div key={room.id} className="bg-white border border-stone-200 rounded-2xl overflow-hidden">
+                    <div className="p-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h3 className="text-xl font-medium text-stone-900">{room.name}</h3>
+                          {room.description && (
+                            <p className="text-stone-600 mt-1">{room.description}</p>
+                          )}
+                          <div className="flex gap-4 mt-3 text-sm text-stone-500">
+                            {room.beds && (
+                              <span className="flex items-center gap-1.5">
+                                <iconify-icon icon="solar:bed-linear" class="text-base" />
+                                {room.beds}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Room Images */}
+                      {room.media && room.media.length > 0 && (
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
+                          {room.media.map((media) => (
+                            <div
+                              key={media.id}
+                              className="group relative aspect-[4/3] rounded-xl overflow-hidden cursor-pointer bg-stone-100"
+                              onClick={() => openLightbox(media.url, room.name, media.caption)}
+                            >
+                              <InspectionImage
+                                src={media.url}
+                                alt={media.caption || room.name}
+                                className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
+                              />
+                              {/* Hover overlay */}
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
+                                <iconify-icon
+                                  icon="solar:eye-linear"
+                                  class="text-white text-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-110"
+                                />
+                              </div>
+                              {/* Image caption indicator */}
+                              {media.caption && (
+                                <div className="absolute bottom-2 left-2 right-2">
+                                  <div className="bg-black/60 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
+                                    {media.caption}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -309,6 +562,72 @@ function PropertyDetailPage() {
           </div>
         </div>
       </section>
+
+      {/* Image Lightbox Modal */}
+      {lightboxImage && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4">
+          {/* Close button */}
+          <button
+            onClick={closeLightbox}
+            className="absolute top-4 right-4 z-10 w-12 h-12 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-all duration-200"
+          >
+            <iconify-icon icon="solar:close-circle-linear" class="text-2xl" />
+          </button>
+
+          {/* Navigation buttons */}
+          {lightboxImage.images.length > 1 && (
+            <>
+              <button
+                onClick={() => navigateLightbox('prev')}
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-all duration-200"
+              >
+                <iconify-icon icon="solar:arrow-left-linear" class="text-2xl" />
+              </button>
+              <button
+                onClick={() => navigateLightbox('next')}
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-all duration-200"
+              >
+                <iconify-icon icon="solar:arrow-right-linear" class="text-2xl" />
+              </button>
+            </>
+          )}
+
+          {/* Image container */}
+          <div className="relative max-w-5xl max-h-[90vh] w-full h-full flex flex-col">
+            {/* Image */}
+            <div className="flex-1 flex items-center justify-center">
+              <InspectionImage
+                src={lightboxImage.url}
+                alt={lightboxImage.caption || lightboxImage.roomName}
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
+
+            {/* Image info */}
+            <div className="bg-black/50 backdrop-blur-sm text-white p-6 rounded-b-xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-medium">{lightboxImage.roomName}</h3>
+                  {lightboxImage.caption && (
+                    <p className="text-stone-300 mt-1">{lightboxImage.caption}</p>
+                  )}
+                </div>
+                {lightboxImage.images.length > 1 && (
+                  <div className="text-sm text-stone-300">
+                    {lightboxImage.currentIndex + 1} of {lightboxImage.images.length}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Click outside to close */}
+          <div
+            className="absolute inset-0 -z-10"
+            onClick={closeLightbox}
+          />
+        </div>
+      )}
     </main>
   );
 }

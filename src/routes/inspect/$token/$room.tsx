@@ -7,6 +7,7 @@ import {
   deleteInspectionMedia,
 } from "../../../server/functions/inspections";
 import { uploadInspectionFile } from "../../../server/functions/uploads";
+import { InspectionImage } from "../../../components/inspection-image";
 
 type InspectionItem = {
   id: string;
@@ -666,11 +667,16 @@ function InspectionItemCard({
                 {media.map((m) => (
                   <div key={m.id} className="relative group">
                     {m.fileType === "image" ? (
-                      <a href={m.url} target="_blank" rel="noopener noreferrer">
-                        <img
+                      <a
+                        href={m.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block w-20 h-20"
+                      >
+                        <InspectionImage
                           src={m.url}
                           alt={m.fileName || "Photo"}
-                          className="w-20 h-20 rounded-xl object-cover border border-stone-200"
+                          className="w-full h-full rounded-xl object-cover border border-stone-200"
                         />
                       </a>
                     ) : (
@@ -757,7 +763,11 @@ function InspectionItemCard({
           {media.slice(0, 4).map((m) => (
             <div key={m.id} className="w-12 h-12 rounded-lg overflow-hidden border border-stone-200">
               {m.fileType === "image" ? (
-                <img src={m.url} alt={m.fileName || "Photo"} className="w-full h-full object-cover" />
+                <InspectionImage
+                  src={m.url}
+                  alt={m.fileName || "Photo"}
+                  className="w-full h-full object-cover"
+                />
               ) : (
                 <div className="w-full h-full bg-stone-100 flex items-center justify-center">
                   <iconify-icon icon="solar:videocamera-record-linear" class="text-stone-400" />
