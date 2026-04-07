@@ -11,6 +11,7 @@ import {
   uploadRoomMedia,
   deleteRoomMedia,
 } from "../../server/functions/property-media";
+import { Button, SubmitButton } from "../ui/button";
 
 interface MediaItem {
   id: string;
@@ -254,21 +255,64 @@ export function PropertyMediaManager({
 
       {activeTab === "gallery" && (
         <div className="space-y-6">
-          {/* Category Selector */}
-          <div className="flex gap-2">
-            {["hero", "gallery", "exterior", "amenity"].map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  selectedCategory === category
-                    ? "bg-sky-100 text-sky-700"
-                    : "bg-stone-100 text-stone-600 hover:bg-stone-200"
-                }`}
-              >
-                {category.charAt(0).toUpperCase() + category.slice(1)}
-              </button>
-            ))}
+          {/* Image Section Selector */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-medium text-stone-900 mb-2">Upload Images for Website Sections</h3>
+              <p className="text-xs text-stone-500 mb-4">Choose where these images will appear on your property listing</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {[
+                {
+                  key: "hero",
+                  label: "Main Hero Image",
+                  description: "Large background image on property detail page",
+                  icon: "solar:gallery-wide-linear"
+                },
+                {
+                  key: "thumbnail",
+                  label: "Property Thumbnail",
+                  description: "Small image shown in property listings/cards",
+                  icon: "solar:square-academic-cap-2-linear"
+                },
+                {
+                  key: "gallery",
+                  label: "Photo Gallery",
+                  description: "Additional photos showcased in property gallery",
+                  icon: "solar:gallery-minimalistic-linear"
+                }
+              ].map((category) => (
+                <button
+                  key={category.key}
+                  onClick={() => setSelectedCategory(category.key)}
+                  className={`p-4 border-2 rounded-xl text-left transition-all ${
+                    selectedCategory === category.key
+                      ? "border-sky-500 bg-sky-50"
+                      : "border-stone-200 hover:border-sky-300 hover:bg-stone-50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <iconify-icon
+                      icon={category.icon}
+                      class={`text-xl ${
+                        selectedCategory === category.key ? "text-sky-600" : "text-stone-400"
+                      }`}
+                    />
+                    <h4 className={`font-medium text-sm ${
+                      selectedCategory === category.key ? "text-sky-900" : "text-stone-900"
+                    }`}>
+                      {category.label}
+                    </h4>
+                  </div>
+                  <p className={`text-xs leading-relaxed ${
+                    selectedCategory === category.key ? "text-sky-700" : "text-stone-500"
+                  }`}>
+                    {category.description}
+                  </p>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Upload Button */}
@@ -287,23 +331,15 @@ export function PropertyMediaManager({
               }}
             />
             <div className="space-y-3">
-              <button
+              <Button
                 onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-                className="flex items-center gap-2 px-4 py-2 bg-sky-600 text-white rounded-lg text-sm font-medium hover:bg-sky-700 transition-colors disabled:opacity-50"
+                loading={uploading}
+                loadingText="Uploading..."
+                size="sm"
               >
-                {uploading ? (
-                  <>
-                    <iconify-icon icon="solar:refresh-linear" class="text-lg animate-spin" />
-                    Uploading...
-                  </>
-                ) : (
-                  <>
-                    <iconify-icon icon="solar:camera-add-linear" class="text-lg" />
-                    Add {selectedCategory} Images
-                  </>
-                )}
-              </button>
+                <iconify-icon icon="solar:camera-add-linear" class="text-lg mr-2" />
+                Add {selectedCategory} Images
+              </Button>
 
               {uploadProgress && (
                 <div className="bg-sky-50 border border-sky-200 rounded-lg p-3 space-y-2">
@@ -363,13 +399,13 @@ export function PropertyMediaManager({
         <div className="space-y-6">
           {/* Add Room Button */}
           <div>
-            <button
+            <Button
               onClick={() => setShowAddRoom(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-sky-600 text-white rounded-lg text-sm font-medium hover:bg-sky-700 transition-colors"
+              size="sm"
             >
-              <iconify-icon icon="solar:add-circle-linear" class="text-lg" />
+              <iconify-icon icon="solar:add-circle-linear" class="text-lg mr-2" />
               Add Room Type
-            </button>
+            </Button>
           </div>
 
           {/* Add Room Form */}
@@ -587,19 +623,20 @@ function RoomForm({
       </div>
 
       <div className="flex justify-end gap-2">
-        <button
+        <Button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 text-stone-600 hover:text-stone-900 text-sm font-medium transition-colors"
+          variant="ghost"
+          size="sm"
         >
           Cancel
-        </button>
-        <button
+        </Button>
+        <SubmitButton
           type="submit"
-          className="px-4 py-2 bg-sky-600 text-white rounded-lg text-sm font-medium hover:bg-sky-700 transition-colors"
+          size="sm"
         >
           {room ? "Update Room" : "Add Room"}
-        </button>
+        </SubmitButton>
       </div>
     </form>
   );

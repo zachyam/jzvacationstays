@@ -1,8 +1,10 @@
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 
 import { useAuth } from "../hooks/use-auth";
 import { logout } from "../server/functions/auth";
 import { getProperties } from "../server/functions/properties";
+import { Button } from "../components/ui/button";
 
 export const Route = createFileRoute("/")({
   beforeLoad: ({ context }) => {
@@ -29,10 +31,17 @@ function HomePage() {
   const { properties } = Route.useLoaderData();
   const user = useAuth();
   const navigate = useNavigate();
+  const [loggingOut, setLoggingOut] = useState(false);
 
   async function handleLogout() {
-    await logout();
-    navigate({ to: "/" });
+    setLoggingOut(true);
+    try {
+      await logout();
+      navigate({ to: "/" });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+    setLoggingOut(false);
   }
 
   // Map DB properties to display data, with fallbacks for hardcoded values
@@ -75,12 +84,16 @@ function HomePage() {
                     {(user.name || user.email).slice(0, 2).toUpperCase()}
                   </div>
                 </Link>
-                <button
+                <Button
                   onClick={handleLogout}
-                  className="px-5 py-2.5 rounded-full bg-stone-200/80 hover:bg-stone-300/80 backdrop-blur-md text-stone-900 text-sm font-medium transition-all duration-200"
+                  loading={loggingOut}
+                  loadingText="Logging out..."
+                  variant="secondary"
+                  size="sm"
+                  className="backdrop-blur-md bg-stone-200/80 hover:bg-stone-300/80"
                 >
                   Log out
-                </button>
+                </Button>
               </>
             ) : (
               <>
@@ -145,8 +158,8 @@ function HomePage() {
               tagline={`${blueOasis?.tagline || "Oceanfront"} • ${blueOasis?.maxGuests || 8} Guests`}
               highlight={blueOasis?.highlight || "Family favorite"}
               highlightColor="bg-emerald-500/90 shadow-emerald-500/50"
-              imageUrl="https://images.unsplash.com/photo-1519046904884-53103b34b206?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-              imageAlt="Family on the beach"
+              imageUrl={blueOasis?.thumbnailUrl || "https://images.unsplash.com/photo-1519046904884-53103b34b206?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"}
+              imageAlt={blueOasis?.name || "Family on the beach"}
             />
 
             <HeroPropertyCard
@@ -155,8 +168,8 @@ function HomePage() {
               tagline={`${surfersSerenity?.tagline || "Private Pool"} • ${surfersSerenity?.maxGuests || 4} Guests`}
               highlight={surfersSerenity?.highlight || "Kid-friendly pool"}
               highlightColor="bg-sky-500/90 shadow-sky-500/50"
-              imageUrl="https://images.unsplash.com/photo-1572331165267-854da2b10ccc?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-              imageAlt="Sunny pool area"
+              imageUrl={surfersSerenity?.thumbnailUrl || "https://images.unsplash.com/photo-1572331165267-854da2b10ccc?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"}
+              imageAlt={surfersSerenity?.name || "Sunny pool area"}
             />
           </div>
         </div>

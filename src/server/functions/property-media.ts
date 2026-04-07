@@ -38,7 +38,7 @@ export const uploadPropertyMedia = createServerFn({ method: "POST" })
       fileName: z.string(),
       fileSize: z.number(),
       caption: z.string().optional(),
-      category: z.enum(["hero", "gallery", "exterior", "amenity"]).default("gallery"),
+      category: z.enum(["hero", "thumbnail", "gallery"]).default("gallery"),
     })
   )
   .handler(async ({ data }) => {

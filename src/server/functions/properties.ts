@@ -1,8 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 import { db } from "../../db";
-import { properties, propertyPhotos } from "../../db/schema";
+import { properties, propertyPhotos, propertyMedia } from "../../db/schema";
 
 export const getProperties = createServerFn({ method: "GET" }).handler(
   async () => {
@@ -11,7 +11,39 @@ export const getProperties = createServerFn({ method: "GET" }).handler(
       .from(properties)
       .where(eq(properties.isActive, true));
 
-    return result;
+    // Get thumbnail media for each property
+    const propertiesWithMedia = await Promise.all(
+      result.map(async (property) => {
+        const thumbnailMedia = await db
+          .select()
+          .from(propertyMedia)
+          .where(
+            and(
+              eq(propertyMedia.propertyId, property.id),
+              eq(propertyMedia.category, 'thumbnail')
+            )
+          )
+          .limit(1);
+
+        const heroMedia = await db
+          .select()
+          .from(propertyMedia)
+          .where(
+            and(
+              eq(propertyMedia.propertyId, property.id),
+              eq(propertyMedia.category, 'hero')
+            )
+          )
+          .limit(1);
+
+        return {
+          ...property,
+          thumbnailUrl: thumbnailMedia[0]?.url || heroMedia[0]?.url || null,
+        };
+      })
+    );
+
+    return propertiesWithMedia;
   },
 );
 

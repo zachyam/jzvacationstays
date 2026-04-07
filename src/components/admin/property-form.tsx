@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { cn } from "../../lib/utils";
+import { SubmitButton } from "../ui/button";
 
 const AMENITY_OPTIONS = [
   "Ocean view",
@@ -556,17 +557,15 @@ export function PropertyForm({
       </section>
 
       <div className="flex justify-end gap-3 pb-8">
-        <button
+        <SubmitButton
           type="submit"
-          disabled={saving}
-          className="bg-sky-600 hover:bg-sky-700 text-white px-8 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm disabled:opacity-50"
+          loading={saving}
+          loadingText="Saving..."
+          size="md"
+          className="px-8"
         >
-          {saving
-            ? "Saving..."
-            : isEdit
-              ? "Save Changes"
-              : "Create Listing"}
-        </button>
+          {isEdit ? "Save Changes" : "Create Listing"}
+        </SubmitButton>
       </div>
     </form>
   );

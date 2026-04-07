@@ -9,6 +9,7 @@ import {
 import { PropertyMediaManager } from "../../../components/admin/property-media-manager";
 import { getPropertyMedia, getRoomTypes } from "../../../server/functions/property-media";
 import { cn } from "../../../lib/utils";
+import { SubmitButton, DeleteButton, Button } from "../../../components/ui/button";
 
 export const Route = createFileRoute("/admin/listings/$slug")({
   loader: async ({ params }) => {
@@ -39,11 +40,35 @@ const SECTIONS = [
 ];
 
 const AMENITY_OPTIONS = [
-  "Ocean view", "Pool", "Hot tub", "Wi-Fi", "Air conditioning", "Heating",
-  "Kitchen", "Washer", "Dryer", "Free parking", "EV charger", "Gym",
-  "BBQ grill", "Fire pit", "Outdoor dining", "Beach access", "Kayaks",
-  "Bikes", "Board games", "Streaming services", "Workspace", "Pet friendly",
-  "Baby gear", "Security cameras",
+  // Views and location
+  "Ocean view", "Beach access",
+
+  // Internet & Entertainment
+  "Wi-Fi", "WiFi", "Streaming services",
+
+  // Climate control
+  "Air conditioning", "Heating", "A/C",
+
+  // Kitchen & Dining
+  "Kitchen", "Full kitchen", "BBQ grill", "Outdoor dining",
+
+  // Laundry
+  "Washer", "Dryer", "Washer/Dryer",
+
+  // Parking & Transportation
+  "Free parking", "Parking", "EV charger", "Bikes", "Kayaks",
+
+  // Recreation
+  "Pool", "Private pool", "Heated pool", "Hot tub", "Gym", "Fire pit", "Board games",
+
+  // Family & Pets
+  "Pet friendly", "Baby gear", "Pack n Play", "High chair",
+
+  // Work & Safety
+  "Workspace", "Security cameras",
+
+  // Other amenities
+  "Fenced yard", "Outdoor shower", "Beach chairs",
 ];
 
 function EditListingPage() {
@@ -51,6 +76,7 @@ function EditListingPage() {
   const navigate = useNavigate();
   const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
   const [showDelete, setShowDelete] = useState(false);
   const [activeSection, setActiveSection] = useState("basic");
@@ -131,12 +157,15 @@ function EditListingPage() {
   }
 
   async function handleDelete() {
+    setDeleting(true);
+    setError("");
     try {
       await deleteProperty({ data: { slug: property.slug } });
       navigate({ to: "/admin/listings" });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to delete listing");
     }
+    setDeleting(false);
   }
 
   // Use property media for cover photo if available
@@ -163,26 +192,20 @@ function EditListingPage() {
 
             {/* Action Buttons */}
             <div className="flex gap-3">
-              <button
+              <DeleteButton
                 onClick={() => setShowDelete(true)}
-                className="px-4 py-2 text-sm text-red-600 hover:text-red-700 font-medium transition-colors"
+                variant="ghost"
+                size="sm"
               >
                 Delete
-              </button>
-              <button
+              </DeleteButton>
+              <SubmitButton
                 onClick={handleSubmit}
-                disabled={saving}
-                className="px-4 py-2 bg-sky-600 text-white rounded-lg text-sm font-medium hover:bg-sky-700 transition-colors disabled:opacity-50"
+                loading={saving}
+                size="sm"
               >
-  {saving ? (
-                <>
-                  <iconify-icon icon="solar:refresh-linear" class="text-sm animate-spin mr-2" />
-                  Saving...
-                </>
-              ) : (
-                "Save Changes"
-              )}
-              </button>
+                Save Changes
+              </SubmitButton>
             </div>
           </div>
 
@@ -585,31 +608,100 @@ function EditListingPage() {
                   Amenities
                 </h1>
                 <p className="text-sm text-stone-500">
-                  Select all amenities available at your property
+                  Select all amenities available at your property ({formData.amenities.length} selected)
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {AMENITY_OPTIONS.map((amenity) => (
-                  <label
-                    key={amenity}
-                    className="flex items-center gap-3 p-3 border border-stone-200 rounded-lg cursor-pointer hover:bg-stone-50 transition-colors"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={formData.amenities.includes(amenity)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setFormData({ ...formData, amenities: [...formData.amenities, amenity] });
-                        } else {
-                          setFormData({ ...formData, amenities: formData.amenities.filter(a => a !== amenity) });
+              {/* Custom amenities that aren't in the predefined list */}
+              {formData.amenities.filter(a => !AMENITY_OPTIONS.includes(a)).length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium text-stone-600 mb-3">Custom Amenities</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {formData.amenities.filter(a => !AMENITY_OPTIONS.includes(a)).map((amenity) => (
+                      <div
+                        key={amenity}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-sky-50 text-sky-700 rounded-lg border border-sky-200"
+                      >
+                        <span className="text-sm">{amenity}</span>
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, amenities: formData.amenities.filter(a => a !== amenity) })}
+                          className="text-sky-600 hover:text-sky-800"
+                        >
+                          <iconify-icon icon="solar:close-circle-linear" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Add custom amenity */}
+              <div className="mb-6">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Add custom amenity (e.g., 'Private tennis court')"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const value = (e.target as HTMLInputElement).value.trim();
+                        if (value && !formData.amenities.includes(value)) {
+                          setFormData({ ...formData, amenities: [...formData.amenities, value] });
+                          (e.target as HTMLInputElement).value = '';
                         }
-                      }}
-                      className="w-4 h-4 text-sky-600 rounded"
-                    />
-                    <span className="text-sm text-stone-700">{amenity}</span>
-                  </label>
-                ))}
+                      }
+                    }}
+                    className="flex-1 px-4 py-2 bg-white border border-stone-200 rounded-lg text-sm text-stone-900 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      const input = (e.currentTarget.previousElementSibling as HTMLInputElement);
+                      const value = input.value.trim();
+                      if (value && !formData.amenities.includes(value)) {
+                        setFormData({ ...formData, amenities: [...formData.amenities, value] });
+                        input.value = '';
+                      }
+                    }}
+                    className="px-4 py-2 bg-sky-600 text-white rounded-lg text-sm hover:bg-sky-700 transition-colors"
+                  >
+                    Add
+                  </button>
+                </div>
+                <p className="text-xs text-stone-500 mt-1">Press Enter or click Add to add a custom amenity</p>
+              </div>
+
+              {/* Predefined amenities */}
+              <div>
+                <h3 className="text-sm font-medium text-stone-600 mb-3">Common Amenities</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {AMENITY_OPTIONS.map((amenity) => (
+                    <label
+                      key={amenity}
+                      className={cn(
+                        "flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors",
+                        formData.amenities.includes(amenity)
+                          ? "border-sky-500 bg-sky-50"
+                          : "border-stone-200 hover:bg-stone-50"
+                      )}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formData.amenities.includes(amenity)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setFormData({ ...formData, amenities: [...formData.amenities, amenity] });
+                          } else {
+                            setFormData({ ...formData, amenities: formData.amenities.filter(a => a !== amenity) });
+                          }
+                        }}
+                        className="w-4 h-4 text-sky-600 rounded"
+                      />
+                      <span className="text-sm text-stone-700">{amenity}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -795,18 +887,23 @@ function EditListingPage() {
               property. This action cannot be undone.
             </p>
             <div className="flex gap-3">
-              <button
+              <Button
                 onClick={() => setShowDelete(false)}
-                className="flex-1 px-4 py-2.5 border border-stone-300 text-stone-700 rounded-xl font-medium hover:bg-stone-50 transition-colors text-sm"
+                variant="secondary"
+                size="sm"
+                disabled={deleting}
+                className="flex-1"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <DeleteButton
                 onClick={handleDelete}
-                className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium transition-colors text-sm"
+                loading={deleting}
+                size="sm"
+                className="flex-1"
               >
-                Delete
-              </button>
+                Delete Property
+              </DeleteButton>
             </div>
           </div>
         </div>

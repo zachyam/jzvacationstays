@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router"
 import { useState } from "react";
 
 import { sendOtp } from "../../server/functions/auth";
+import { SubmitButton } from "../../components/ui/button";
 
 export const Route = createFileRoute("/auth/login")({
   component: LoginPage,
@@ -125,13 +126,16 @@ function LoginPage() {
               <p className="text-sm text-red-600">{error}</p>
             )}
 
-            <button
+            <SubmitButton
               type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-stone-900 hover:bg-stone-800 text-white font-medium rounded-xl transition-colors disabled:opacity-50"
+              loading={loading}
+              loadingText="Sending code..."
+              className="w-full"
+              variant="primary"
+              size="lg"
             >
-              {loading ? "Sending code..." : "Continue"}
-            </button>
+              Continue
+            </SubmitButton>
           </form>
         </div>
       </div>

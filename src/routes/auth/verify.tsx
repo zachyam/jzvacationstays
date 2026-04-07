@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { verifyOtp } from "../../server/functions/auth";
+import { SubmitButton, Button } from "../../components/ui/button";
 
 type VerifySearch = {
   email: string;
@@ -87,23 +88,28 @@ function VerifyPage() {
 
             {error && <p className="text-sm text-red-600">{error}</p>}
 
-            <button
+            <SubmitButton
               type="submit"
-              disabled={loading || code.length !== 6}
-              className="w-full py-3 bg-stone-900 hover:bg-stone-800 text-white font-medium rounded-xl transition-colors disabled:opacity-50"
+              disabled={code.length !== 6}
+              loading={loading}
+              loadingText="Verifying..."
+              className="w-full"
+              size="lg"
             >
-              {loading ? "Verifying..." : "Verify"}
-            </button>
+              Verify
+            </SubmitButton>
           </form>
 
           <p className="text-sm text-stone-400 text-center mt-6">
             Didn't receive a code?{" "}
-            <button
+            <Button
               onClick={() => navigate({ to: "/auth/login" })}
-              className="text-sky-600 hover:text-sky-700 font-medium"
+              variant="ghost"
+              size="sm"
+              className="text-sky-600 hover:text-sky-700 p-0 h-auto font-medium"
             >
               Try again
-            </button>
+            </Button>
           </p>
         </div>
       </div>

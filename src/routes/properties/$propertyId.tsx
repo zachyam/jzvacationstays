@@ -145,13 +145,20 @@ function PropertyDetailPage() {
     );
   }
 
-  // Use new hero media if available, otherwise fall back to old photos
+  // Use new media system with fallback to old photos
   const heroMedia = propertyMedia.find((m) => m.category === 'hero');
+  const thumbnailMedia = propertyMedia.find((m) => m.category === 'thumbnail');
+  const galleryMedia = propertyMedia.filter((m) => m.category === 'gallery');
+
   const coverPhoto = photos.find((p) => p.isCover) ?? photos[0];
   const heroUrl =
     heroMedia?.url ||
+    thumbnailMedia?.url ||
     coverPhoto?.url ||
     "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=2800&q=80";
+
+  // Thumbnail URL for cards/listings (when needed)
+  const thumbnailUrl = thumbnailMedia?.url || heroMedia?.url || coverPhoto?.url;
 
   const nightlyRate = property.nightlyRate || 0;
   const nights =
@@ -283,114 +290,41 @@ function PropertyDetailPage() {
           {/* Amenities */}
           <PropertyAmenities amenities={(property.amenities as string[]) || []} />
 
-          {/* Enhanced Photo Gallery */}
-          {(propertyMedia.length > 0 || photos.length > 1) && (
+          {/* Enhanced Photo Gallery - Only show if there are gallery images */}
+          {galleryMedia.length > 0 && (
             <div className="mt-12">
               <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-stone-900 mb-6">
                 Gallery
               </h2>
 
-              {/* Hero Images */}
-              {propertyMedia.filter(m => m.category === 'hero').length > 0 && (
-                <div className="mb-8">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {propertyMedia
-                      .filter(m => m.category === 'hero')
-                      .map((media) => (
-                        <div
-                          key={media.id}
-                          className="aspect-[16/9] rounded-2xl overflow-hidden"
-                        >
-                          <InspectionImage
-                            src={media.url}
-                            alt={media.caption || property.name}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                          />
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Gallery Images */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {/* Use new media if available, otherwise fall back to old photos */}
-                {propertyMedia.filter(m => m.category === 'gallery').length > 0 ? (
-                  propertyMedia
-                    .filter(m => m.category === 'gallery')
-                    .map((media) => (
-                      <div
-                        key={media.id}
-                        className="aspect-[4/3] rounded-2xl overflow-hidden"
-                      >
-                        <InspectionImage
-                          src={media.url}
-                          alt={media.caption || property.name}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                        />
-                      </div>
-                    ))
-                ) : (
-                  photos.map((photo) => (
-                    <div
-                      key={photo.id}
-                      className="aspect-[4/3] rounded-2xl overflow-hidden"
-                    >
-                      <img
-                        src={photo.url}
-                        alt={photo.alt || property.name}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {galleryMedia.map((media) => (
+                  <div
+                    key={media.id}
+                    className="group relative aspect-[4/3] rounded-xl overflow-hidden cursor-pointer bg-stone-100"
+                    onClick={() => openLightbox(media.url, "Property Photo", media.caption)}
+                  >
+                    <InspectionImage
+                      src={media.url}
+                      alt={media.caption || property.name}
+                      className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
+                      <iconify-icon
+                        icon="solar:eye-linear"
+                        class="text-white text-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-110"
                       />
                     </div>
-                  ))
-                )}
+                    {media.caption && (
+                      <div className="absolute bottom-2 left-2 right-2">
+                        <div className="bg-black/60 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
+                          {media.caption}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
-
-              {/* Exterior Images */}
-              {propertyMedia.filter(m => m.category === 'exterior').length > 0 && (
-                <div className="mt-8">
-                  <h3 className="text-xl font-medium text-stone-800 mb-4">Exterior</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {propertyMedia
-                      .filter(m => m.category === 'exterior')
-                      .map((media) => (
-                        <div
-                          key={media.id}
-                          className="aspect-[4/3] rounded-2xl overflow-hidden"
-                        >
-                          <InspectionImage
-                            src={media.url}
-                            alt={media.caption || "Exterior view"}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                          />
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Amenity Images */}
-              {propertyMedia.filter(m => m.category === 'amenity').length > 0 && (
-                <div className="mt-8">
-                  <h3 className="text-xl font-medium text-stone-800 mb-4">Amenities</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {propertyMedia
-                      .filter(m => m.category === 'amenity')
-                      .map((media) => (
-                        <div
-                          key={media.id}
-                          className="aspect-[4/3] rounded-2xl overflow-hidden"
-                        >
-                          <InspectionImage
-                            src={media.url}
-                            alt={media.caption || "Amenity"}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                          />
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
