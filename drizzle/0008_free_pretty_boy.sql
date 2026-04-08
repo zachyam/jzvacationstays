@@ -1,0 +1,1 @@
+ALTER TABLE "properties" ALTER COLUMN "bathrooms" SET DATA TYPE double precision;

@@ -7,6 +7,7 @@ import { getAvailability } from "../../server/functions/calendar-sync";
 import { getPropertyMedia, getRoomTypes } from "../../server/functions/property-media";
 import { Header } from "../../components/layout/header";
 import { PropertyAmenities } from "../../components/property/property-amenities";
+import { PropertyDescription } from "../../components/property/property-description";
 import { PropertyReviews } from "../../components/property/property-reviews";
 import { DateRangePicker } from "../../components/ui/date-range-picker";
 import { formatCurrency } from "../../lib/utils";
@@ -254,21 +255,7 @@ function PropertyDetailPage() {
           <hr className="border-stone-200 mb-10" />
 
           {/* Description */}
-          {property.description && (
-            <>
-              <div className="mb-12">
-                <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-stone-900 mb-6">
-                  About this home
-                </h2>
-                <div className="space-y-6 text-lg font-light text-stone-700 leading-relaxed">
-                  {property.description.split("\n\n").map((para, i) => (
-                    <p key={i}>{para}</p>
-                  ))}
-                </div>
-              </div>
-              <hr className="border-stone-200 mb-10" />
-            </>
-          )}
+          <PropertyDescription description={(property.description as string)} />
 
           {/* More Details */}
           {property.moreDetails && (

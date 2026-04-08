@@ -72,7 +72,7 @@ export const propertySchema = z.object({
   moreDetails: z.string().optional().or(z.literal("")),
   maxGuests: z.number().int().min(1, "At least 1 guest"),
   bedrooms: z.number().int().min(0),
-  bathrooms: z.number().min(0.5, "Must be at least 0.5").refine(val => val % 0.5 === 0, "Must be in increments of 0.5 (e.g. 1, 1.5, 2)"),
+  bathrooms: z.coerce.number().min(0.5),
   beds: z.array(z.string()).default([]),
   cleaningFee: z.number().int().min(0, "Cannot be negative"),
   nightlyRate: z.number().int().min(0, "Cannot be negative"),

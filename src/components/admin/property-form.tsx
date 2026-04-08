@@ -55,7 +55,7 @@ export function PropertyForm({
     (defaults?.bedrooms as number) || 1,
   );
   const [bathrooms, setBathrooms] = useState(
-    (defaults?.bathrooms as string) || "1",
+    defaults?.bathrooms ? Number(defaults.bathrooms) : 1,
   );
   const [beds, setBeds] = useState<string[]>(
     (defaults?.beds as string[]) || [],
@@ -277,10 +277,12 @@ export function PropertyForm({
               Bathrooms
             </label>
             <input
-              type="text"
+              type="number"
               value={bathrooms}
-              onChange={(e) => setBathrooms(e.target.value)}
+              onChange={(e) => setBathrooms(Number(e.target.value))}
               required
+              min={0.5}
+              step={0.5}
               className="w-full border border-stone-300 rounded-lg px-4 py-2.5 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
               placeholder="e.g. 2.5"
             />

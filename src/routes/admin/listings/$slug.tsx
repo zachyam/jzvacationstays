@@ -124,16 +124,36 @@ function EditListingPage() {
     );
   }
 
-  async function handleSubmit() {
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
     setSaving(true);
     setError("");
     try {
+      // Convert form data to the format expected by the server
       const updates = {
-        ...formData,
-        bathrooms: typeof formData.bathrooms === 'string' ? parseFloat(formData.bathrooms) : formData.bathrooms,
-        cleaningFee: Math.round(formData.cleaningFee * 100),
-        nightlyRate: Math.round(formData.nightlyRate * 100),
-        petFee: Math.round(formData.petFee * 100),
+        slug: formData.slug,
+        name: formData.name,
+        tagline: formData.tagline || "",
+        description: formData.description || "",
+        moreDetails: formData.moreDetails || "",
+        maxGuests: formData.maxGuests,
+        bedrooms: formData.bedrooms,
+        bathrooms: Number(formData.bathrooms),
+        beds: formData.beds,
+        cleaningFee: Math.round(formData.cleaningFee * 100), // Convert to cents
+        nightlyRate: Math.round(formData.nightlyRate * 100), // Convert to cents
+        petFee: Math.round(formData.petFee * 100), // Convert to cents
+        maxPets: formData.maxPets,
+        minStay: formData.minStay,
+        checkInTime: formData.checkInTime || "",
+        checkOutTime: formData.checkOutTime || "",
+        houseRules: formData.houseRules || "",
+        address: formData.address || "",
+        latitude: formData.latitude || "",
+        longitude: formData.longitude || "",
+        amenities: formData.amenities,
+        highlight: formData.highlight || "",
+        isActive: formData.isActive,
       };
 
       const result = await updateProperty({
@@ -370,15 +390,25 @@ function EditListingPage() {
                   </label>
                   <div className="relative">
                     <input
-                      type="number"
-                      step="0.5"
-                      min="0.5"
+                      type="text"
+                      inputMode="decimal"
                       value={formData.bathrooms}
                       onChange={(e) => {
+                        const value = e.target.value;
+                        // Allow typing, validate on submit
+                        if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                          setFormData({ ...formData, bathrooms: value });
+                        }
+                      }}
+                      onBlur={(e) => {
+                        // Convert to number on blur
                         const value = parseFloat(e.target.value);
-                        setFormData({ ...formData, bathrooms: isNaN(value) ? 1 : value });
+                        if (!isNaN(value)) {
+                          setFormData({ ...formData, bathrooms: value });
+                        }
                       }}
                       className="w-full pl-4 pr-20 py-2.5 bg-white border border-stone-200 rounded-lg text-sm text-stone-900 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                      placeholder="e.g., 2.5"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-stone-400">
                       Bathrooms

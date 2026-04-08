@@ -95,8 +95,8 @@ export const createProperty = createServerFn({ method: "POST" })
 
 export const updateProperty = createServerFn({ method: "POST" })
   .inputValidator((data: { slug: string; updates: unknown }) => {
-    const updates = propertySchema.partial().parse(data.updates);
-    return { slug: data.slug, updates };
+    const validatedUpdates = propertySchema.partial().parse(data.updates);
+    return { slug: data.slug, updates: validatedUpdates };
   })
   .handler(async ({ data }) => {
     await requireAdmin();
