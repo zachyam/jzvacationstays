@@ -16,10 +16,8 @@ declare global {
 
 import { getPropertyBySlug } from "../../server/functions/properties";
 import { createBooking } from "../../server/functions/bookings";
-import { createPaymentIntent } from "../../server/functions/payments";
 import { sendOtp, verifyOtp } from "../../server/functions/auth";
 import { useAuth } from "../../hooks/use-auth";
-import { StripePayment } from "../../components/booking/stripe-payment";
 import { formatDate } from "../../lib/utils";
 
 type BookingSearch = {
@@ -47,15 +45,11 @@ export const Route = createFileRoute("/booking/$propertyId")({
   component: BookingPage,
 });
 
-type Step = "details" | "payment";
-
 function BookingPage() {
   const { property, coverPhoto } = Route.useLoaderData();
   const { checkIn, checkOut, guests } = Route.useSearch();
   const user = useAuth();
   const navigate = useNavigate();
-
-  const [step, setStep] = useState<Step>("details");
 
   // Guest details
   const [guestName, setGuestName] = useState(user?.name || "");
@@ -70,13 +64,12 @@ function BookingPage() {
   const [otpCode, setOtpCode] = useState("");
   const [authError, setAuthError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
+  const [signupLoading, setSignupLoading] = useState(false);
   const [authenticatedUserId, setAuthenticatedUserId] = useState<string | null>(
     user?.id || null,
   );
 
-  // Payment state
-  const [clientSecret, setClientSecret] = useState("");
-  const [bookingId, setBookingId] = useState("");
+  // Booking state
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -144,11 +137,15 @@ function BookingPage() {
     setAuthError("");
     try {
       const result = await sendOtp({
-        data: { email: emailToUse, name: authName || guestName || undefined },
+        data: { email: emailToUse },
       });
       if (result.needsName) {
         setShowNameField(true);
         setAuthMode("send");
+        if (result.error) {
+          // User tried to sign in with unregistered email
+          setAuthError(result.error);
+        }
         setAuthLoading(false);
         return;
       }
@@ -186,6 +183,11 @@ function BookingPage() {
         setAuthMode("none");
         if (!guestName && result.user.name) setGuestName(result.user.name);
         if (!guestEmail) setGuestEmail(result.user.email);
+
+        // Clear OTP code after successful verification
+        setOtpCode("");
+        setAuthEmail("");
+        setAuthName("");
       } else {
         setAuthError(result.error || "Verification failed");
       }
@@ -195,8 +197,30 @@ function BookingPage() {
     setAuthLoading(false);
   }
 
+  async function handleSignUp() {
+    setSignupLoading(true);
+    setAuthError("");
+    try {
+      // Send OTP for signup with isSignup flag
+      const result = await sendOtp({
+        data: { email: guestEmail, isSignup: true },
+      });
+
+      if (result.success) {
+        setAuthEmail(guestEmail);
+        setAuthName(guestName);
+        setAuthMode("verify");
+      } else {
+        setAuthError(result.error || "Failed to send verification code");
+      }
+    } catch (err: any) {
+      setAuthError(err.message || "Failed to send verification code");
+    }
+    setSignupLoading(false);
+  }
+
   async function handleContinueToPayment() {
-    if (!guestName || !guestEmail || !authenticatedUserId || !property) return;
+    if (!authenticatedUserId || !property) return;
 
     setPaymentLoading(true);
     setError("");
@@ -207,11 +231,8 @@ function BookingPage() {
           checkIn,
           checkOut,
           guestsCount,
-          guestName,
-          guestEmail,
-          guestPhone: guestPhone || undefined,
           totalAmount,
-          userId: authenticatedUserId,
+          userId: authenticatedUserId
         },
       });
 
@@ -221,28 +242,17 @@ function BookingPage() {
         return;
       }
 
-      setBookingId(result.booking.id);
-
-      const paymentResult = await createPaymentIntent({
-        data: { bookingId: result.booking.id, amount: totalAmount },
+      // Redirect to payment page instead of inline payment
+      navigate({
+        to: "/payment/$bookingId",
+        params: { bookingId: result.booking.id },
       });
-
-      if (paymentResult.clientSecret) {
-        setClientSecret(paymentResult.clientSecret);
-        setStep("payment");
-      }
     } catch (err: any) {
       setError(err.message || "Something went wrong");
+      setPaymentLoading(false);
     }
-    setPaymentLoading(false);
   }
 
-  function handlePaymentSuccess() {
-    navigate({
-      to: "/booking/confirmation/$bookingId",
-      params: { bookingId },
-    });
-  }
 
 
   function handleApplyChanges() {
@@ -460,10 +470,9 @@ function BookingPage() {
           </section>
 
           {/* Auth and Guest Details */}
-          {step === "details" && (
-            <div className="space-y-10">
+          <div className="space-y-10">
               {/* Account Sign-in Card */}
-              {!isLoggedIn && (
+              {!isLoggedIn && authMode !== "verify" && (
                 <div className="bg-white border border-stone-200 rounded-[1.5rem] p-6 sm:p-8 shadow-sm transition-all">
                   <div className="flex items-start gap-4 mb-6">
                     <div className="w-12 h-12 rounded-full bg-sky-50 text-sky-500 flex items-center justify-center flex-shrink-0 border border-sky-100/50">
@@ -475,7 +484,7 @@ function BookingPage() {
                     </div>
                   </div>
 
-                  {authMode === "none" && (
+                  {(authMode === "none" || authMode === "send") && (
                     <div className="flex flex-col sm:flex-row gap-4 mt-2">
                       <input
                         type="email"
@@ -494,28 +503,8 @@ function BookingPage() {
                     </div>
                   )}
 
-                  {(authMode === "send" || showNameField) && (
-                    <div className="space-y-4">
-                      {showNameField && (
-                        <input
-                          type="text"
-                          value={authName}
-                          onChange={(e) => setAuthName(e.target.value)}
-                          placeholder="Full name (required for new accounts)"
-                          className="w-full bg-white border border-stone-200 rounded-xl px-5 py-3.5 text-base text-stone-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all placeholder:text-stone-400 shadow-sm"
-                        />
-                      )}
-                      <button
-                        onClick={handleSendOtp}
-                        disabled={authLoading || (showNameField && !authName)}
-                        className="w-full bg-stone-500 hover:bg-stone-600 text-white font-medium py-3.5 rounded-xl text-base transition-colors shadow-sm disabled:opacity-50"
-                      >
-                        {authLoading ? "Sending..." : "Send verification code"}
-                      </button>
-                      {authError && (
-                        <p className="text-sm text-red-600">{authError}</p>
-                      )}
-                    </div>
+                  {authError && (
+                    <p className="text-sm text-red-600 mt-4">{authError}</p>
                   )}
 
                   {authMode === "verify" && (
@@ -564,7 +553,7 @@ function BookingPage() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-emerald-900">
-                      Signed in{user?.name ? ` as ${user.name}` : ""}
+                      Signed in{user?.name ? ` as ${user.name}` : ""} and verified
                     </p>
                     <p className="text-xs text-emerald-700">
                       Your booking will be saved to your account.
@@ -574,9 +563,9 @@ function BookingPage() {
               )}
 
               {/* Guest Details Section - Only for non-logged-in users */}
-              {!isLoggedIn && (
+              {!isLoggedIn && (authMode === "none" || (authMode === "send" && showNameField)) && (
                 <div>
-                  <h2 className="text-2xl font-medium tracking-tight text-stone-900 mb-6">Guest details</h2>
+                  <h2 className="text-2xl font-medium tracking-tight text-stone-900 mb-6">Sign up for an account</h2>
 
                   <div className="space-y-6">
                     <div>
@@ -584,7 +573,10 @@ function BookingPage() {
                       <input
                         type="text"
                         value={guestName}
-                        onChange={(e) => setGuestName(e.target.value)}
+                        onChange={(e) => {
+                          setGuestName(e.target.value);
+                          if (authError) setAuthError(""); // Clear error when user starts typing
+                        }}
                         className="w-full bg-white border border-stone-200 rounded-xl px-5 py-4 text-base text-stone-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all shadow-sm placeholder:text-stone-400"
                         placeholder="Your full name"
                       />
@@ -602,7 +594,7 @@ function BookingPage() {
                     </div>
 
                     <div>
-                      <label className="block text-base font-medium text-stone-600 mb-2.5">Phone (optional)</label>
+                      <label className="block text-base font-medium text-stone-600 mb-2.5">Phone</label>
                       <input
                         type="tel"
                         value={guestPhone}
@@ -616,35 +608,69 @@ function BookingPage() {
                   {error && <p className="text-sm text-red-600 mt-4">{error}</p>}
 
                   <button
-                    onClick={handleContinueToPayment}
+                    onClick={isLoggedIn ? handleContinueToPayment : handleSignUp}
                     disabled={
                       !guestName ||
                       !guestEmail ||
-                      !isLoggedIn ||
-                      paymentLoading
+                      !guestPhone ||
+                      (isLoggedIn && paymentLoading) ||
+                      signupLoading
                     }
-                    className="w-full mt-8 bg-sky-400 text-white rounded-xl py-4 text-base font-medium text-center shadow-sm cursor-not-allowed transition-all disabled:opacity-50"
+                    className="w-full mt-8 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl py-4 text-base font-medium text-center shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {paymentLoading
+                    {signupLoading
+                      ? "Sending verification code..."
+                      : paymentLoading
                       ? "Setting up payment..."
-                      : "Sign in above to continue"}
+                      : isLoggedIn ? "Continue to Payment" : "Sign Up"}
                   </button>
                 </div>
               )}
 
-            </div>
-          )}
+              {/* OTP Verification Section - Only when in verify mode */}
+              {!isLoggedIn && authMode === "verify" && (
+                <div className="bg-white border border-stone-200 rounded-[1.5rem] p-6 sm:p-8 shadow-sm">
+                  <div className="flex items-start gap-4 mb-6">
+                    <div className="w-12 h-12 rounded-full bg-sky-50 text-sky-500 flex items-center justify-center flex-shrink-0 border border-sky-100/50">
+                      <iconify-icon icon="solar:shield-check-linear" width="24" height="24"></iconify-icon>
+                    </div>
+                    <div className="pt-0.5">
+                      <h2 className="text-xl font-medium tracking-tight text-stone-900">Verify your email</h2>
+                      <p className="text-base text-stone-500 mt-1 leading-relaxed">
+                        Enter the 6-digit code sent to{" "}
+                        <span className="font-medium">{authEmail}</span>
+                      </p>
+                    </div>
+                  </div>
 
-          {/* Step 2: Payment */}
-          {step === "payment" && clientSecret && (
-            <div className="space-y-6">
-              <h2 className="text-xl font-medium text-stone-900">Payment</h2>
-              <StripePayment
-                clientSecret={clientSecret}
-                onSuccess={handlePaymentSuccess}
-              />
-            </div>
-          )}
+                  <div className="space-y-4">
+                    <input
+                      type="text"
+                      value={otpCode}
+                      onChange={(e) =>
+                        setOtpCode(
+                          e.target.value.replace(/\D/g, "").slice(0, 6),
+                        )
+                      }
+                      placeholder="000000"
+                      maxLength={6}
+                      className="w-full bg-white border border-stone-200 rounded-xl px-5 py-3.5 text-base text-stone-900 text-center tracking-[0.5em] font-mono focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all placeholder:text-stone-400 shadow-sm"
+                    />
+                    {authError && (
+                      <p className="text-sm text-red-600">{authError}</p>
+                    )}
+                    <button
+                      onClick={handleVerifyOtp}
+                      disabled={otpCode.length !== 6 || authLoading}
+                      className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-3.5 rounded-xl text-base transition-colors shadow-sm disabled:opacity-50"
+                    >
+                      {authLoading ? "Verifying..." : "Verify & Continue"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+          </div>
 
         </div>
 
@@ -701,13 +727,13 @@ function BookingPage() {
             {/* Action Button */}
             {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
 
-            {isLoggedIn && step === "details" ? (
+            {isLoggedIn ? (
               <button
                 onClick={handleContinueToPayment}
                 disabled={paymentLoading}
                 className="w-full bg-sky-500 text-white font-medium py-4 rounded-xl shadow-md shadow-sky-500/20 hover:bg-sky-400 hover:shadow-lg hover:-translate-y-0.5 transition-all focus:ring-4 focus:ring-sky-500/20 focus:outline-none text-lg disabled:opacity-50"
               >
-                {paymentLoading ? "Setting up payment..." : "Confirm & Pay"}
+                {paymentLoading ? "Creating booking..." : "Continue to Payment"}
               </button>
             ) : (
               <button

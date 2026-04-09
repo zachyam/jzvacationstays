@@ -13,7 +13,13 @@ const stripePromise = loadStripe(
     "",
 );
 
-function CheckoutForm({ onSuccess }: { onSuccess: () => void }) {
+function CheckoutForm({
+  onSuccess,
+  onProcessing
+}: {
+  onSuccess: () => void;
+  onProcessing?: (processing: boolean) => void;
+}) {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -25,6 +31,7 @@ function CheckoutForm({ onSuccess }: { onSuccess: () => void }) {
 
     setLoading(true);
     setError("");
+    onProcessing?.(true);
 
     const { error: submitError } = await stripe.confirmPayment({
       elements,
@@ -34,7 +41,9 @@ function CheckoutForm({ onSuccess }: { onSuccess: () => void }) {
     if (submitError) {
       setError(submitError.message || "Payment failed");
       setLoading(false);
+      onProcessing?.(false);
     } else {
+      onProcessing?.(false);
       onSuccess();
     }
   }
@@ -48,7 +57,7 @@ function CheckoutForm({ onSuccess }: { onSuccess: () => void }) {
         disabled={!stripe || loading}
         className="w-full py-3 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50"
       >
-        {loading ? "Processing..." : "Pay now"}
+        {loading ? "Processing..." : !stripe ? "Loading payment..." : "Pay now"}
       </button>
     </form>
   );
@@ -57,16 +66,18 @@ function CheckoutForm({ onSuccess }: { onSuccess: () => void }) {
 export function StripePayment({
   clientSecret,
   onSuccess,
+  onProcessing,
 }: {
   clientSecret: string;
   onSuccess: () => void;
+  onProcessing?: (processing: boolean) => void;
 }) {
   return (
     <Elements
       stripe={stripePromise}
       options={{ clientSecret, appearance: { theme: "stripe" } }}
     >
-      <CheckoutForm onSuccess={onSuccess} />
+      <CheckoutForm onSuccess={onSuccess} onProcessing={onProcessing} />
     </Elements>
   );
 }

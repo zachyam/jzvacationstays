@@ -21,7 +21,7 @@ function generateToken(): string {
  */
 export const sendOtp = createServerFn({ method: "POST" })
   .inputValidator(
-    (data: { email: string; name?: string }) => {
+    (data: { email: string; isSignup?: boolean }) => {
       if (!data.email || !data.email.includes("@")) {
         throw new Error("Valid email is required");
       }
@@ -31,7 +31,7 @@ export const sendOtp = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     // Import db inside the handler to ensure it only runs server-side
     const { db } = await import("../../db");
-    const { email, name } = data;
+    const { email, isSignup } = data;
 
     // Check if user exists
     const [existingUser] = await db
@@ -42,9 +42,15 @@ export const sendOtp = createServerFn({ method: "POST" })
 
     const isNewUser = !existingUser;
 
-    // New user requires name
-    if (isNewUser && !name?.trim()) {
-      return { success: false, isNewUser: true, needsName: true };
+    // If this is a signup request, skip the user existence check
+    if (isSignup) {
+      // For signup, always send OTP regardless of user existence
+      // If user exists, they'll be able to sign in during verification
+    } else {
+      // For sign-in, check if user exists
+      if (isNewUser) {
+        return { success: false, isNewUser: true, needsName: true, error: "No account found with this email. Please sign up below." };
+      }
     }
 
     // Skip OTP for admin users - directly create session
@@ -74,7 +80,8 @@ export const sendOtp = createServerFn({ method: "POST" })
           id: existingUser.id,
           email: existingUser.email,
           name: existingUser.name,
-          role: existingUser.role
+          role: existingUser.role,
+          emailVerified: existingUser.emailVerified
         },
       };
     }
@@ -160,8 +167,16 @@ export const verifyOtp = createServerFn({ method: "POST" })
           email: normalizedEmail,
           name: name.trim(),
           role: "guest",
+          emailVerified: true,
         })
         .returning();
+    } else {
+      // Update existing user as verified
+      await db
+        .update(users)
+        .set({ emailVerified: true })
+        .where(eq(users.id, user.id));
+      user.emailVerified = true;
     }
 
     // Create session
@@ -185,7 +200,7 @@ export const verifyOtp = createServerFn({ method: "POST" })
 
     return {
       success: true,
-      user: { id: user.id, email: user.email, name: user.name, role: user.role },
+      user: { id: user.id, email: user.email, name: user.name, role: user.role, emailVerified: user.emailVerified },
     };
   });
 
@@ -215,6 +230,7 @@ export const getSession = createServerFn({ method: "GET" }).handler(
         email: users.email,
         name: users.name,
         role: users.role,
+        emailVerified: users.emailVerified,
       })
       .from(users)
       .where(eq(users.id, session.userId))

@@ -9,6 +9,7 @@ export type SessionUser = {
   email: string;
   name: string | null;
   role: string;
+  emailVerified: boolean;
 };
 
 /**
@@ -37,6 +38,7 @@ export async function requireAuth(): Promise<SessionUser> {
       email: users.email,
       name: users.name,
       role: users.role,
+      emailVerified: users.emailVerified,
     })
     .from(users)
     .where(eq(users.id, session.userId))

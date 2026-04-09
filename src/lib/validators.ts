@@ -18,7 +18,7 @@ export const bookingSchema = z.object({
   guestsCount: z.number().int().min(1, "At least 1 guest required"),
   guestName: z.string().min(1, "Name is required"),
   guestEmail: z.string().email("Please enter a valid email"),
-  guestPhone: z.string().optional(),
+  guestPhone: z.string().min(1, "Phone number is required"),
   totalAmount: z.number().int().min(1),
   userId: z.string().uuid().optional(),
 });

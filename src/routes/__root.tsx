@@ -99,6 +99,9 @@ export const Route = createRootRouteWithContext<{
       {
         src: "https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js",
       },
+      {
+        children: `window.__STRIPE_PUBLISHABLE_KEY__ = "${process.env.STRIPE_PUBLISHABLE_KEY || ""}";`,
+      },
     ],
   }),
   component: RootComponent,

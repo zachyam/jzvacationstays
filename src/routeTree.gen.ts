@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PropertiesIndexRouteImport } from './routes/properties/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as PropertiesPropertyIdRouteImport } from './routes/properties/$propertyId'
+import { Route as PaymentBookingIdRouteImport } from './routes/payment/$bookingId'
 import { Route as BookingPropertyIdRouteImport } from './routes/booking/$propertyId'
 import { Route as AuthVerifyRouteImport } from './routes/auth/verify'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
@@ -73,6 +74,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const PropertiesPropertyIdRoute = PropertiesPropertyIdRouteImport.update({
   id: '/properties/$propertyId',
   path: '/properties/$propertyId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentBookingIdRoute = PaymentBookingIdRouteImport.update({
+  id: '/payment/$bookingId',
+  path: '/payment/$bookingId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BookingPropertyIdRoute = BookingPropertyIdRouteImport.update({
@@ -211,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/auth/login': typeof AuthLoginRoute
   '/auth/verify': typeof AuthVerifyRoute
   '/booking/$propertyId': typeof BookingPropertyIdRoute
+  '/payment/$bookingId': typeof PaymentBookingIdRoute
   '/properties/$propertyId': typeof PropertiesPropertyIdRoute
   '/admin/': typeof AdminIndexRoute
   '/properties/': typeof PropertiesIndexRoute
@@ -242,6 +249,7 @@ export interface FileRoutesByTo {
   '/auth/login': typeof AuthLoginRoute
   '/auth/verify': typeof AuthVerifyRoute
   '/booking/$propertyId': typeof BookingPropertyIdRoute
+  '/payment/$bookingId': typeof PaymentBookingIdRoute
   '/properties/$propertyId': typeof PropertiesPropertyIdRoute
   '/admin': typeof AdminIndexRoute
   '/properties': typeof PropertiesIndexRoute
@@ -275,6 +283,7 @@ export interface FileRoutesById {
   '/auth/login': typeof AuthLoginRoute
   '/auth/verify': typeof AuthVerifyRoute
   '/booking/$propertyId': typeof BookingPropertyIdRoute
+  '/payment/$bookingId': typeof PaymentBookingIdRoute
   '/properties/$propertyId': typeof PropertiesPropertyIdRoute
   '/admin/': typeof AdminIndexRoute
   '/properties/': typeof PropertiesIndexRoute
@@ -309,6 +318,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/verify'
     | '/booking/$propertyId'
+    | '/payment/$bookingId'
     | '/properties/$propertyId'
     | '/admin/'
     | '/properties/'
@@ -340,6 +350,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/verify'
     | '/booking/$propertyId'
+    | '/payment/$bookingId'
     | '/properties/$propertyId'
     | '/admin'
     | '/properties'
@@ -372,6 +383,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/verify'
     | '/booking/$propertyId'
+    | '/payment/$bookingId'
     | '/properties/$propertyId'
     | '/admin/'
     | '/properties/'
@@ -397,6 +409,7 @@ export interface RootRouteChildren {
   AuthLoginRoute: typeof AuthLoginRoute
   AuthVerifyRoute: typeof AuthVerifyRoute
   BookingPropertyIdRoute: typeof BookingPropertyIdRoute
+  PaymentBookingIdRoute: typeof PaymentBookingIdRoute
   PropertiesPropertyIdRoute: typeof PropertiesPropertyIdRoute
   PropertiesIndexRoute: typeof PropertiesIndexRoute
   BookingConfirmationBookingIdRoute: typeof BookingConfirmationBookingIdRoute
@@ -454,6 +467,13 @@ declare module '@tanstack/react-router' {
       path: '/properties/$propertyId'
       fullPath: '/properties/$propertyId'
       preLoaderRoute: typeof PropertiesPropertyIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment/$bookingId': {
+      id: '/payment/$bookingId'
+      path: '/payment/$bookingId'
+      fullPath: '/payment/$bookingId'
+      preLoaderRoute: typeof PaymentBookingIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/booking/$propertyId': {
@@ -671,6 +691,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthLoginRoute: AuthLoginRoute,
   AuthVerifyRoute: AuthVerifyRoute,
   BookingPropertyIdRoute: BookingPropertyIdRoute,
+  PaymentBookingIdRoute: PaymentBookingIdRoute,
   PropertiesPropertyIdRoute: PropertiesPropertyIdRoute,
   PropertiesIndexRoute: PropertiesIndexRoute,
   BookingConfirmationBookingIdRoute: BookingConfirmationBookingIdRoute,

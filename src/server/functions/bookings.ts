@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { eq, and, desc } from "drizzle-orm";
 
 import { db } from "../../db";
-import { bookings, properties } from "../../db/schema";
+import { bookings, properties, users } from "../../db/schema";
 import { requireAuth } from "../middleware/auth";
 
 export const createBooking = createServerFn({ method: "POST" })
@@ -12,22 +12,40 @@ export const createBooking = createServerFn({ method: "POST" })
       checkIn: string;
       checkOut: string;
       guestsCount: number;
-      guestName: string;
-      guestEmail: string;
-      guestPhone?: string;
       totalAmount: number;
       userId?: string;
     }) => {
       if (!data.propertySlug || !data.checkIn || !data.checkOut) {
         throw new Error("Property, check-in, and check-out are required");
       }
-      if (!data.guestName || !data.guestEmail) {
-        throw new Error("Guest name and email are required");
-      }
       return data;
     },
   )
   .handler(async ({ data }) => {
+    // Look up user information if userId is provided
+    let guestName = "Guest";
+    let guestEmail = "";
+    let guestPhone = "";
+
+    if (data.userId) {
+      const [user] = await db
+        .select({
+          name: users.name,
+          email: users.email,
+          emailVerified: users.emailVerified
+        })
+        .from(users)
+        .where(eq(users.id, data.userId))
+        .limit(1);
+
+      if (!user || !user.emailVerified) {
+        return { success: false, error: "User not found or email verification required" };
+      }
+
+      guestName = user.name || "Guest";
+      guestEmail = user.email;
+    }
+
     const [property] = await db
       .select()
       .from(properties)
@@ -43,9 +61,9 @@ export const createBooking = createServerFn({ method: "POST" })
       .values({
         propertyId: property.id,
         userId: data.userId,
-        guestName: data.guestName,
-        guestEmail: data.guestEmail,
-        guestPhone: data.guestPhone,
+        guestName,
+        guestEmail,
+        guestPhone,
         guestsCount: data.guestsCount,
         checkIn: data.checkIn,
         checkOut: data.checkOut,
