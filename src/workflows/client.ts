@@ -23,7 +23,7 @@ class SimpleConductorClient implements ConductorClient {
 
   async startWorkflow(workflowName: string, input: any): Promise<{ workflowId: string; status: string }> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/workflow/startWorkflow`, {
+      const response = await fetch(`${this.baseUrl}/api/workflow`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
