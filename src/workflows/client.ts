@@ -13,7 +13,12 @@ class SimpleConductorClient implements ConductorClient {
   private baseUrl: string;
 
   constructor(baseUrl = process.env.CONDUCTOR_URL || "http://localhost:8000") {
-    this.baseUrl = baseUrl;
+    // Ensure the URL has a protocol
+    if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+      this.baseUrl = `https://${baseUrl}`;
+    } else {
+      this.baseUrl = baseUrl;
+    }
   }
 
   async startWorkflow(workflowName: string, input: any): Promise<{ workflowId: string; status: string }> {
