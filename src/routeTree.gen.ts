@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WorkflowTestRouteImport } from './routes/workflow-test'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
@@ -41,6 +42,11 @@ import { Route as AdminListingsSlugRouteImport } from './routes/admin/listings/$
 import { Route as AdminInspectionsInspectionIdRouteImport } from './routes/admin/inspections/$inspectionId'
 import { Route as AdminChecklistsChecklistIdRouteImport } from './routes/admin/checklists/$checklistId'
 
+const WorkflowTestRoute = WorkflowTestRouteImport.update({
+  id: '/workflow-test',
+  path: '/workflow-test',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -205,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteRouteWithChildren
   '/account': typeof AccountRoute
   '/dashboard': typeof DashboardRoute
+  '/workflow-test': typeof WorkflowTestRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/calendar': typeof AdminCalendarRoute
   '/admin/calendar-sync': typeof AdminCalendarSyncRoute
@@ -237,6 +244,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/dashboard': typeof DashboardRoute
+  '/workflow-test': typeof WorkflowTestRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/calendar': typeof AdminCalendarRoute
   '/admin/calendar-sync': typeof AdminCalendarSyncRoute
@@ -271,6 +279,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteRouteWithChildren
   '/account': typeof AccountRoute
   '/dashboard': typeof DashboardRoute
+  '/workflow-test': typeof WorkflowTestRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/calendar': typeof AdminCalendarRoute
   '/admin/calendar-sync': typeof AdminCalendarSyncRoute
@@ -306,6 +315,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/account'
     | '/dashboard'
+    | '/workflow-test'
     | '/admin/bookings'
     | '/admin/calendar'
     | '/admin/calendar-sync'
@@ -338,6 +348,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/dashboard'
+    | '/workflow-test'
     | '/admin/bookings'
     | '/admin/calendar'
     | '/admin/calendar-sync'
@@ -371,6 +382,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/account'
     | '/dashboard'
+    | '/workflow-test'
     | '/admin/bookings'
     | '/admin/calendar'
     | '/admin/calendar-sync'
@@ -405,6 +417,7 @@ export interface RootRouteChildren {
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   AccountRoute: typeof AccountRoute
   DashboardRoute: typeof DashboardRoute
+  WorkflowTestRoute: typeof WorkflowTestRoute
   ApiDebugRoute: typeof ApiDebugRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthVerifyRoute: typeof AuthVerifyRoute
@@ -420,6 +433,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/workflow-test': {
+      id: '/workflow-test'
+      path: '/workflow-test'
+      fullPath: '/workflow-test'
+      preLoaderRoute: typeof WorkflowTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -687,6 +707,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRouteRoute: AdminRouteRouteWithChildren,
   AccountRoute: AccountRoute,
   DashboardRoute: DashboardRoute,
+  WorkflowTestRoute: WorkflowTestRoute,
   ApiDebugRoute: ApiDebugRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthVerifyRoute: AuthVerifyRoute,

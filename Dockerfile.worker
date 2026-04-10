@@ -1,0 +1,21 @@
+# Dockerfile for the worker service
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY pnpm-lock.yaml ./
+
+# Install pnpm and dependencies
+RUN npm install -g pnpm
+RUN pnpm install --frozen-lockfile
+
+# Copy source code
+COPY src/workflows ./src/workflows
+
+# Expose health check port
+EXPOSE 3001
+
+# Start the worker directly with tsx
+CMD ["pnpm", "workflow:worker"]

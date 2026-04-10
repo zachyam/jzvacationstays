@@ -1,0 +1,12 @@
+{
+  "name": "check_odd_even",
+  "description": "Task to check if a number is odd or even",
+  "retryCount": 3,
+  "retryLogic": "FIXED",
+  "retryDelaySeconds": 1,
+  "timeoutSeconds": 10,
+  "timeoutPolicy": "TIME_OUT_WF",
+  "responseTimeoutSeconds": 8,
+  "inputKeys": ["number"],
+  "outputKeys": ["result"]
+}

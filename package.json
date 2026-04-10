@@ -11,7 +11,9 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx src/db/seed.ts",
-    "temporal:worker": "tsx src/temporal/worker.ts"
+    "workflow:worker": "tsx src/workflows/workers/index.ts",
+    "workflow:worker:prod": "node dist/workflows/workers/index.js",
+    "build:worker": "tsc src/workflows/workers/index.ts --outDir dist --target ES2020 --module ES2020 --moduleResolution node --esModuleInterop"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1004.0",
@@ -23,10 +25,6 @@
     "@tanstack/react-router": "^1.166.2",
     "@tanstack/react-router-ssr-query": "^1.166.2",
     "@tanstack/react-start": "^1.166.2",
-    "@temporalio/activity": "^1.15.0",
-    "@temporalio/client": "^1.15.0",
-    "@temporalio/worker": "^1.15.0",
-    "@temporalio/workflow": "^1.15.0",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.1",
     "ical-generator": "^10.0.0",

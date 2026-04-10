@@ -3,7 +3,7 @@
 ## Tech Stack
 - React 19 + TypeScript + TanStack Start (Router + Query) + Tailwind CSS
 - PostgreSQL + Drizzle ORM
-- Stripe for payments, Resend for email, Temporal for async workflows
+- Stripe for payments, Resend for email, Conductor for workflow orchestration
 - Deployed on Railway
 
 ## Commands

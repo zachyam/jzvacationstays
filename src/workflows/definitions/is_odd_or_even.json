@@ -1,0 +1,20 @@
+{
+  "name": "is_odd_or_even_workflow",
+  "description": "Determines if a number is odd or even",
+  "version": 1,
+  "tasks": [
+    {
+      "name": "check_odd_even",
+      "taskReferenceName": "check_odd_even_task",
+      "inputParameters": {
+        "number": "${workflow.input.number}"
+      },
+      "type": "SIMPLE"
+    }
+  ],
+  "inputParameters": ["number"],
+  "outputParameters": {
+    "result": "${check_odd_even_task.output.result}"
+  },
+  "schemaVersion": 2
+}

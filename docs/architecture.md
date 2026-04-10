@@ -16,8 +16,8 @@ Vacation booking website for 2 family-owned short-term rental properties in Flor
 | Payments | Stripe (Payment Intents + React Stripe.js) | Industry standard, deposits/refunds |
 | Email | Resend API | Simple transactional email |
 | Calendar sync | node-ical + ical-generator | iCal standard for platform interop |
-| Async workflows | Temporal | Durable workflows for reminders, post-stay emails |
-| Deployment | Railway | App + Postgres + Temporal worker |
+| Async workflows | Conductor | Durable workflows for reminders, post-stay emails |
+| Deployment | Railway | App + Postgres |
 
 ## Directory Structure
 
@@ -102,11 +102,11 @@ jzvacationstays/
 │   │   ├── property/           # PropertyCard, Gallery, Amenities, Reviews
 │   │   ├── booking/            # BookingForm, Summary, StripePayment, Calendar
 │   │   └── admin/              # StatsCard, ChecklistItem, ThermostatControl
-│   ├── temporal/
-│   │   ├── worker.ts           # Worker entrypoint (separate process)
-│   │   ├── client.ts           # Client for starting workflows
-│   │   ├── workflows/          # Workflow definitions
-│   │   └── activities/         # Activity implementations
+│   ├── workflows/
+│   │   ├── definitions/        # Conductor workflow definitions (JSON)
+│   │   ├── tasks/              # Conductor task definitions (JSON)
+│   │   ├── workers/            # Conductor worker implementations (TypeScript)
+│   │   └── client.ts           # Conductor client configuration
 │   ├── lib/
 │   │   ├── utils.ts            # cn(), formatCurrency, formatDate
 │   │   ├── constants.ts        # Property slugs, date formats
@@ -130,8 +130,8 @@ Industry standard. Import from platforms via feed URLs, export via our own `.ics
 ### Adapter Pattern for Thermostat
 Generic `ThermostatAdapter` interface with `MockThermostatAdapter` until brand is chosen. Easy to swap in Ecobee/Nest/Honeywell later.
 
-### Temporal for Async Workflows
-Durable workflows handle booking lifecycle (confirmation → reminders → review requests), calendar sync, and checklist reminders. Runs as separate Railway service.
+### Conductor for Async Workflows
+Durable workflows handle booking lifecycle (confirmation → reminders → review requests), calendar sync, and checklist reminders. Conductor runs locally via Docker for orchestration.
 
 ## Design Language
 
