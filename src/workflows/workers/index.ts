@@ -21,6 +21,9 @@ class ConductorWorker {
     console.log("🚀 Conductor worker started, polling for tasks...");
     console.log("📋 Available task handlers:", Object.keys(taskHandlers));
 
+    // Auto-register definitions on startup
+    await this.registerDefinitions();
+
     while (this.polling) {
       try {
         // Poll for each task type we can handle
@@ -115,6 +118,70 @@ class ConductorWorker {
       } catch (updateError) {
         console.error('Failed to update task as failed:', updateError);
       }
+    }
+  }
+
+  private async registerDefinitions() {
+    try {
+      console.log('🔧 Auto-registering workflow definitions...');
+
+      // Register task definition
+      const taskResponse = await fetch(`${this.baseUrl}/api/metadata/taskdefs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify([{
+          name: "check_odd_even",
+          description: "Task to check if a number is odd or even",
+          retryCount: 3,
+          retryLogic: "FIXED",
+          retryDelaySeconds: 1,
+          timeoutSeconds: 10,
+          timeoutPolicy: "TIME_OUT_WF",
+          responseTimeoutSeconds: 8,
+          inputKeys: ["number"],
+          outputKeys: ["result"]
+        }])
+      });
+
+      if (taskResponse.ok) {
+        console.log('✅ Task definition registered');
+      } else {
+        console.log('ℹ️ Task definition may already exist');
+      }
+
+      // Register workflow definition
+      const workflowResponse = await fetch(`${this.baseUrl}/api/metadata/workflow`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: "is_odd_or_even_workflow",
+          description: "Determines if a number is odd or even",
+          version: 1,
+          tasks: [{
+            name: "check_odd_even",
+            taskReferenceName: "check_odd_even_task",
+            inputParameters: {
+              number: "${workflow.input.number}"
+            },
+            type: "SIMPLE"
+          }],
+          inputParameters: ["number"],
+          outputParameters: {
+            result: "${check_odd_even_task.output.result}"
+          },
+          schemaVersion: 2
+        })
+      });
+
+      if (workflowResponse.ok) {
+        console.log('✅ Workflow definition registered');
+      } else {
+        console.log('ℹ️ Workflow definition may already exist');
+      }
+
+      console.log('✅ All definitions registered successfully!');
+    } catch (error) {
+      console.log('⚠️ Registration failed (Conductor may not be ready yet):', error.message);
     }
   }
 
