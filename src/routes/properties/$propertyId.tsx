@@ -29,21 +29,33 @@ export const Route = createFileRoute("/properties/$propertyId")({
 
     if (!property) return { property: null, photos: [], reviews: [], blockedDates: [], propertyMedia: [], roomTypes: [] };
 
-    const [reviews, availability, mediaData, roomData] = await Promise.all([
-      getReviewsByProperty({ data: { propertyId: property.id } }),
-      getAvailability({ data: { propertySlug: property.slug } }),
-      getPropertyMedia({ data: { propertyId: property.id } }),
-      getRoomTypes({ data: { propertyId: property.id } }),
-    ]);
+    try {
+      const [reviews, availability, mediaData, roomData] = await Promise.all([
+        getReviewsByProperty({ data: { propertyId: property.id } }),
+        getAvailability({ data: { propertySlug: property.slug } }),
+        getPropertyMedia({ data: { propertyId: property.id } }),
+        getRoomTypes({ data: { propertyId: property.id } }),
+      ]);
 
-    return {
-      property,
-      photos,
-      reviews,
-      blockedDates: availability.blockedDates,
-      propertyMedia: mediaData.media,
-      roomTypes: roomData.rooms
-    };
+      return {
+        property,
+        photos,
+        reviews,
+        blockedDates: availability?.blockedDates || [],
+        propertyMedia: mediaData?.media || [],
+        roomTypes: roomData?.rooms || []
+      };
+    } catch (error) {
+      console.error('Error loading property data:', error);
+      return {
+        property,
+        photos,
+        reviews: [],
+        blockedDates: [],
+        propertyMedia: [],
+        roomTypes: []
+      };
+    }
   },
   component: PropertyDetailPage,
 });
