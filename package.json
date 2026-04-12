@@ -29,7 +29,7 @@
     "drizzle-orm": "^0.45.1",
     "ical-generator": "^10.0.0",
     "nitro": "npm:nitro-nightly@latest",
-    "node-ical": "^0.25.4",
+    "node-ical": "^0.26.0",
     "postgres": "^3.4.8",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
